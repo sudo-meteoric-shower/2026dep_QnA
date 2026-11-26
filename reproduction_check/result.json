@@ -1,0 +1,215 @@
+{
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found) http://127.0.0.1:8000/models/whisper-base/onnx/encoder_model.onnx",
+    "Failed to load resource: the server responded with a status of 404 (File not found) http://127.0.0.1:8000/models/Qwen3-0.6B-ONNX/onnx/model_q4f16.onnx",
+    "Failed to load resource: the server responded with a status of 404 (File not found) http://127.0.0.1:8000/models/bge-small-zh-v1.5/onnx/model_q4.onnx"
+  ],
+  "failedRequests": [
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8000/models/whisper-base/onnx/encoder_model.onnx"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8000/models/Qwen3-0.6B-ONNX/onnx/model_q4f16.onnx"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8000/models/bge-small-zh-v1.5/onnx/model_q4.onnx"
+    }
+  ],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "cfg": true,
+        "onnx": true,
+        "size": 23201314,
+        "hi": false,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "cfg": true,
+        "onnx": true,
+        "size": 617687575,
+        "hi": false,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "cfg": true,
+        "onnx": true,
+        "size": 24010842,
+        "hi": false,
+        "label": "bge-small-zh"
+      }
+    },
+    "asr": {
+      "type": "asr-ready",
+      "gpu": false,
+      "ts": 2556.599999964237
+    },
+    "llm": {
+      "type": "llm-ready",
+      "gpu": false,
+      "ts": 10025.300000011921
+    },
+    "emb": {
+      "type": "emb-ready",
+      "gpu": false,
+      "ts": 10592
+    },
+    "plainText": {
+      "deltas": 19,
+      "firstMs": 6071,
+      "totalMs": 13659,
+      "sourceShown": false,
+      "text": "深度学习是一种通过多层神经网络实现复杂模式识别和数据处理的技术。",
+      "usedRag": false,
+      "sources": []
+    },
+    "withoutRag": {
+      "deltas": 14,
+      "firstMs": 5482,
+      "totalMs": 12845,
+      "sourceShown": false,
+      "text": "青岚实验箱的校验代号是 Q-3。",
+      "usedRag": false,
+      "sources": []
+    },
+    "index": {
+      "type": "index-done",
+      "added": 1,
+      "total": 1,
+      "ts": 37451.59999996424
+    },
+    "withRag": {
+      "deltas": 80,
+      "firstMs": 4186,
+      "totalMs": 19436,
+      "sourceShown": true,
+      "text": "青岚实验箱的校验代号为松柏三七。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.7454544775027475,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。 青岚实验箱的校验代号是松柏三七。 实验箱在使用之前需要充电十五分钟。"
+        }
+      ]
+    },
+    "grounding": {
+      "without": false,
+      "with": true
+    },
+    "transcript": {
+      "type": "transcript",
+      "text": "實驗箱的教驗代號是什麼?",
+      "ts": 80412.80000001192
+    },
+    "voiceAnswer": {
+      "deltas": 85,
+      "firstMs": 3144,
+      "totalMs": 21308,
+      "sourceShown": true,
+      "text": "资料中未提及具体教验证号。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.6063011120709741,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。 青岚实验箱的校验代号是松柏三七。 实验箱在使用之前需要充电十五分钟。"
+        }
+      ]
+    },
+    "speech": {
+      "voices": [
+        {
+          "name": "Microsoft Huihui - Chinese (Simplified, PRC)",
+          "local": true
+        },
+        {
+          "name": "Microsoft Kangkang - Chinese (Simplified, PRC)",
+          "local": true
+        },
+        {
+          "name": "Microsoft Yaoyao - Chinese (Simplified, PRC)",
+          "local": true
+        },
+        {
+          "name": "Microsoft 晓晓 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 云希 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 云健 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 晓伊 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 云扬 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 云夏 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 晓北 Online (Natural) - Chinese (Northeastern Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 晓妮 Online (Natural) - Chinese (Zhongyuan Mandarin Shaanxi, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 曉曼 Online (Natural) - Chinese (Cantonese, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 雲龍 Online (Natural) - Chinese (Cantonese, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 曉佳 Online (Natural) - Chinese (Cantonese, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 曉臻 Online (Natural) - Chinese (Taiwanese Mandarin, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 雲哲 Online (Natural) - Chinese (Taiwanese Mandarin, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 曉雨 Online (Natural) - Chinese (Taiwanese Mandarin, Traditional)",
+          "local": false
+        }
+      ],
+      "events": [
+        {
+          "event": "queued",
+          "lang": "zh-CN",
+          "voice": "Microsoft Huihui - Chinese (Simplified, PRC)",
+          "text": "资料中未提及具体教验证号。"
+        },
+        {
+          "event": "start"
+        },
+        {
+          "event": "end"
+        }
+      ]
+    },
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0"
+  }
+}

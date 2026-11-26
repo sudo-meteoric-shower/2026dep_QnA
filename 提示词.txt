@@ -1,0 +1,63 @@
+【任务】构建一个纯浏览器离线运行的「笔记本语音问答助手」，交付于 D:\voice_qa_local\，
+包含 voice_qa_assistant_local.html、README.md、启动本地服务.bat、界面预览.png。
+
+【目标受众与语言】简体中文用户；界面、注释、文档、回答全部使用简体中文。
+
+【一、架构约束（不可违背）】
+1. 坚持纯浏览器离线：Transformers.js 3.8.1 + ONNX Runtime Web（WASM 后端），
+   不得引入 Ollama、云 API、CDN 在线模型。
+2. 本地读取模型：env.localModelPath="./models/"，env.allowLocalModels=true，
+   env.allowRemoteModels=false，env.backends.onnx.wasm.wasmPaths="./ort/"。
+3. 必须通过本地 HTTP 服务运行（python -m http.server 8000），
+   禁止 file:// 直接打开（浏览器会阻止读取本地模型）。
+4. 依赖库全部本地化于 lib/：transformers.min.js、tailwind、Font Awesome
+   （字体路径 ./webfonts/）、pdf.js、mammoth.js、xlsx。
+
+【二、模型配置（models/ 共 8 个，全部来自 ModelScope 国内源，已下载）】
+- 语音识别 ASR：whisper-tiny(40MB) / whisper-base(77MB，默认·均衡推荐) /
+  whisper-small(241MB，最准)。
+- 问答生成 LLM：Qwen3-0.6B(617MB) / Qwen2.5-1.5B(1.5GB，默认·推荐) /
+  Qwen3-1.7B(1.7GB，最强)。
+- 向量 EMB：bge-small-zh-v1.5(24MB，默认) / bge-base-zh-v1.5(98MB，更准)。
+- 三个 ASR/LLM/EMB 卡片各提供模型选择下拉；切换后点「加载」生效。
+- 精度档位下拉：快速·量化(q8) / 高精度。高精度档复用同目录已复制进各模型
+  onnx/ 的原始权重：Whisper encoder fp32、bge q4、Qwen3 q4f16。
+
+【三、功能链路】
+1. 语音输入：Web Audio 直采 16kHz 单声道 PCM（不用 MediaRecorder），
+   关闭 autoGainControl 防削波；峰值 12% 阈值 VAD 裁剪首尾静音；
+   RMS 归一化；录音上限 20s；实时音量波形。
+2. 转录后处理 cleanTranscript()：去 Whisper 时间戳、去「谢谢观看/字幕由…提供」
+   等幻觉短语、压缩循环重复句。
+3. RAG 知识库：支持 PDF/Word/Excel/TXT 多文件上传；pdf.js/mammoth/SheetJS
+   前端解析；分块 360 字符、重叠 60；bge 向量 mean pooling + L2 归一化；
+   Top-3 检索并附引用；换向量模型时提示重建索引。
+4. 问答生成：用 pipeline 自带的 llm.tokenizer（禁止独立调用
+   AutoTokenizer.from_pretrained，本地模型会抛错）+ apply_chat_template
+   生成字符串 prompt + HF.TextStreamer({skip_prompt:true, callback_function})
+   实现流式输出，emit "answer-delta" 逐字渲染；Qwen3 系列用 /no_think 关思考，
+   Qwen2.5 显式要求中文；repetition_penalty=1.15，max_new_tokens 适度降低。
+5. 答案后处理 cleanAnswer()：剥离 <think> 与 <|...|> 控制 token、去 AI 套话
+   （「你是一个语言模型…」）、句子级去重、截断长列表、去开头孤立标点、
+   去尾部未完句与免责声明，限约 3 句/160 字。
+6. 语音播报：Web Speech API 朗读答案；支持清空对话。
+
+【四、界面规格】
+- 蓝色主色 #165DFF；顶部状态栏（版本 v16、引擎、源、自检状态）。
+- 模型卡片 + 知识库卡片双栏；处理流水线指示；对话区占满剩余高度
+  （最小 280px），消息气泡 13px 带行高与内边距，多轮问答一屏可见。
+- 麦克风、输入框、发送、播报、清空统一置于对话卡底部；
+  模型文件路径折叠展示。
+- 明确禁止右侧注解/说明框；布局整洁、对齐、无重叠、不留大片空白。
+
+【五、验收标准】
+- 自检显示三个模型就绪、无 404；
+- 默认配置自动生效（base / Qwen2.5-1.5B / bge-small）；
+- 流式输出产生数十个 delta 片段、首字亚秒级出现；
+- 答案为干净中文、无套话/重复/思考串入；
+- 浏览器 console 0 错误；
+- 合成音频走通「采集→转写→问答→播报」全链路。
+
+【六、已知取舍（须在文档中如实说明）】
+1.5B 模型在纯 WASM 下完整生成约 77 秒（物理限制），流式输出改善的是
+等待感知；追求速度可切回 Qwen3-0.6B，但牺牲答案质量。

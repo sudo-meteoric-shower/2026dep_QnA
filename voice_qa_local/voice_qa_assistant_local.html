@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<!--
+  笔记本语音问答助手 · RAG 知识库增强版（浏览器端本地推理）
+  ============================================================
+  相对「真实模型版」的增强：
+    1. 界面更紧凑：模型区与知识库区并排、间距与内边距收紧、信息密度提高；
+    2. 新增「知识库上传」：支持多文件、多格式，本地解析后分块并建立向量索引；
+    3. RAG 检索增强：提问时先用中文向量模型检索知识库相关片段，注入 Qwen3 上下文，
+       使模型能基于专业知识作答，并返回引用来源。
+
+  支持的知识库格式：
+    PDF、DOCX、XLSX/XLS、TXT、MD、CSV、JSON、LOG、XML、HTML、YAML、常见代码文本
+    解析库（本地 lib/）：pdf.js / mammoth.js / SheetJS，纯前端解析，文件不上传。
+
+  模型（首次下载后浏览器缓存）：
+    - 语音识别 onnx-community/whisper-tiny（~60-75MB，中文转写）
+    - 向量模型 Xenova/bge-small-zh-v1.5（中文句向量，512 维）
+    - 问答模型 onnx-community/Qwen3-0.6B-ONNX（本地 q8/int8，~590MB）
+    - 语音播报 Web Speech API（浏览器原生）
+  【v16 彻底重构版】针对「识别/输出乱糟糟 + 响应慢」：
+    1) 默认改为质量档：Whisper-base / Qwen2.5-1.5B / bge-small（开箱即用即高质量）；
+    2) 录音链路重构：关闭浏览器AGC避免削波、VAD裁剪首尾静音（消除Whisper幻觉）、RMS归一化、时长20s；
+    3) 转录清洗 cleanTranscript：去时间戳/幻觉短语/重复句；
+    4) 流式输出：TextStreamer 逐字呈现，首字亚秒级（消除分钟级空白等待）；
+    5) 答案清洗强化：去套话/去重/去列表/限长，用 pipeline 自带 tokenizer 确保流式可靠。
+  【v14 多模型版】针对「识别/回答不准」，在纯浏览器离线架构内新增开源免费模型下拉切换，不删除任何旧模型：
+    语音识别：Whisper-tiny(最快) / Whisper-base(均衡) / Whisper-small(更准)
+    问答生成：Qwen3-0.6B(最快) / Qwen2.5-1.5B-Instruct(推荐·非思考输出干净) / Qwen3-1.7B(最强)
+    知识库向量：bge-small-zh(快) / bge-base-zh(更准)
+    切换下拉后点「加载」生效；换向量模型会提示重建索引。Qwen2.5 不加 /no_think，Qwen3 系列自动关闭思考。
+  【v11 离线版 · 界面优化】三个模型已下载到本目录 models/ 下，页面直接从本地读取，无需联网：
+    修复：原 testSource 按钮标签残缺会导致 customHost 输入框丢失、configure() 抛错、
+          进而使所有模型加载按钮失效（点了没反应）。本版已补全标签并校验全部 DOM 引用。
+    界面：重排为「顶部状态栏 + 模型/知识库双卡片 + 处理流水线 + 满高对话区」，
+          模型链接改为可折叠区，输入区并入对话卡底部，页面不留大片空白。
+    models/whisper-tiny/        语音识别（q8 量化，约 41MB）
+    models/Qwen3-0.6B-ONNX/     问答生成（int8 量化，约 590MB）
+    models/bge-small-zh-v1.5/   中文向量（q8 量化，约 24MB）
+  推理库与 ONNX 运行时同样本地化：lib/transformers.min.js、ort/*.wasm，全程不访问 CDN。
+  必须经本地 HTTP 服务访问：双击「启动本地服务.bat」，浏览器打开 http://localhost:8000/
+  （直接双击 html 用 file:// 打开时，浏览器禁止读取本地模型文件）。
+  仍保留远程源（魔搭 → hf-mirror → 官方）作为兜底，可在界面切换。
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>语音问答助手 · RAG 知识库增强版</title>
+  <link rel="icon" href="data:,">
+  <!-- 样式库与解析库全部本地化（lib/），缺失时自动回退 CDN -->
+  <script src="./lib/tailwind.js" onerror="var _s=document.createElement('script');_s.src='https://cdn.tailwindcss.com';document.head.appendChild(_s);"></script>
+  <link rel="stylesheet" href="./lib/fa/all.min.css" onerror="this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'">
+  <script src="./lib/pdf.min.js" onerror="var _p=document.createElement('script');_p.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';document.head.appendChild(_p);"></script>
+  <script src="./lib/mammoth.browser.min.js" onerror="var _m=document.createElement('script');_m.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';document.head.appendChild(_m);"></script>
+  <script src="./lib/xlsx.full.min.js" onerror="var _x=document.createElement('script');_x.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';document.head.appendChild(_x);"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; overflow: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #F5F7FA; }
+    ::-webkit-scrollbar-thumb { background: #c9c9c9; border-radius: 3px; }
+
+    .btn-click:active { transform:scale(0.97); }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .form-input:focus { border-color:#165DFF; box-shadow:0 0 0 2px rgba(22,93,255,0.1); outline:none; }
+
+    .mic-btn { transition:all 0.25s ease; }
+    .mic-btn.recording { background:#F53F3F !important; box-shadow:0 0 0 8px rgba(245,63,63,0.12),0 6px 18px rgba(245,63,63,0.35); }
+    .pulse-ring { display:none; }
+    .mic-btn.recording + .pulse-ring { display:block; }
+    .pulse-ring::before,.pulse-ring::after { content:''; position:absolute; inset:-10px; border-radius:50%; border:2px solid rgba(245,63,63,0.5); animation:ripple 1.4s ease-out infinite; }
+    .pulse-ring::after { animation-delay:0.7s; }
+    @keyframes ripple { 0%{transform:scale(0.85);opacity:0.9;} 100%{transform:scale(1.5);opacity:0;} }
+    .wave-bar { width:3px; background:linear-gradient(180deg,#165DFF,#69b1ff); border-radius:3px; height:5px; transition:height 0.12s ease; }
+    .wave-bar.idle { height:5px !important; opacity:0.35; }
+
+    .pipe-node .dot { transition:all 0.3s ease; }
+    .pipe-node.done .dot { background:#00B42A !important; border-color:#00B42A !important; color:#fff; }
+    .pipe-node.active .dot { background:#165DFF !important; border-color:#165DFF !important; color:#fff; animation:nodePulse 1s ease-in-out infinite; }
+    @keyframes nodePulse { 0%,100%{box-shadow:0 0 0 0 rgba(22,93,255,0.35);} 50%{box-shadow:0 0 0 6px rgba(22,93,255,0);} }
+    .progress-fill { transition:width 0.25s ease; }
+    .spin { animation:spin 1s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    .typing-cursor { color:#165DFF; animation:blink 0.9s steps(1) infinite; }
+    @keyframes blink { 50%{opacity:0;} }
+    #dropZone.dragover { border-color:#165DFF; background:rgba(22,93,255,0.05); }
+
+    #left-panel { width:100%; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="protoWarn" class="hidden bg-amber-50 border-b border-amber-300 text-amber-800 text-[11px] px-3 py-1.5 text-center"></div>
+
+  <div id="app" class="h-screen flex flex-col">
+    <!-- 顶部栏 -->
+    <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-1.5 flex items-center justify-between shadow-sm z-10">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-[#165DFF] rounded-lg flex items-center justify-center text-white text-sm shadow-sm"><i class="fas fa-microphone-alt"></i></div>
+        <h1 class="text-sm font-semibold text-gray-800">语音问答助手 <span class="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 align-middle ml-1">RAG 知识库增强</span> <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 align-middle ml-1" id="verTag">v16</span></h1>
+      </div>
+      <div class="flex items-center gap-4 text-[10px] text-gray-500">
+        <span id="engineText"><i class="fas fa-circle text-[8px] mr-1" style="color:#f59e0b"></i>检测中</span>
+        <span id="kbStat"><i class="fas fa-book text-[#165DFF] mr-1"></i>知识库 0 块</span>
+      </div>
+    </header>
+
+    <!-- 主体工作区 -->
+    <main class="flex-1 min-h-0 w-full max-w-[1280px] mx-auto px-3 py-2 flex flex-col gap-2">
+      <!-- 上排：模型 + 知识库 -->
+      <div class="shrink-0 grid grid-cols-1 lg:grid-cols-2 gap-2">
+        <!-- 模型卡片 -->
+        <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-3 flex flex-col">
+          <div class="flex items-center justify-between mb-2.5">
+            <h2 class="text-xs font-semibold text-gray-800"><i class="fas fa-cubes text-[#165DFF] mr-1.5"></i>模型状态</h2>
+            <div class="flex items-center gap-1">
+              <select id="sourceSelect" onchange="onSourceChange()" class="text-[10px] border border-gray-200 rounded px-1.5 py-1 text-gray-700 bg-white outline-none focus:border-[#165DFF]" title="选择模型下载源">
+                <option value="local" selected>本地模型（离线）</option>
+                <option value="modelscope">魔搭 ModelScope</option>
+                <option value="mirror">hf-mirror</option>
+                <option value="official">HuggingFace 官方</option>
+                <option value="custom">自定义地址</option>
+              </select>
+              <select id="precisionSelect" onchange="onPrecisionChange()" class="text-[10px] border border-gray-200 rounded px-1.5 py-1 text-gray-700 bg-white outline-none focus:border-[#165DFF]" title="使用本地量化权重（q8）">
+                <option value="fast" selected>快速·量化</option>
+              </select>
+              <button onclick="checkLocal()" title="检查 models/ 目录三个模型是否齐全" class="btn text-[10px] text-green-600 hover:bg-green-50 px-1.5 py-1 rounded"><i class="fas fa-hard-drive mr-0.5"></i>自检</button>
+              <button onclick="testSource()" title="测试当前源可访问性" class="btn text-[10px] text-blue-600 hover:bg-blue-50 px-1.5 py-1 rounded"><i class="fas fa-plug mr-0.5"></i>测试</button>
+            </div>
+          </div>
+          <div id="customHostWrap" class="hidden mb-2">
+            <input id="customHost" type="text" placeholder="https://your-mirror.com （模型仓库遵循 HF 目录结构）" class="w-full text-[10px] border border-gray-200 rounded px-2 py-1.5 outline-none focus:border-[#165DFF]">
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="rounded-lg border border-gray-100 bg-gray-50/60 p-2 flex flex-col items-center gap-1.5">
+              <div class="flex items-center gap-1"><i class="fas fa-ear-listen text-[#165DFF] text-xs"></i><span class="text-[10px] font-medium text-gray-700 truncate">语音识别</span></div>
+              <select id="asrModel" onchange="onModelChange('asr')" title="选择语音识别模型" class="w-full text-[9px] border border-gray-200 rounded px-1 py-0.5 text-gray-700 bg-white outline-none focus:border-[#165DFF]">
+                <option value="base" selected>Whisper-base</option>
+              </select>
+              <span id="asrBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">未加载</span>
+              <button id="asrBtn" onclick="loadASR()" class="btn w-full bg-[#165DFF] text-white py-1 rounded text-[10px]">加载</button>
+              <div class="w-full h-1 bg-gray-200 rounded-full overflow-hidden hidden" id="asrProgressWrap"><div id="asrProgress" class="progress-fill h-full bg-[#165DFF]" style="width:0%"></div></div>
+            </div>
+            <div class="rounded-lg border border-gray-100 bg-gray-50/60 p-2 flex flex-col items-center gap-1.5">
+              <div class="flex items-center gap-1"><i class="fas fa-brain text-purple-600 text-xs"></i><span class="text-[10px] font-medium text-gray-700 truncate">问答生成</span></div>
+              <select id="llmModel" onchange="onModelChange('llm')" title="选择问答大模型" class="w-full text-[9px] border border-gray-200 rounded px-1 py-0.5 text-gray-700 bg-white outline-none focus:border-[#165DFF]">
+                <option value="qwen3_06b" selected>Qwen3-0.6B</option>
+              </select>
+              <span id="llmBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">未加载</span>
+              <button id="llmBtn" onclick="loadLLM()" class="btn w-full bg-[#165DFF] text-white py-1 rounded text-[10px]">加载</button>
+              <div class="w-full h-1 bg-gray-200 rounded-full overflow-hidden hidden" id="llmProgressWrap"><div id="llmProgress" class="progress-fill h-full bg-purple-500" style="width:0%"></div></div>
+            </div>
+            <div class="rounded-lg border border-gray-100 bg-gray-50/60 p-2 flex flex-col items-center gap-1.5">
+              <div class="flex items-center gap-1"><i class="fas fa-vector-square text-green-600 text-xs"></i><span class="text-[10px] font-medium text-gray-700 truncate">知识库向量</span></div>
+              <select id="embModel" onchange="onModelChange('emb')" title="选择向量模型" class="w-full text-[9px] border border-gray-200 rounded px-1 py-0.5 text-gray-700 bg-white outline-none focus:border-[#165DFF]">
+                <option value="small" selected>bge-small-zh</option>
+              </select>
+              <span id="embBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">未加载</span>
+              <button id="embBtn" onclick="loadEmb()" class="btn w-full bg-[#165DFF] text-white py-1 rounded text-[10px]">加载</button>
+              <div class="w-full h-1 bg-gray-200 rounded-full overflow-hidden hidden" id="embProgressWrap"><div id="embProgress" class="progress-fill h-full bg-green-500" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span id="sourceTag" class="text-[9px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 whitespace-nowrap shrink-0">源：本地模型</span>
+              <p class="text-[9px] text-gray-400 truncate" id="downloadInfo">本地模型就绪，点击「全部加载」即可离线运行</p>
+            </div>
+            <button onclick="loadAll()" class="btn bg-gray-800 text-white px-2.5 py-1 rounded text-[10px] whitespace-nowrap shrink-0"><i class="fas fa-download mr-1"></i>全部加载</button>
+          </div>
+          <details class="mt-1.5 group">
+            <summary class="text-[9px] text-gray-400 cursor-pointer select-none hover:text-[#165DFF]"><i class="fas fa-chevron-right mr-1 inline-block transition-transform group-open:rotate-90"></i>本地模型文件路径 / 下载链接 <button onclick="event.stopPropagation();copyLinks()" class="ml-1 text-[#165DFF] hover:underline">复制全部</button></summary>
+            <div id="modelUrls" class="mt-1.5 text-[9px] text-gray-500 leading-relaxed space-y-0.5">
+              <div class="flex items-start gap-1"><span class="w-8 flex-shrink-0 text-gray-400">识别</span><a href="./models/whisper-tiny/onnx/encoder_model_quantized.onnx" target="_blank" rel="noopener" class="text-[#165DFF] hover:underline break-all">./models/whisper-tiny/onnx/encoder_model_quantized.onnx</a></div>
+              <div class="flex items-start gap-1"><span class="w-8 flex-shrink-0 text-gray-400">问答</span><a href="./models/Qwen3-0.6B-ONNX/onnx/model_quantized.onnx" target="_blank" rel="noopener" class="text-[#165DFF] hover:underline break-all">./models/Qwen3-0.6B-ONNX/onnx/model_quantized.onnx</a></div>
+              <div class="flex items-start gap-1"><span class="w-8 flex-shrink-0 text-gray-400">向量</span><a href="./models/bge-small-zh-v1.5/onnx/model_quantized.onnx" target="_blank" rel="noopener" class="text-[#165DFF] hover:underline break-all">./models/bge-small-zh-v1.5/onnx/model_quantized.onnx</a></div>
+            </div>
+          </details>
+        </section>
+
+        <!-- 知识库卡片 -->
+        <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-3 flex flex-col">
+          <div class="flex items-center justify-between mb-2.5">
+            <h2 class="text-xs font-semibold text-gray-800"><i class="fas fa-book text-[#165DFF] mr-1.5"></i>知识库（RAG 检索增强）</h2>
+            <div class="flex gap-1">
+              <button onclick="document.getElementById('fileInput').click()" class="btn bg-[#165DFF] text-white px-2 py-1 rounded text-[10px]"><i class="fas fa-plus mr-1"></i>上传文件</button>
+              <button onclick="clearKB()" title="清空知识库" class="btn bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px]"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+          <div id="dropZone" class="border border-dashed border-gray-300 rounded-lg px-2 py-2.5 text-center cursor-pointer hover:border-[#165DFF] transition-colors shrink-0" onclick="document.getElementById('fileInput').click()">
+            <p class="text-[10px] text-gray-400"><i class="fas fa-cloud-upload-alt mr-1"></i>点击或拖入多个文件 · PDF / DOCX / XLSX / TXT / MD / CSV / JSON / HTML 等</p>
+          </div>
+          <input type="file" id="fileInput" multiple accept=".pdf,.docx,.xlsx,.xls,.txt,.md,.csv,.json,.log,.xml,.html,.htm,.yaml,.yml,.js,.py,.java,.cpp,.sql" class="hidden" onchange="handleFiles(this.files)">
+          <div id="fileList" class="mt-2 space-y-1 overflow-y-auto flex-1 min-h-[40px] max-h-[72px]">
+            <p class="text-[10px] text-gray-300 text-center py-2" id="fileEmpty">尚未上传知识库文件</p>
+          </div>
+          <div id="kbProgressWrap" class="mt-1.5 hidden shrink-0"><div class="flex items-center justify-between text-[9px] text-gray-500 mb-0.5"><span id="kbProgressText">建立索引中…</span><span id="kbProgressPct">0%</span></div><div class="h-1 bg-gray-200 rounded-full overflow-hidden"><div id="kbProgress" class="progress-fill h-full bg-green-500" style="width:0%"></div></div></div>
+        </section>
+      </div>
+
+      <!-- 流水线 -->
+      <div class="shrink-0 bg-white rounded-xl border border-gray-200 shadow-sm px-3 py-1.5 flex items-center gap-3">
+        <span class="text-[10px] text-gray-400 whitespace-nowrap"><i class="fas fa-stream text-[#165DFF] mr-1"></i>处理流程</span>
+        <div class="flex items-center flex-1 max-w-xl mx-auto">
+          <div class="pipe-node flex flex-col items-center gap-0.5" id="pipe1"><div class="dot w-7 h-7 rounded-full border-2 border-gray-200 bg-gray-50 text-gray-400 flex items-center justify-center text-[10px]"><i class="fas fa-microphone"></i></div><span class="text-[9px] text-gray-400">采集</span></div>
+          <div class="flex-1 h-0.5 bg-gray-200 mx-1"></div>
+          <div class="pipe-node flex flex-col items-center gap-0.5" id="pipe2"><div class="dot w-7 h-7 rounded-full border-2 border-gray-200 bg-gray-50 text-gray-400 flex items-center justify-center text-[10px]"><i class="fas fa-align-left"></i></div><span class="text-[9px] text-gray-400">识别</span></div>
+          <div class="flex-1 h-0.5 bg-gray-200 mx-1"></div>
+          <div class="pipe-node flex flex-col items-center gap-0.5" id="pipe3"><div class="dot w-7 h-7 rounded-full border-2 border-gray-200 bg-gray-50 text-gray-400 flex items-center justify-center text-[10px]"><i class="fas fa-search"></i></div><span class="text-[9px] text-gray-400">检索</span></div>
+          <div class="flex-1 h-0.5 bg-gray-200 mx-1"></div>
+          <div class="pipe-node flex flex-col items-center gap-0.5" id="pipe4"><div class="dot w-7 h-7 rounded-full border-2 border-gray-200 bg-gray-50 text-gray-400 flex items-center justify-center text-[10px]"><i class="fas fa-brain"></i></div><span class="text-[9px] text-gray-400">生成</span></div>
+        </div>
+        <span id="statusText" class="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-600 whitespace-nowrap shrink-0">待机</span>
+      </div>
+
+      <!-- 对话区（占满剩余高度，页面不留空白） -->
+      <section class="flex-1 min-h-[280px] bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="shrink-0 px-3 py-1.5 border-b border-gray-100 flex items-center justify-between">
+          <h2 class="text-xs font-semibold text-gray-700"><i class="fas fa-comments text-[#165DFF] mr-1.5"></i>对话（基于知识库）</h2>
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-1 text-[10px] text-gray-500 cursor-pointer"><input type="checkbox" id="ragToggle" class="accent-[#165DFF]" checked>启用 RAG</label>
+            <span class="text-[9px] text-gray-400" id="latencyText">—</span>
+          </div>
+        </div>
+        <div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 bg-[#FBFCFE]" id="chatBox">
+          <div class="text-center text-gray-300 text-xs py-10" id="emptyHint"><i class="fas fa-comment-dots text-2xl block mb-1"></i>加载模型并上传知识库后，说话或输入专业问题</div>
+        </div>
+        <div class="shrink-0 border-t border-gray-100 px-3 py-2 bg-white">
+          <div class="flex items-center gap-2">
+            <div class="relative shrink-0">
+              <button id="micBtn" onclick="toggleRecording()" class="mic-btn w-11 h-11 rounded-full bg-[#165DFF] text-white flex items-center justify-center shadow-md shadow-blue-200 btn-click" title="点击录音，再次点击结束"><i class="fas fa-microphone text-base" id="micIcon"></i></button>
+              <div class="pulse-ring"></div>
+            </div>
+            <input id="questionInput" type="text" placeholder="输入问题（结合知识库作答），回车发送" class="form-input flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-[11px] outline-none" onkeydown="if(event.key==='Enter')sendQuestion()">
+            <button onclick="sendQuestion()" class="btn bg-[#165DFF] text-white px-3 py-2 rounded-lg text-[11px] shrink-0" title="发送问题"><i class="fas fa-paper-plane"></i></button>
+            <button onclick="speakAnswer(null)" class="btn bg-purple-600 text-white px-3 py-2 rounded-lg text-[11px] shrink-0" title="播报最新回答"><i class="fas fa-volume-up"></i></button>
+            <button onclick="resetAll()" class="btn bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-[11px] shrink-0" title="清空对话"><i class="fas fa-eraser"></i></button>
+          </div>
+          <div class="flex items-center justify-between mt-1.5">
+            <div class="flex items-center gap-[2px] h-5 w-28" id="waveBox">
+              <div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div>
+              <div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div>
+              <div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div><div class="wave-bar idle"></div>
+            </div>
+            <p class="text-[9px] text-gray-400" id="micHint">点击录音，再次点击结束（≤20s）</p>
+            <p class="text-[9px] text-gray-400"><i class="fas fa-shield-alt mr-1"></i>文件与音频全程本地处理，不上传服务器</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============ Worker：真实模型推理 + RAG 检索 ============ -->
+  <script type="module" id="engine-src">
+    // 推理引擎运行在【主线程】：不使用 Worker，规避预览/沙箱环境对 Blob Worker 的安全策略限制。
+    const emit=(msg)=>{ try{ window.dispatchEvent(new CustomEvent('engine-msg',{detail:msg})); }catch(e){} };
+    // ============================================================
+    // 关键设计：引擎顶层【不写任何 import / await】，推理库改为按需懒加载。
+    // 这样即使 CDN 暂时不可达，页面与界面仍正常，失败只影响单次模型加载并可重试。
+    // ============================================================
+    let HF=null, pipeline=null, env=null, hfLoading=null;
+
+    // 关键：模板必须与 transformers.js v3.8.x 匹配——其内部只替换 {model}/{revision}，
+    // 文件名由库自动拼接。若模板含 {file}，请求 URL 会出现字面量 "%7Bfile%7D" 导致 404。
+    const PATH_TEMPLATE="{model}/resolve/{revision}/";
+
+    // ===== 下载源定义（每个源有独立的 host / 修订名）=====
+    // 国内首推【魔搭 ModelScope】：响应头 Access-Control-Allow-Origin: *，浏览器可直接跨域拉取；
+    // 且其仓库名与 HuggingFace 完全一致（onnx-community/*、Xenova/*），可直接作为 HF 兼容源，
+    // 仅修订名用 master（HF 为 main，实测 ModelScope 两者都可用）。
+    const SOURCE_DEFS={
+      local:{name:"本地模型",host:"",revision:"",local:true},
+      modelscope:{name:"魔搭ModelScope",host:"https://modelscope.cn/models",revision:"master"},
+      mirror:{name:"hf-mirror",host:"https://hf-mirror.com",revision:"main"},
+      official:{name:"HuggingFace官方",host:"https://huggingface.co",revision:"main"}
+    };
+    // 三个模型的具体权重文件（仓库 + 相对路径），已逐一实测存在；用于生成完整下载地址并展示。
+    // ===== 多模型目录：每类提供多个开源免费选项（均已下载到本地 models/）=====
+    const MODEL_CATALOG={
+      asr:{
+        tiny:{repo:"onnx-community/whisper-tiny",local:"whisper-tiny",label:"Whisper-tiny",
+              file:"onnx/encoder_model_quantized.onnx",remoteFile:"onnx/encoder_model.onnx",
+              hiFile:"onnx/encoder_model.onnx",size:"40MB",
+              dtFast:{encoder_model:"q8",decoder_model_merged:"q8"},
+              dtHigh:{encoder_model:"fp32",decoder_model_merged:"q8"}},
+        base:{repo:"onnx-community/whisper-base",local:"whisper-base",label:"Whisper-base",
+              file:"onnx/encoder_model_quantized.onnx",remoteFile:"onnx/encoder_model.onnx",
+              hiFile:"onnx/encoder_model.onnx",size:"77MB",
+              dtFast:{encoder_model:"q8",decoder_model_merged:"q8"},
+              dtHigh:{encoder_model:"fp32",decoder_model_merged:"q8"}},
+        small:{repo:"onnx-community/whisper-small",local:"whisper-small",label:"Whisper-small",
+              file:"onnx/encoder_model_quantized.onnx",remoteFile:"onnx/encoder_model.onnx",
+              hiFile:"onnx/encoder_model.onnx",size:"241MB",
+              dtFast:{encoder_model:"q8",decoder_model_merged:"q8"},
+              dtHigh:{encoder_model:"fp32",decoder_model_merged:"q8"}}
+      },
+      llm:{
+        qwen3_06b:{repo:"onnx-community/Qwen3-0.6B-ONNX",local:"Qwen3-0.6B-ONNX",label:"Qwen3-0.6B",
+              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4f16.onnx",
+              hiFile:"onnx/model_q4f16.onnx",size:"617MB"},
+        qwen25_15b:{repo:"onnx-community/Qwen2.5-1.5B-Instruct",local:"Qwen2.5-1.5B-Instruct",label:"Qwen2.5-1.5B",
+              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4f16.onnx",
+              hiFile:"onnx/model_q4f16.onnx",size:"1.5GB"},
+        qwen3_17b:{repo:"onnx-community/Qwen3-1.7B-ONNX",local:"Qwen3-1.7B-ONNX",label:"Qwen3-1.7B",
+              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4f16.onnx",
+              hiFile:"onnx/model_q4f16.onnx",size:"1.7GB"}
+      },
+      emb:{
+        small:{repo:"Xenova/bge-small-zh-v1.5",local:"bge-small-zh-v1.5",label:"bge-small-zh",
+              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4.onnx",
+              hiFile:"onnx/model_q4.onnx",size:"24MB"},
+        base:{repo:"Xenova/bge-base-zh-v1.5",local:"bge-base-zh-v1.5",label:"bge-base-zh",
+              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4.onnx",
+              hiFile:"onnx/model_q4.onnx",size:"98MB"}
+      }
+    };
+    // 当前选中的模型 key（由界面下拉框驱动）
+    const activeModel={asr:"base",llm:"qwen3_06b",emb:"small"};
+    // MODEL_FILES 始终指向当前选中的模型定义，供 fullUrl / check-local / load 使用
+    const MODEL_FILES={
+      asr:MODEL_CATALOG.asr.base,
+      llm:MODEL_CATALOG.llm.qwen3_06b,
+      emb:MODEL_CATALOG.emb.small
+    };
+    const LOCAL_BASE="./models/";
+    const isLocalSrc=()=>!!(sources[0]&&sources[0].local);
+    function resolveDef(key,customHost){
+      if(key==="custom"){
+        const h=String(customHost||"").trim().replace(/\/+$/,"");
+        if(!h) throw new Error("自定义地址为空，请填写镜像根地址（如 https://modelscope.cn/models）");
+        return {name:"自定义",host:h,revision:"main"};
+      }
+      return SOURCE_DEFS[key]||SOURCE_DEFS.modelscope;
+    }
+    function modelIdFor(def,m){ return def.local ? m.local : m.repo; }
+    function fullUrl(def,m){
+      if(def.local) return LOCAL_BASE+m.local+"/"+m.file;
+      return String(def.host).replace(/\/+$/,"")+"/"+m.repo+"/resolve/"+def.revision+"/"+(m.remoteFile||m.file);
+    }
+    // 回退链（按序尝试）：默认 魔搭 → hf-mirror → 官方
+    let sources=[SOURCE_DEFS.local,SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror];
+
+    // 懒加载推理库（多个 CDN 依次尝试），只在此处动态 import
+    const HF_VER="3.8.1";
+    const LOCAL_LIB="./lib/transformers.min.js";
+    // 本地推理库优先；缺失时才回退 CDN（离线部署只用第一项）
+    const CDN_LIST=[
+      LOCAL_LIB,
+      "https://cdn.jsdelivr.net/npm/@huggingface/transformers@"+HF_VER,
+      "https://fastly.jsdelivr.net/npm/@huggingface/transformers@"+HF_VER,
+      "https://unpkg.com/@huggingface/transformers@"+HF_VER+"/+esm"
+    ];
+    // ONNX Runtime 的 wasm 需从 CDN 单独下载，必须与推理库同源，否则换 CDN 后仍会卡住
+    function wasmPathsFor(url){
+      // 本地推理库 → ONNX 运行时同样取本地 ort2/ 目录，彻底不联网
+      // （目录名用 ort2：旧 ort/ 的 jsep.mjs 曾被浏览器以错误 MIME 缓存，换名强制重新拉取）
+      if(String(url).indexOf("./lib/")===0){ try{ return new URL("./ort2/",location.href).href; }catch(_){} }
+      const re=new RegExp("^(https://[^/]+)/npm/@huggingface/transformers@([^/]+)");
+      const m=String(url).match(re);
+      if(m) return m[1]+"/npm/@huggingface/transformers@"+m[2]+"/dist/";
+      return "https://cdn.jsdelivr.net/npm/@huggingface/transformers@"+HF_VER+"/dist/";
+    }
+    async function ensureHF(){
+      if(HF) return HF;
+      if(hfLoading) return hfLoading;
+      hfLoading=(async()=>{
+        let lastErr=null;
+        for(const url of CDN_LIST){
+          try{
+            const mod=await import(/* webpackIgnore: true */ url);
+            const p=mod.pipeline||(mod.default&&mod.default.pipeline);
+            const e=mod.env||(mod.default&&mod.default.env);
+            if(typeof p==="function"&&e){
+              HF=mod; pipeline=p; env=e;
+              env.remotePathTemplate=PATH_TEMPLATE;
+              try{ if(env.backends&&env.backends.onnx&&env.backends.onnx.wasm) env.backends.onnx.wasm.wasmPaths=wasmPathsFor(url); }catch(_){}
+              applySource(sources[0]); // 本地：开 allowLocalModels；远程：设 remoteHost
+              let host=""; try{ host=new URL(url).host; }catch(_){}
+              emit({type:"note",message:"推理库已加载："+(host||url)});
+              return HF;
+            }
+            lastErr=new Error("该地址返回的不是 Transformers.js 模块");
+          }catch(err){ lastErr=err; }
+        }
+        throw new Error("推理库 CDN 全部不可达（jsdelivr/unpkg/esm.sh）。请检查网络，或改用配套 Python 版。"+String(lastErr&&lastErr.message||lastErr||""));
+      })();
+      hfLoading.catch(()=>{ hfLoading=null; }); // 失败后允许重试
+      return hfLoading;
+    }
+
+    function applySource(def){
+      if(!def) throw new Error("下载源为空");
+      if(!env) return def; // 推理库未加载，留待 ensureHF 应用
+      if(def.local){
+        env.allowLocalModels=true;
+        env.allowRemoteModels=false;
+        env.localModelPath=LOCAL_BASE;
+        // 本地模型不写入浏览器缓存（Cache Storage 在 C 盘 AppData，会占用约等于模型体积的空间）
+        env.useBrowserCache=false;
+      }else{
+        const h=String(def.host||"").trim().replace(/\/+$/,"");
+        if(!h) throw new Error("下载源地址为空");
+        env.allowLocalModels=false;
+        env.allowRemoteModels=true;
+        env.remoteHost=h;
+        env.remotePathTemplate=PATH_TEMPLATE;
+        env.useBrowserCache=true; // 远程下载仍走缓存
+      }
+      return def;
+    }
+
+    // 带多源回退的 pipeline 加载；device/dtype 逐级降级由调用方负责
+    async function pipelineWithFallback(task,m,options,label){
+      await ensureHF(); // 确保推理库就绪
+      let lastErr;
+      for(let i=0;i<sources.length;i++){
+        const def=applySource(sources[i]);
+        const modelId=modelIdFor(def,m);
+        if(i>0) emit({type:"note",message:label+"：切换到备用源 "+def.name});
+        try{
+          const pipe=await pipeline(task,modelId,options);
+          emit({type:"note",message:label+" 已从 "+def.name+" 加载成功"});
+          return pipe;
+        }catch(err){
+          lastErr=err;
+          emit({type:"note",message:label+" 从 "+def.name+" 加载失败："+String(err&&err.message||err).slice(0,120)});
+        }
+      }
+      throw new Error(label+" 全部来源失败："+String(lastErr&&lastErr.message||lastErr||""));
+    }
+
+    let asr=null, llm=null, embed=null, gpu=false;
+    let KB=[]; // [{text, source, embedding: number[]}]
+
+    function report(p){
+      if(!p) return;
+      if(p.status==="initiate") emit({type:"progress",model:pendingModel,file:p.file||"",loaded:0,total:p.total||0});
+      else if(p.status==="progress") emit({type:"progress",model:pendingModel,file:p.file||"",loaded:p.loaded||0,total:p.total||0});
+      else if(p.status==="done") emit({type:"progress",model:pendingModel,file:p.file||"",loaded:p.total||1,total:p.total||1,done:true});
+    }
+    let pendingModel="";
+    function cosine(a,b){let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s;}
+
+    async function handle(m){
+      const type=m.type;
+      try{
+        if(type==="config"){
+          const sel=m.source||"local";
+          let chain;
+          if(sel==="local") chain=[SOURCE_DEFS.local,SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror];
+          else if(sel==="modelscope") chain=[SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror,SOURCE_DEFS.official];
+          else if(sel==="mirror") chain=[SOURCE_DEFS.mirror,SOURCE_DEFS.modelscope,SOURCE_DEFS.official];
+          else if(sel==="official") chain=[SOURCE_DEFS.official,SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror];
+          else chain=[resolveDef("custom",m.customHost),SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror];
+          sources=chain;
+          // 应用界面选择的模型；变更时释放已加载实例（向量模型变更还需重建索引）
+          if(m.models){
+            for(const k of ["asr","llm","emb"]){
+              const key=m.models[k];
+              const cat=MODEL_CATALOG[k];
+              if(key && cat[key] && key!==activeModel[k]){
+                activeModel[k]=key;
+                MODEL_FILES[k]=cat[key];
+                if(k==="asr") asr=null;
+                else if(k==="llm") llm=null;
+                else if(k==="emb"){ embed=null; KB=[]; }
+                emit({type:"note",message:"已切换 "+({asr:"识别",llm:"问答",emb:"向量"})[k]+"模型为 "+cat[key].label+"（"+cat[key].size+"）"});
+              }
+            }
+          }
+          const def=applySource(sources[0]);
+          // 回传三个模型的具体位置（本地为相对路径，远程为完整 URL）
+          const urls={};
+          for(const k in MODEL_FILES){ urls[k]=fullUrl(def,MODEL_FILES[k]); }
+          emit({type:"configured",source:sel,host:def.host,sourceName:def.name,local:!!def.local,urls,
+                fallback:sources.slice(1).map(s=>s.name)});
+          return;
+        }
+
+        if(type==="check-local"){
+          const res={};
+          for(const k in MODEL_FILES){
+            const M=MODEL_FILES[k], base=LOCAL_BASE+M.local+"/";
+            let cfgOk=false, onnxOk=false, size=0;
+            try{ const r=await fetch(base+"config.json",{cache:"no-store"}); cfgOk=r.ok; }catch(_){}
+            try{
+              const r2=await fetch(base+M.file,{method:"HEAD"});
+              onnxOk=r2.ok; size=parseInt(r2.headers.get("content-length")||"0",10)||0;
+            }catch(_){}
+            let hiOk=false;
+            if(M.hiFile){ try{ const r3=await fetch(base+M.hiFile,{method:"HEAD"}); hiOk=r3.ok; }catch(_){} }
+            res[k]={ok:cfgOk&&onnxOk,cfg:cfgOk,onnx:onnxOk,size,hi:hiOk,label:M.label};
+          }
+          emit({type:"local-checked",result:res}); return;
+        }
+
+        if(type==="test-source"){
+          const def=applySource(sources[0]);
+          const testUrl=def.local
+            ? LOCAL_BASE+MODEL_FILES.llm.local+"/config.json"
+            : String(def.host).replace(/\/+$/,"")+"/"+MODEL_FILES.llm.repo+"/resolve/"+def.revision+"/config.json";
+          let ok=false, status=0;
+          try{ const resp=await fetch(testUrl,{cache:"no-store"}); ok=resp.ok; status=resp.status; }catch(err){ status=String(err&&err.message||err).slice(0,40); }
+          emit({type:"source-tested",host:def.host,name:def.name,ok,status,url:testUrl}); return;
+        }
+
+        if(type==="load-asr"){
+          pendingModel="asr";
+          const common={progress_callback:report};
+          const task="automatic-speech-recognition", M=MODEL_FILES.asr;
+          const high = isLocalSrc() && m.precision==="high" && !!M.hiFile;
+          // WebGPU 下 q8 权重输出乱码（int8 MatMul 与 WebGPU EP 不兼容），
+          // WebGPU 一律使用 fp32 encoder + q4 decoder（官方 whisper-webgpu 配置）；
+          // 本地缺少 fp32/q4 文件时自动退回 WASM+q8。
+          const dtGpu={encoder_model:"fp32",decoder_model_merged:"q4"};
+          const dtWasm = high?M.dtHigh:(isLocalSrc()?M.dtFast:{encoder_model:"fp32",decoder_model_merged:"q4"});
+          emit({type:"note",message:M.label+" 精度档："+(m.gpu?"WebGPU fp32+q4":(high?"高精度(encoder fp32)":"快速(q8)"))});
+          if(m.gpu){
+            try{ asr=await pipelineWithFallback(task,M,{...common,device:"webgpu",dtype:dtGpu},"Whisper/WebGPU"); gpu=true; }
+            catch(err){
+              emit({type:"note",message:"WebGPU 加载失败，改用 WASM："+String(err.message||err).slice(0,80)}); gpu=false;
+              asr=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtWasm},"Whisper/WASM");
+            }
+          } else asr=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtWasm},"Whisper/WASM");
+          emit({type:"asr-ready",gpu}); return;
+        }
+
+        if(type==="load-llm"){
+          pendingModel="llm";
+          const common={progress_callback:report};
+          const task="text-generation", M=MODEL_FILES.llm;
+          const high = isLocalSrc() && m.precision==="high" && !!M.hiFile;
+          // WebGPU 下 q8/int8 权重会输出乱码（int8 MatMul 与 WebGPU EP 兼容性差），
+          // WebGPU 一律使用 q4f16 权重；本地缺少 q4f16 文件时退回 WASM+q8。
+          const gpuQ4 = isLocalSrc() ? !!M.hiFile : true;
+          const dtGpu="q4f16";
+          const dtWasm=isLocalSrc()?(high?"q4f16":"q8"):"q4";
+          // WASM 回退：q8 大权重（>1GB）可能超出 WASM 内存上限，失败后自动改用 q4f16
+          const tryWasm=async()=>{
+            try{ llm=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtWasm},"Qwen/WASM"); }
+            catch(e1){
+              if(isLocalSrc()&&M.hiFile&&dtWasm!=="q4f16"){
+                emit({type:"note",message:"WASM q8 加载失败，改用 q4f16 权重重试"});
+                llm=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:"q4f16"},"Qwen/WASM-q4f16");
+              } else throw e1;
+            }
+          };
+          emit({type:"note",message:M.label+" 精度档："+(m.gpu?(gpuQ4?"WebGPU q4f16":"WASM "+(high?"q4f16":"q8")):(high?"高精度(q4f16)":"快速(q8/int8)"))});
+          if(m.gpu&&gpuQ4){
+            try{ llm=await pipelineWithFallback(task,M,{...common,device:"webgpu",dtype:dtGpu},"Qwen/WebGPU"); gpu=true; }
+            catch(err){
+              emit({type:"note",message:"WebGPU 加载失败，改用 WASM："+String(err.message||err).slice(0,80)}); gpu=false;
+              await tryWasm();
+            }
+          } else await tryWasm();
+          emit({type:"llm-ready",gpu}); return;
+        }
+
+        if(type==="load-embed"){
+          pendingModel="emb";
+          const common={progress_callback:report};
+          const task="feature-extraction", M=MODEL_FILES.emb;
+          const high = isLocalSrc() && m.precision==="high" && !!M.hiFile;
+          // WebGPU 下 q8 权重会输出异常向量，WebGPU 一律使用 q4（实测检索相似度正常）
+          const gpuQ4 = isLocalSrc() ? !!M.hiFile : true;
+          const dtGpu="q4";
+          const dtEmb=isLocalSrc()?(high?"q4":"q8"):"q8";
+          emit({type:"note",message:M.label+" 精度档："+(m.gpu?(gpuQ4?"WebGPU q4":"WASM "+(high?"q4":"q8")):(high?"高精度(q4)":"快速(q8)"))});
+          if(m.gpu&&gpuQ4){
+            try{ embed=await pipelineWithFallback(task,M,{...common,device:"webgpu",dtype:dtGpu},"bge-zh/WebGPU"); gpu=true; }
+            catch(err){
+              emit({type:"note",message:"WebGPU 加载失败，改用 WASM："+String(err.message||err).slice(0,80)}); gpu=false;
+              embed=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtEmb},"bge-zh/WASM");
+            }
+          } else embed=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtEmb},"bge-zh/WASM");
+          emit({type:"emb-ready",gpu}); return;
+        }
+
+        if(type==="index-docs"){
+          if(!embed) throw new Error("向量模型未加载");
+          const chunks=m.chunks, total=chunks.length;
+          for(let i=0;i<total;i++){
+            const out=await embed(chunks[i].text,{pooling:"mean",normalize:true});
+            KB.push({text:chunks[i].text,source:chunks[i].source,embedding:Array.from(out.data)});
+            if((i+1)%3===0||i===total-1) emit({type:"index-progress",done:i+1,total});
+          }
+          emit({type:"index-done",added:total,total:KB.length}); return;
+        }
+
+        if(type==="clear-kb"){ KB=[]; emit({type:"kb-cleared"}); return; }
+
+        if(type==="transcribe"){
+          if(!asr) throw new Error("语音识别模型未加载");
+          const out=await asr(m.pcm,{language:"chinese",task:"transcribe"});
+          emit({type:"transcript",text:cleanTranscript(out.text||"")}); return;
+        }
+
+        if(type==="generate"){
+          if(!llm) throw new Error("问答模型未加载");
+          const q=String(m.question||"").trim();
+          let system=m.system, sources=[];
+          if(m.useRag && KB.length && embed){
+            const out=await embed("为这个句子生成表示以用于检索相关文章："+q,{pooling:"mean",normalize:true});
+            const qv=Array.from(out.data);
+            const ranked=KB.map(k=>({k,score:cosine(qv,k.embedding)})).sort((a,b)=>b.score-a.score).slice(0,3);
+            const ctx=ranked.map((r,i)=>"["+(i+1)+"] "+r.k.text).join("\n");
+            sources=ranked.map(r=>({source:r.k.source,score:r.score,text:r.k.text}));
+            system="你是专业问答助手。请严格依据下方参考资料回答，简明扼要（两三句、不超过120字）。若资料不足以回答，请说明“资料中未提及”，不要编造。只输出最终答案，不要输出思考过程。\n\n参考资料：\n"+ctx;
+          }
+          // Qwen3 系列需关闭思考（/no_think）；Qwen2.5 非思考模型显式追加中文指令
+          const isThink=String(activeModel.llm).indexOf("qwen3")>=0;
+          const userContent = isThink ? (q+"/no_think") : (q+"\n请用中文简明回答。");
+          const messages=[{role:"system",content:system},{role:"user",content:userContent}];
+          let answer="";
+          // 流式输出：直接使用 pipeline 自带的 tokenizer（最可靠，无需重复加载）
+          let promptStr=null, tok=llm&&llm.tokenizer;
+          try{
+            if(tok && tok.apply_chat_template){
+              promptStr=tok.apply_chat_template(messages,{tokenize:false,add_generation_prompt:true});
+            }
+          }catch(_){ promptStr=null; }
+          emit({type:"note",message:"生成准备：prompt="+(promptStr?promptStr.length:"无")+" tokenizer="+(tok?"OK":"无")});
+          let streamBuf="", streamer=null;
+          if(promptStr && HF && HF.TextStreamer && tok){
+            try{
+              streamer=new HF.TextStreamer(tok,{skip_prompt:true,skip_special_tokens:true,
+                callback_function:(chunk)=>{ if(chunk){streamBuf+=chunk;emit({type:"answer-delta",text:chunk});} }
+              });
+            }catch(_){ streamer=null; }
+          }
+          if(streamer){
+            try{
+              await llm(promptStr,{max_new_tokens:110,do_sample:false,temperature:0,repetition_penalty:1.15,streamer});
+              answer=streamBuf;
+              emit({type:"note",message:"流式生成完成，片段="+streamBuf.length+"字"});
+            }catch(err){ answer=""; emit({type:"note",message:"流式失败改用整体生成："+String(err.message||err).slice(0,60)}); }
+          }
+          // 回退：一次性生成（chat 数组或字符串 prompt）
+          if(!answer){
+            try{
+              const out=await llm(promptStr?promptStr:messages,{max_new_tokens:110,do_sample:false,temperature:0,repetition_penalty:1.15});
+              const gen=(out&&out[0]&&out[0].generated_text)||[];
+              const last=gen[gen.length-1];
+              answer=(last&&typeof last.content==="string")?last.content:(typeof last==="string"?last:"");
+            }catch(err){ answer=""; }
+          }
+          answer=cleanAnswer(answer);
+          if(!answer) answer="（模型未返回有效内容，请换个说法重试）";
+          emit({type:"answer",text:answer,sources,usedRag:!!(m.useRag&&KB.length)}); return;
+        }
+
+      }catch(err){
+        emit({type:"error",stage:type,message:String((err&&err.message)||err)});
+      }
+    }
+
+    // 语音转录清洗：去 Whisper 常见幻觉（重复句、"谢谢观看/字幕由..."等）、规整标点
+    function cleanTranscript(t){
+      let s=String(t||"").trim();
+      // 去时间戳标记与常见幻觉短语
+      s=s.replace(/\[\d{2}:\d{2}(:\d{2})?\->\d{2}:\d{2}(:\d{2})?\]/g,"");
+      s=s.replace(/(谢谢观看|感谢观看|字幕由.*?提供|请不吝点赞|订阅.*?频道|转载请注明|www\.\S+|HTTP\S*)/gi,"");
+      // 连续重复句/短语去重（Whisper 在小音频上易循环）
+      const seg=s.split(/(?<=[。！？!?，,])/).map(x=>x.trim()).filter(Boolean);
+      const seen=new Set(), uniq=[];
+      for(const g of seg){ const k=g.replace(/[\s，,。！？!?]/g,""); if(!k||seen.has(k))continue; seen.add(k);uniq.push(g); }
+      s=uniq.join("").trim();
+      // 同一短句连续重复 N 次（无标点分隔）折叠为一次
+      s=s.replace(/(.{2,12}?)\1{2,}/g,"$1");
+      return s.replace(/\s+/g," ").trim();
+    }
+    // 统一清洗模型输出：剥离思考段、控制 token、Markdown 残留，规范空白
+    function cleanAnswer(t){
+      let s=String(t||"");
+      s=s.replace(/<think>[\s\S]*?<\/think>/g,"").replace(/<think>[\s\S]*$/g,"").replace(/<\/?think>/g,"");
+      s=s.replace(/\/no_think|\/think/g,"");
+      s=s.replace(/<\|[a-z_]+\|>/gi,"");
+      s=s.replace(/^\s*#{1,6}\s*/gm,"").replace(/\*\*/g,"").replace(/`/g,"");
+      s=s.replace(/[ \t]+/g," ").replace(/\n{3,}/g,"\n\n").trim();
+      // 先去开头孤立标点，确保重复句 key 一致
+      s=s.replace(/^[，,、；;：:\s]+/,"");
+      // 去重：按句子切分，去除连续/循环重复的句子（小模型确定性解码常见）
+      const parts=s.split(/(?<=[。！？.!?\n])/).map(x=>x.trim()).filter(Boolean);
+      const seen=new Set(), uniq=[];
+      for(const p of parts){
+        const key=p.replace(/\s+/g,"");
+        if(!key) continue;
+        if(seen.has(key)) continue; // 完全重复句丢弃
+        seen.add(key); uniq.push(p);
+      }
+      s=uniq.join("").trim();
+      // 去掉开头的孤立标点/连接词与末尾未完句、免责声明、自我提示
+      s=s.replace(/^[，,、；;：:\s]+/,"");
+      s=s.replace(/(请提供|请记住|请注意|作为一个?AI|我的知识是有限的?).*$/s,"");
+      s=s.replace(/[，,、；;：:]+$/,"");
+      const lastPunn=s.search(/[。！？.!?]$/);
+      if(lastPunn<0){ const cut=Math.max(s.lastIndexOf("。"),s.lastIndexOf("！"),s.lastIndexOf("？"),s.lastIndexOf("."));
+        if(cut>s.length*0.4) s=s.slice(0,cut+1); }
+      // 整段连续重复的二次兜底
+      if(s.length>200){ const half=Math.floor(s.length/2); if(s.slice(0,half)===s.slice(half)) s=s.slice(0,half).trim(); }
+      // 去开头的残缺标点/碎片（如 ".你是一个语言模型，"）
+      s=s.replace(/^[.。·、，,;；:\s]+/,"");
+      // 去 AI 套话开头（含"你是一个语言模型，可以提供帮助。"这类完整套话句）
+      s=s.replace(/^([.。]\s*)?(你(是|们是)(一名|一个)?(语言模型|人工智能|AI)[^。]*?[。])/i,"");
+      s=s.replace(/^(我是(一名|一个)?(人工智能|AI|语言模型)[^。]*?[。]|作为(一名|一个)?(人工智能|AI)[^。]*?[。]|可以提供帮助[。，]|关于这个问题，?)/i,"");
+      // 去列表化结构（1. / - / • 开头的多项）：截取到列表前，避免长篇罗列
+      const listMatch=s.match(/(?:^|[。：:])\s*(?:\d{1,2}[.、)]|[-•])/);
+      if(listMatch && listMatch.index>20){
+        s=s.slice(0,listMatch.index+1).trim();
+        // 若截断后停在冒号/引导语，回退到上一个完整句号
+        if(/[：:]$/.test(s)){ const p=s.lastIndexOf("。"); if(p>10) s=s.slice(0,p+1).trim(); else s=s.replace(/[：:]$/,"。"); }
+      }
+      // 限长：最多 3 句且 160 字，保证简明
+      const sent=s.match(/[^。！？!?]+[。！？!?]?/g)||[];
+      if(sent.length>3) s=sent.slice(0,3).join("");
+      if(s.length>160) s=s.slice(0,160).replace(/[，,、；;]+$/,"")+"。";
+      return s.trim();
+    }
+
+    // ===== 对外接口：串行队列，避免并发重入 =====
+    // 将模型目录暴露到全局，供主脚本 onPrecisionChange() 等界面逻辑读取
+    // （模块作用域内的 const 无法被普通脚本与行内事件处理器访问）
+    window.MODEL_CATALOG=MODEL_CATALOG;
+    window.MODEL_FILES=MODEL_FILES;
+    let __queue=Promise.resolve();
+    window.EnginePost=(msg)=>{
+      __queue=__queue
+        .then(()=>new Promise(r=>setTimeout(r,0))) // 让出主线程，先让界面渲染状态
+        .then(()=>handle(msg))
+        .catch(err=>{ emit({type:"error",stage:msg&&msg.type,message:String((err&&err.message)||err)}); });
+    };
+    // 引擎就绪通知（延迟一个 tick，确保主脚本已注册监听）
+    setTimeout(()=>emit({type:"worker-ready"}),0);
+  </script>
+
+  <script>
+    /* ===== 引擎通信（主线程，不使用 Worker）===== */
+    const $=id=>document.getElementById(id);
+    // 轻量消息总线：完全替代 Worker，避免预览/沙箱环境对 Blob Worker 的安全限制。
+    const __pending=[];
+    const worker={
+      onmessage:null, onerror:null,
+      postMessage(msg){
+        if(typeof window.EnginePost==='function') window.EnginePost(msg);
+        else __pending.push(msg);
+      }
+    };
+    window.addEventListener('engine-msg',(ev)=>{
+      const d=ev.detail;
+      if(worker.onmessage) worker.onmessage({data:d});
+      // 引擎就绪后排空早期排队的消息
+      if(d&&d.type==='worker-ready'&&__pending.length&&typeof window.EnginePost==='function'){
+        const q=__pending.splice(0);q.forEach(m=>window.EnginePost(m));
+      }
+    });
+    const state={asr:'idle',llm:'idle',emb:'idle',gpu:false,files:{},fileProgress:{},pendingModel:''};
+    const chatBox=$('chatBox');
+    let currentAnswer='';
+    const statusMap={asr:{badge:'asrBadge',btn:'asrBtn',bar:'asrProgress',wrap:'asrProgressWrap'},llm:{badge:'llmBadge',btn:'llmBtn',bar:'llmProgress',wrap:'llmProgressWrap'},emb:{badge:'embBadge',btn:'embBtn',bar:'embProgress',wrap:'embProgressWrap'}};
+
+    worker.onmessage=(e)=>{
+      const m=e.data;
+      if(m.type==='worker-ready'){ configure(); checkGPU(); return; }
+      if(m.type==='configured'){
+        const nm=m.sourceName||'模型源';
+        $('sourceTag').textContent='源：'+nm;
+        $('sourceTag').className='text-[9px] px-1.5 py-0.5 rounded-full '+(m.local?'bg-green-50 text-green-600':'bg-blue-50 text-[#165DFF]');
+        if(m.local){
+          $('downloadInfo').textContent='本地模型就绪，全程离线（models/ 目录）';
+        }else{
+          let host=''; try{ host=new URL(m.host).host; }catch(_){ host=m.host||''; }
+          $('downloadInfo').textContent=nm+'（'+host+'）已就绪'+(m.fallback&&m.fallback.length?'，失败自动切换：'+m.fallback.join(' → '):'');
+        }
+        if(m.urls){
+          const u=m.urls;
+          const row=(k,t)=>'<div class="flex items-start gap-1"><span class="w-8 flex-shrink-0 text-gray-400">'+t+'</span><a href="'+u[k]+'" target="_blank" rel="noopener" class="text-[#165DFF] hover:underline break-all">'+u[k]+'</a></div>';
+          $('modelUrls').innerHTML=row('asr','识别')+row('llm','问答')+row('emb','向量');
+          $('modelUrls').classList.remove('hidden');
+        }
+        return;
+      }
+      if(m.type==='source-tested'){
+        const nm=m.name||m.host||'当前源';
+        $('downloadInfo').textContent=nm+'：'+(m.ok?'可访问（HTTP '+m.status+'）':'不可访问（'+m.status+'）');
+        $('sourceTag').className='text-[9px] px-1.5 py-0.5 rounded-full '+(m.ok?'bg-green-50 text-green-600':'bg-red-50 text-red-600');
+        return;
+      }
+      if(m.type==='local-checked'){
+        const r=m.result||{};
+        const names={asr:'识别',llm:'问答',emb:'向量'};
+        const badges={asr:'asrBadge',llm:'llmBadge',emb:'embBadge'};
+        const miss=[];
+        ['asr','llm','emb'].forEach(k=>{
+          const it=r[k]||{};
+          if(!it.ok){
+            miss.push(names[k]);
+            const b=$(badges[k]);
+            if(b){ b.textContent='本地缺失'; b.className='text-[9px] px-1.5 py-0.5 rounded-full bg-red-50 text-red-600'; }
+          }
+        });
+        if(miss.length) $('downloadInfo').textContent='本地缺少：'+miss.join('、')+'（可点下方链接下载，或切换联网源）';
+        else {
+          const hiCount=['asr','llm','emb'].filter(k=>r[k]&&r[k].hi).length;
+          const nm=['asr','llm','emb'].map(k=>r[k]&&r[k].label).filter(Boolean).join(' / ');
+          $('downloadInfo').textContent='当前模型（'+nm+'）均已在本地就绪（全程离线）'
+            +(hiCount?'，其中 '+hiCount+' 个含高精度权重':'');
+        }
+        return;
+      }
+      if(m.type==='progress'){
+        const s=statusMap[m.model];if(!s)return;
+        state[m.model+'Files']=state[m.model+'Files']||{};
+        state[m.model+'Files'][m.file]={loaded:m.loaded,total:m.total};
+        let l=0,t=0;Object.values(state[m.model+'Files']).forEach(v=>{l+=v.loaded;t+=v.total;});
+        const pct=t?Math.min(99,Math.round(l/t*100)):0;
+        $(s.wrap).classList.remove('hidden');
+        $(s.bar).style.width=(t?pct+'%':'35%')+'%';
+        // 部分源（如魔搭）可能不回 content-length，此时显示已下载体积而非百分比
+        $('downloadInfo').textContent=t
+          ? '下载 '+m.file.split('/').pop()+' '+pct+'%'
+          : '下载 '+m.file.split('/').pop()+' 已获取 '+(l/1048576).toFixed(1)+' MB';
+        return;
+      }
+      if(m.type==='note'){$('downloadInfo').textContent=m.message;return;}
+      ['asr','llm','emb'].forEach(k=>{
+        if(m.type===k+'-ready'){
+          state[k]='ready';state.gpu=m.gpu;
+          const s=statusMap[k];$(s.badge).className='text-[9px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-600';$(s.badge).textContent='已就绪';
+          $(s.btn).disabled=true;$(s.btn).textContent='已加载';$(s.bar).style.width='100%';updateEngine();
+          $('downloadInfo').textContent=k.toUpperCase()+' 模型已就绪';
+        }
+      });
+      if(m.type==='index-progress'){
+        const pct=Math.round(m.done/m.total*100);$('kbProgress').style.width=pct+'%';$('kbProgressPct').textContent=pct+'%';$('kbProgressText').textContent='建立向量索引 '+m.done+'/'+m.total;return;
+      }
+      if(m.type==='index-done'){
+        $('kbProgressWrap').classList.add('hidden');updateKBStat();
+        $('downloadInfo').textContent='知识库索引完成，共 '+m.total+' 个向量块';return;
+      }
+      if(m.type==='kb-cleared'){updateKBStat();return;}
+      if(m.type==='transcript'){onTranscript(m.text);return;}
+      if(m.type==='answer-delta'){onAnswerDelta(m.text);return;}
+      if(m.type==='answer'){onAnswer(m.text,m.sources,m.usedRag);return;}
+      if(m.type==='error'){
+        const sw=$('streamWrap');if(sw)sw.remove();
+        setStatus('出错','bg-red-50 text-red-600');$('downloadInfo').textContent=m.stage+' 失败：'+m.message;
+        const keys=['load-asr','load-llm','load-embed'];
+        const k=keys.indexOf(m.stage)>=0?['asr','llm','emb'][keys.indexOf(m.stage)]:null;
+        if(k){state[k]='idle';const s=statusMap[k];$(s.btn).disabled=false;$(s.btn).textContent='重试';}
+      }
+    };
+    // 引擎异常兜底（主线程模式，仅作最后防线，正常不会触发）
+    worker.onerror=(err)=>{
+      const detail=(err&&err.message)?err.message:'推理引擎异常';
+      $('downloadInfo').textContent='引擎提示：'+detail+'。可点击下方模型链接手动下载后重试。';
+    };
+
+    function updateEngine(){$('engineText').innerHTML='<i class="fas fa-circle text-[8px] mr-1" style="color:'+(state.gpu?'#00B42A':'#165DFF')+'"></i>'+(state.gpu?'WebGPU':'WASM');}
+    function updateKBStat(){const n=Object.values(state.files).reduce((a,b)=>a+b.chunks,0);$('kbStat').innerHTML='<i class="fas fa-book text-[#165DFF] mr-1"></i>知识库 '+n+' 块';}
+    async function checkGPU(){state.gpu=false;updateEngine();} // 强制 WASM（见 startLoad 注释）
+    function onSourceChange(){
+      $('customHostWrap').classList.toggle('hidden',$('sourceSelect').value!=='custom');
+      configure(); // 立即应用新源，界面上的下载链接随之更新
+    }
+    function configure(){
+      worker.postMessage({type:'config',source:$('sourceSelect').value,customHost:$('customHost').value,
+        models:{asr:$('asrModel').value,llm:$('llmModel').value,emb:$('embModel').value},
+        precision:$('precisionSelect').value});
+    }
+    function onModelChange(kind){
+      const sel=$(kind+'Model');
+      const label=sel.selectedOptions[0].textContent;
+      const s=statusMap[kind];
+      state[kind]='idle';
+      $(s.badge).textContent='未加载';
+      $(s.badge).className='text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500';
+      $(s.btn).disabled=false;
+      $(s.btn).innerHTML='<i class="fas fa-download mr-1"></i>加载';
+      $(s.wrap).classList.add('hidden');
+      if(kind==='emb'&&Object.values(state.files).some(f=>f.chunks>0)){
+        $('downloadInfo').textContent='已切换向量模型为 '+label+'，知识库需重新建立索引';
+      }else{
+        $('downloadInfo').textContent='已切换为 '+label+'，点击「加载」生效';
+      }
+      configure();
+    }
+    function copyLinks(){
+      const links=[].slice.call(document.querySelectorAll('#modelUrls a')).map(a=>a.href).join('\n');
+      const done=()=>{$('downloadInfo').textContent='已复制 '+document.querySelectorAll('#modelUrls a').length+' 个模型下载链接';};
+      if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(links).then(done).catch(()=>{$('downloadInfo').textContent='复制失败，请手动选择链接';});
+      else { const ta=document.createElement('textarea');ta.value=links;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){$('downloadInfo').textContent='复制失败，请手动选择链接';}ta.remove(); }
+    }
+    function testSource(){
+      configure();
+      setTimeout(()=>worker.postMessage({type:'test-source'}),50);
+    }
+    function checkLocal(){
+      worker.postMessage({type:'check-local'});
+    }
+    function onPrecisionChange(){
+      const hi=$('precisionSelect').value==='high';
+      const hasHi={
+        asr:!!MODEL_CATALOG.asr[$('asrModel').value].hiFile,
+        llm:!!MODEL_CATALOG.llm[$('llmModel').value].hiFile,
+        emb:!!MODEL_CATALOG.emb[$('embModel').value].hiFile
+      };
+      const anyHi=hasHi.asr||hasHi.llm||hasHi.emb;
+      $('downloadInfo').textContent=hi
+        ?(anyHi?'高精度档：对含原始权重的模型启用高精度，其余模型自动用 q8，需重新加载':'当前所选模型均无高精度权重，将统一使用 q8')
+        :'快速档：使用量化权重（q8），需重新加载模型';
+    }
+
+    function startLoad(kind){
+      if(state[kind]==='loading'||state[kind]==='ready')return;
+      state[kind]='loading';
+      const s=statusMap[kind];$(s.btn).disabled=true;$(s.btn).innerHTML='<i class="fas fa-spinner spin"></i>';
+      $(s.badge).className='text-[9px] px-1.5 py-0.5 rounded-full bg-blue-50 text-[#165DFF]';$(s.badge).textContent='加载中';
+      // WebGPU 已禁用：本机无独立 GPU，且 WebGPU 所需 q4f16/q4 量化权重未下载到本地，
+      // 启用会导致每次加载回退到联网下载。强制走本地 WASM + q8（文件齐全、已验证）。
+      configure();worker.postMessage({type:({asr:'load-asr',llm:'load-llm',emb:'load-embed'})[kind],gpu:false,precision:$('precisionSelect').value});
+    }
+    const loadASR=()=>startLoad('asr'),loadLLM=()=>startLoad('llm'),loadEmb=()=>startLoad('emb');
+    function loadAll(){configure();['asr','llm','emb'].forEach((k,i)=>setTimeout(()=>startLoad(k),i*200));}
+
+    /* ===== 文件解析与分块（主线程） ===== */
+    async function parseFile(file){
+      const ext=file.name.split('.').pop().toLowerCase();
+      if(['txt','md','csv','json','log','xml','html','htm','yaml','yml','js','py','java','cpp','sql','c','h','css'].includes(ext)) return await file.text();
+      if(ext==='pdf'){
+        const buf=await file.arrayBuffer();
+        pdfjsLib.GlobalWorkerOptions.workerSrc='./lib/pdf.worker.min.js';
+        const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+        let out='';for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();out+=tc.items.map(x=>x.str||'').join(' ')+'\n';}
+        return out;
+      }
+      if(ext==='docx'){
+        const buf=await file.arrayBuffer();
+        const r=await mammoth.extractRawText({arrayBuffer:buf});return r.value||'';
+      }
+      if(['xlsx','xls'].includes(ext)){
+        const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});let out='';
+        wb.SheetNames.forEach(sn=>{out+='[工作表 '+sn+']\n'+XLSX.utils.sheet_to_csv(wb.Sheets[sn])+'\n';});
+        return out;
+      }
+      throw new Error('不支持的格式：'+ext);
+    }
+    function chunkText(text,source,size=360,overlap=60){
+      let segs=text.split(/\n\s*\n+/).map(s=>s.trim()).filter(Boolean);
+      if(segs.length<=1) segs=text.split(/(?<=[。！？；.!?\n])/).map(s=>s.trim()).filter(Boolean);
+      const out=[];let cur='';
+      for(const s of segs){
+        if(cur.length+s.length>size){if(cur)out.push(cur);cur=cur.slice(-overlap)+s;}
+        else cur+=(cur?' ':'')+s;
+      }
+      if(cur.trim())out.push(cur.trim());
+      return out.filter(c=>c.length>=8).map(c=>({text:c,source}));
+    }
+    async function handleFiles(files){
+      const arr=Array.from(files);if(!arr.length)return;
+      if(state.emb!=='ready'){alert('请先加载向量模型（bge-small-zh）');return;}
+      $('kbProgressWrap').classList.remove('hidden');$('kbProgress').style.width='0%';$('kbProgressPct').textContent='0%';$('kbProgressText').textContent='解析文件中…';
+      const allChunks=[];
+      for(const f of arr){
+        try{
+          const txt=await parseFile(f);
+          const chunks=chunkText(txt,f.name);
+          state.files[f.name]={chunks:chunks.length};
+          allChunks.push(...chunks);
+          renderFileList();
+        }catch(err){state.files[f.name]={chunks:0,error:err.message};renderFileList();}
+      }
+      if(!allChunks.length){$('kbProgressWrap').classList.add('hidden');$('downloadInfo').textContent='未从文件中提取到可索引文本';return;}
+      configure();worker.postMessage({type:'index-docs',chunks:allChunks});
+    }
+    function renderFileList(){
+      const box=$('fileList');box.innerHTML='';
+      const entries=Object.entries(state.files);
+      if(!entries.length){box.innerHTML='<p class="text-[10px] text-gray-300 text-center py-2">尚未上传知识库文件</p>';return;}
+      entries.forEach(([name,info])=>{
+        const d=document.createElement('div');d.className='flex items-center justify-between text-[10px] bg-gray-50 rounded px-2 py-1';
+        const icon=name.toLowerCase().endsWith('.pdf')?'fa-file-pdf':name.toLowerCase().endsWith('.docx')?'fa-file-word':name.toLowerCase().endsWith('.xlsx')?'fa-file-excel':'fa-file-alt';
+        d.innerHTML='<span class="truncate text-gray-700 max-w-[75%]"><i class="fas '+icon+' text-[#165DFF] mr-1"></i>'+escHtml(name)+'</span>'+
+          '<span class="'+(info.error?'text-red-500':'text-green-600')+'">'+(info.error?'解析失败':info.chunks+' 块')+'</span>';
+        box.appendChild(d);
+      });
+      updateKBStat();
+    }
+    function clearKB(){state.files={};renderFileList();configure();worker.postMessage({type:'clear-kb'});$('downloadInfo').textContent='知识库已清空';}
+
+    /* ===== 录音（Web Audio 直采 16kHz 单声道 PCM，绕开 webm 编解码兼容问题）===== */
+    let recording=false, audioCtx=null, mediaStream=null, srcNode=null, procNode=null, gainNode=null, silentNode=null;
+    let pcmChunks=[], recTimer=null, waveTimer=null, peakLevel=0;
+    function setWave(on){
+      const bars=document.querySelectorAll('.wave-bar');
+      if(waveTimer){clearInterval(waveTimer);waveTimer=null;}
+      if(!on){bars.forEach(b=>{b.style.height='5px';b.classList.add('idle');});return;}
+      bars.forEach(b=>b.classList.remove('idle'));
+      waveTimer=setInterval(()=>{
+        const lv=Math.max(0.08,Math.min(1,peakLevel));
+        bars.forEach((bar,k)=>{
+          const w=0.4+0.6*Math.abs(Math.sin(Date.now()/140+k*0.7));
+          bar.style.height=(5+lv*18*w)+'px';
+        });
+        peakLevel*=0.82;
+      },90);
+    }
+    function cleanupAudio(){
+      try{procNode&&procNode.disconnect();}catch(e){}
+      try{srcNode&&srcNode.disconnect();}catch(e){}
+      try{gainNode&&gainNode.disconnect();}catch(e){}
+      try{silentNode&&silentNode.disconnect();}catch(e){}
+      try{mediaStream&&mediaStream.getTracks().forEach(t=>t.stop());}catch(e){}
+      try{audioCtx&&audioCtx.close();}catch(e){}
+      procNode=null;srcNode=null;gainNode=null;silentNode=null;mediaStream=null;audioCtx=null;
+    }
+    async function toggleRecording(){
+      if(recording){stopRecording();return;}
+      if(state.asr!=='ready'){alert('请先加载语音识别模型');return;}
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('当前浏览器不支持麦克风采集，请在 localhost 或 HTTPS 下使用');return;}
+      try{
+        // 关键：关闭 autoGainControl（与浏览器AGC叠加会削波失真）；保留基础降噪与回声消除
+        mediaStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false}});
+      }catch(err){
+        alert('无法访问麦克风：'+err.message+'。请在地址栏允许麦克风权限，并确认使用 localhost 或 HTTPS 访问。');return;
+      }
+      try{
+        const AC=window.AudioContext||window.webkitAudioContext;
+        audioCtx=new AC({sampleRate:16000});
+        await audioCtx.resume();
+        srcNode=audioCtx.createMediaStreamSource(mediaStream);
+        // 不再固定放大2倍：直接采集原始PCM，避免削波；归一化留到结束后统一做
+        silentNode=audioCtx.createGain();silentNode.gain.value=0;
+        procNode=audioCtx.createScriptProcessor(4096,1,1);
+        pcmChunks=[];peakLevel=0;
+        procNode.onaudioprocess=(e)=>{
+          if(!recording)return;
+          const ch=e.inputBuffer.getChannelData(0);
+          pcmChunks.push(new Float32Array(ch));
+          let sum=0;for(let i=0;i<ch.length;i+=8)sum+=ch[i]*ch[i];
+          peakLevel=Math.max(peakLevel,Math.min(1,Math.sqrt(sum/Math.ceil(ch.length/8))*8));
+        };
+        srcNode.connect(procNode);
+        procNode.connect(silentNode);silentNode.connect(audioCtx.destination);
+      }catch(err){
+        alert('音频初始化失败：'+err.message);cleanupAudio();return;
+      }
+      recording=true;
+      $('micBtn').classList.add('recording');$('micIcon').className='fas fa-stop text-sm';
+      $('micHint').textContent='录音中…再次点击结束';setStatus('录音中','bg-red-50 text-red-600');
+      setWave(true);resetPipe();pipe(1,'active');
+      recTimer=setTimeout(()=>{if(recording)stopRecording();},20000);
+    }
+    // VAD：按帧能量裁剪首尾静音，避免静音段让 Whisper 产生幻觉文本
+    function trimSilence(pcm,sr){
+      const win=Math.floor(sr*0.02); // 20ms 窗
+      const rms=[];
+      for(let i=0;i+win<=pcm.length;i+=win){
+        let sum=0;for(let j=i;j<i+win;j++)sum+=pcm[j]*pcm[j];
+        rms.push(Math.sqrt(sum/win));
+      }
+      if(!rms.length) return pcm;
+      const mx=Math.max.apply(null,rms);
+      const thr=mx*0.12; // 相对阈值：峰值的12%
+      let a=0,b=rms.length-1;
+      while(a<rms.length&&rms[a]<thr)a++;
+      while(b>a&&rms[b]<thr)b--;
+      // 保留前后各 5 帧缓冲，防止切掉字词
+      a=Math.max(0,a-5);b=Math.min(rms.length-1,b+5);
+      if(b<=a) return pcm;
+      return pcm.slice(a*win,(b+1)*win);
+    }
+    function stopRecording(){
+      if(!recording)return;
+      clearTimeout(recTimer);recording=false;
+      $('micBtn').classList.remove('recording');$('micIcon').className='fas fa-microphone text-lg';
+      $('micHint').textContent='点击录音，再次点击结束（≤20s）';setWave(false);
+      let total=0;pcmChunks.forEach(c=>total+=c.length);
+      const raw=new Float32Array(total);let off=0;
+      pcmChunks.forEach(c=>{raw.set(c,off);off+=c.length;});
+      pcmChunks=[];cleanupAudio();
+      if(total<1600){setStatus('录音太短','bg-amber-50 text-amber-600');alert('录音时间太短，请多说几个字');return;}
+      // VAD 裁剪首尾静音
+      let pcm=trimSilence(raw,16000);
+      if(pcm.length<1600) pcm=raw; // 裁剪过度则回退
+      let rms=0;for(let i=0;i<pcm.length;i++)rms+=pcm[i]*pcm[i];
+      rms=Math.sqrt(rms/pcm.length);
+      if(rms<0.001){setStatus('未检测到声音','bg-amber-50 text-amber-600');alert('未检测到声音，请靠近麦克风并确认已允许权限');return;}
+      // RMS 归一化到目标电平（比峰值归一化更稳，不会被单个脉冲主导）
+      const target=0.18, k=Math.min(6,target/rms);
+      for(let i=0;i<pcm.length;i++){let v=pcm[i]*k;pcm[i]=v>1?1:(v<-1?-1:v);}
+      pipe(1,'done');pipe(2,'active');setStatus('语音识别中…','bg-blue-50 text-[#165DFF]');
+      worker.postMessage({type:'transcribe',pcm},[pcm.buffer]);
+    }
+
+    /* ===== 问答 ===== */
+    const SYSTEM='你是专业的中文语音问答助手。请直接用中文回答，内容准确、简明（两三句，不超过120字）。只输出最终答案，不要输出思考过程、推理步骤或任何标记，不要使用Markdown格式。';
+    function onTranscript(text){
+      pipe(2,'done');
+      if(!text){setStatus('未识别到内容','bg-amber-50 text-amber-600');return;}
+      addUser(text);
+      if(state.llm!=='ready'){addAnswer('识别成功，但问答模型尚未加载。',[],false);setStatus('模型未加载','bg-amber-50 text-amber-600');return;}
+      doGenerate(text);
+    }
+    function sendQuestion(){
+      const q=$('questionInput').value.trim();if(!q){alert('请输入问题');return;}
+      if(state.llm!=='ready'){alert('请先加载问答模型');return;}
+      $('questionInput').value='';resetPipe();pipe(1,'done');pipe(2,'done');addUser(q);doGenerate(q);
+    }
+    function doGenerate(q){
+      if($('ragToggle').checked&&state.emb==='ready'&&Object.keys(state.files).length)pipe(3,'active');
+      pipe(4,'active');setStatus('模型生成中…','bg-blue-50 text-[#165DFF]');
+      window._t0=performance.now();window._streamRaw='';
+      configure();worker.postMessage({type:'generate',system:SYSTEM,question:q,useRag:$('ragToggle').checked});
+    }
+    // 流式增量渲染：首次片段创建"生成中"气泡，后续片段实时追加
+    function onAnswerDelta(chunk){
+      if(!chunk)return;
+      window._streamRaw=(window._streamRaw||'')+chunk;
+      let b=$('streamBubble');
+      if(!b){
+        $('emptyHint')&&$('emptyHint').remove();
+        const wrap=document.createElement('div');wrap.className='flex justify-start';wrap.id='streamWrap';
+        wrap.innerHTML='<div class="bg-gray-100 text-gray-800 text-[13px] leading-relaxed rounded-lg rounded-bl-sm px-3 py-2.5 max-w-[88%]">'+
+          '<span class="text-[9px] text-[#165DFF] mr-1"><i class="fas fa-spinner spin"></i></span><span id="streamBubble"></span><span class="typing-cursor">▍</span></div>';
+        chatBox.appendChild(wrap);
+        b=$('streamBubble');
+      }
+      b.textContent=window._streamRaw;
+      chatBox.scrollTop=chatBox.scrollHeight;
+      const el=(performance.now()-window._t0)/1000;
+      $('latencyText').textContent=el.toFixed(1)+'s';
+    }
+    function onAnswer(text,sources,usedRag){
+      pipe(3,'done');pipe(4,'done');currentAnswer=text||'（空答案）';
+      const sw=$('streamWrap');if(sw)sw.remove(); // 移除流式临时气泡，用清洗后的正式答案替换
+      addAnswer(currentAnswer,sources||[],usedRag);
+      $('latencyText').textContent=((performance.now()-window._t0)/1000).toFixed(1)+'s';
+      setStatus('待机','bg-green-50 text-green-600');
+    }
+    function addUser(t){$('emptyHint')&&$('emptyHint').remove();const d=document.createElement('div');d.className='flex justify-end';d.innerHTML='<div class="bg-[#165DFF] text-white text-[13px] leading-relaxed rounded-lg rounded-br-sm px-3 py-2.5 max-w-[85%]"><i class="fas fa-user mr-1 opacity-70"></i>'+escHtml(t)+'</div>';chatBox.appendChild(d);chatBox.scrollTop=chatBox.scrollHeight;}
+    function addAnswer(t,sources,usedRag){
+      $('emptyHint')&&$('emptyHint').remove();
+      const d=document.createElement('div');d.className='flex justify-start';
+      let srcHtml='';
+      if(sources&&sources.length&&usedRag){
+        srcHtml='<details class="mt-1.5 pt-1.5 border-t border-gray-200"><summary class="text-[9px] text-[#165DFF] cursor-pointer"><i class="fas fa-quote-left mr-1"></i>RAG 引用来源（'+sources.length+' 条）</summary>'+
+          sources.map(s=>'<div class="mt-1 text-[9px] text-gray-500 bg-white rounded px-1.5 py-1"><span class="text-green-600">'+escHtml(s.source)+'</span> · 相似度 '+(s.score||0).toFixed(2)+'<div class="text-gray-400 mt-0.5 line-clamp-2">'+escHtml(s.text.slice(0,100))+'…</div></div>').join('')+'</details>';
+      }
+      d.innerHTML='<div class="bg-gray-100 text-gray-800 text-[13px] leading-relaxed rounded-lg rounded-bl-sm px-3 py-2.5 max-w-[88%]">'+
+        (usedRag?'<span class="text-[9px] px-1 py-0.5 rounded bg-green-50 text-green-600 mr-1">RAG</span>':'')+escHtml(t)+
+        srcHtml+'<div class="mt-1.5 pt-1.5 border-t border-gray-200"><button onclick="speakAnswer(this)" data-answer="'+escAttr(t)+'" class="text-[#165DFF] text-[9px]"><i class="fas fa-volume-up mr-1"></i>播报</button></div></div>';
+      chatBox.appendChild(d);chatBox.scrollTop=chatBox.scrollHeight;
+    }
+    function speakAnswer(btn){
+      const t=btn?btn.getAttribute('data-answer'):currentAnswer;if(!t){alert('暂无答案');return;}
+      if(!('speechSynthesis' in window)){alert('浏览器不支持语音合成');return;}
+      window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';u.rate=1;
+      const vs=window.speechSynthesis.getVoices()||[];const v=vs.find(v=>/zh[-_]?CN/i.test(v.lang))||vs.find(v=>/zh/i.test(v.lang));if(v)u.voice=v;
+      window.speechSynthesis.speak(u);
+    }
+    function escHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+    function escAttr(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    function setStatus(t,c){$('statusText').innerHTML='<i class="fas fa-circle text-[7px] mr-1"></i>'+t;$('statusText').className='text-[10px] px-2 py-0.5 rounded-full '+c;}
+    function pipe(n,s){const el=$('pipe'+n);el.classList.remove('active','done');if(s)el.classList.add(s);}
+    function resetPipe(){for(let i=1;i<=5;i++){const el=$('pipe'+i);if(el){el.classList.remove('active','done');}}}
+    function resetAll(){
+      recording=false;clearTimeout(recTimer);cleanupAudio();
+      $('micBtn').classList.remove('recording');$('micIcon').className='fas fa-microphone text-lg';setWave(false);
+      chatBox.innerHTML='<div class="text-center text-gray-300 text-xs py-10" id="emptyHint"><i class="fas fa-comment-dots text-2xl block mb-1"></i>加载模型并上传知识库后，说话或输入专业问题</div>';
+      $('questionInput').value='';$('latencyText').textContent='—';currentAnswer='';resetPipe();setStatus('待机','bg-green-50 text-green-600');
+    }
+    /* 拖拽上传 */
+    document.addEventListener('DOMContentLoaded',()=>{
+      configure();checkGPU();checkLocal();
+      if(location.protocol==='file:'){
+        const w=$('protoWarn');
+        w.classList.remove('hidden');
+        w.innerHTML='<i class="fas fa-triangle-exclamation mr-1"></i>当前以 file:// 方式打开，浏览器禁止读取本地模型文件。'
+          +'请双击目录中的「启动本地服务.bat」，再访问 http://localhost:8000/voice_qa_assistant_local.html';
+      }
+      const dz=$('dropZone');
+      ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('dragover');}));
+      ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('dragover');}));
+      dz.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
+    });
+  </script>
+</body>
+</html>

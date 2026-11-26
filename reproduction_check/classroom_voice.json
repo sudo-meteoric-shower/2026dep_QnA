@@ -1,0 +1,173 @@
+{
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found) http://127.0.0.1:8000/models/whisper-base/onnx/encoder_model.onnx",
+    "Failed to load resource: the server responded with a status of 404 (File not found) http://127.0.0.1:8000/models/Qwen3-0.6B-ONNX/onnx/model_q4f16.onnx",
+    "Failed to load resource: the server responded with a status of 404 (File not found) http://127.0.0.1:8000/models/bge-small-zh-v1.5/onnx/model_q4.onnx"
+  ],
+  "failedRequests": [
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8000/models/whisper-base/onnx/encoder_model.onnx"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8000/models/Qwen3-0.6B-ONNX/onnx/model_q4f16.onnx"
+    },
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8000/models/bge-small-zh-v1.5/onnx/model_q4.onnx"
+    }
+  ],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "cfg": true,
+        "onnx": true,
+        "size": 23201314,
+        "hi": false,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "cfg": true,
+        "onnx": true,
+        "size": 617687575,
+        "hi": false,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "cfg": true,
+        "onnx": true,
+        "size": 24010842,
+        "hi": false,
+        "label": "bge-small-zh"
+      }
+    },
+    "asr": {
+      "type": "asr-ready",
+      "gpu": false,
+      "ts": 2522.899999976158
+    },
+    "llm": {
+      "type": "llm-ready",
+      "gpu": false,
+      "ts": 4824.5
+    },
+    "emb": {
+      "type": "emb-ready",
+      "gpu": false,
+      "ts": 4954
+    },
+    "index": {
+      "type": "index-done",
+      "added": 1,
+      "total": 1,
+      "ts": 5304.899999976158
+    },
+    "transcript": {
+      "type": "transcript",
+      "text": "你好,請解釋一下語音識別。",
+      "ts": 29093.099999964237
+    },
+    "voiceAnswer": {
+      "deltas": 13,
+      "firstMs": 2005,
+      "totalMs": 4358,
+      "sourceShown": false,
+      "text": "语音识别是将声音转换为文字的过程。",
+      "usedRag": false,
+      "sources": []
+    },
+    "speech": {
+      "voices": [
+        {
+          "name": "Microsoft Huihui - Chinese (Simplified, PRC)",
+          "local": true
+        },
+        {
+          "name": "Microsoft Kangkang - Chinese (Simplified, PRC)",
+          "local": true
+        },
+        {
+          "name": "Microsoft Yaoyao - Chinese (Simplified, PRC)",
+          "local": true
+        },
+        {
+          "name": "Microsoft 晓晓 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 云希 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 云健 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 晓伊 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 云扬 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 云夏 Online (Natural) - Chinese (Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 晓北 Online (Natural) - Chinese (Northeastern Mandarin, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 晓妮 Online (Natural) - Chinese (Zhongyuan Mandarin Shaanxi, Simplified)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 曉曼 Online (Natural) - Chinese (Cantonese, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 雲龍 Online (Natural) - Chinese (Cantonese, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 曉佳 Online (Natural) - Chinese (Cantonese, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 曉臻 Online (Natural) - Chinese (Taiwanese Mandarin, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 雲哲 Online (Natural) - Chinese (Taiwanese Mandarin, Traditional)",
+          "local": false
+        },
+        {
+          "name": "Microsoft 曉雨 Online (Natural) - Chinese (Taiwanese Mandarin, Traditional)",
+          "local": false
+        }
+      ],
+      "events": [
+        {
+          "event": "queued",
+          "lang": "zh-CN",
+          "voice": "Microsoft Huihui - Chinese (Simplified, PRC)",
+          "text": "语音识别是将声音转换为文字的过程。"
+        },
+        {
+          "event": "start"
+        },
+        {
+          "event": "end"
+        }
+      ]
+    },
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "voiceClassroomAnswer": true
+  }
+}
