@@ -37,7 +37,7 @@
     models/Qwen3-0.6B-ONNX/     问答生成（int8 量化，约 590MB）
     models/bge-small-zh-v1.5/   中文向量（q8 量化，约 24MB）
   推理库与 ONNX 运行时同样本地化：lib/transformers.min.js、ort/*.wasm，全程不访问 CDN。
-  必须经本地 HTTP 服务访问：双击「启动本地服务.bat」，浏览器打开 http://localhost:8000/
+  必须经本地 HTTP 服务访问：双击「启动本地服务.bat」，浏览器打开 http://127.0.0.1:8000/
   （直接双击 html 用 file:// 打开时，浏览器禁止读取本地模型文件）。
   仍保留远程源（魔搭 → hf-mirror → 官方）作为兜底，可在界面切换。
 -->
@@ -86,6 +86,8 @@
 
     #left-panel { width:100%; }
   </style>
+  <script src="./figure_rag.js"></script>
+  <script src="./vision_evidence.js"></script>
 </head>
 <body class="bg-gray-50">
   <div id="protoWarn" class="hidden bg-amber-50 border-b border-amber-300 text-amber-800 text-[11px] px-3 py-1.5 text-center"></div>
@@ -95,7 +97,7 @@
     <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-1.5 flex items-center justify-between shadow-sm z-10">
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 bg-[#165DFF] rounded-lg flex items-center justify-center text-white text-sm shadow-sm"><i class="fas fa-microphone-alt"></i></div>
-        <h1 class="text-sm font-semibold text-gray-800">语音问答助手 <span class="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 align-middle ml-1">RAG 知识库增强</span> <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 align-middle ml-1" id="verTag">v16</span></h1>
+        <h1 class="text-sm font-semibold text-gray-800">语音问答助手 <span class="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 align-middle ml-1">RAG 知识库增强</span> <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 align-middle ml-1" id="verTag">expansion</span></h1>
       </div>
       <div class="flex items-center gap-4 text-[10px] text-gray-500">
         <span id="engineText"><i class="fas fa-circle text-[8px] mr-1" style="color:#f59e0b"></i>检测中</span>
@@ -181,13 +183,17 @@
             <h2 class="text-xs font-semibold text-gray-800"><i class="fas fa-book text-[#165DFF] mr-1.5"></i>知识库（RAG 检索增强）</h2>
             <div class="flex gap-1">
               <button onclick="document.getElementById('fileInput').click()" class="btn bg-[#165DFF] text-white px-2 py-1 rounded text-[10px]"><i class="fas fa-plus mr-1"></i>上传文件</button>
-              <button onclick="clearKB()" title="清空知识库" class="btn bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px]"><i class="fas fa-trash"></i></button>
+              <button id="clearKbBtn" onclick="clearKB()" title="清空知识库" class="btn bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px]"><i class="fas fa-trash"></i></button>
             </div>
           </div>
           <div id="dropZone" class="border border-dashed border-gray-300 rounded-lg px-2 py-2.5 text-center cursor-pointer hover:border-[#165DFF] transition-colors shrink-0" onclick="document.getElementById('fileInput').click()">
-            <p class="text-[10px] text-gray-400"><i class="fas fa-cloud-upload-alt mr-1"></i>点击或拖入多个文件 · PDF / DOCX / XLSX / TXT / MD / CSV / JSON / HTML 等</p>
+            <p class="text-[10px] text-gray-400"><i class="fas fa-cloud-upload-alt mr-1"></i>点击或拖入多个文件 · 文档 / PNG / JPEG / WebP</p>
           </div>
-          <input type="file" id="fileInput" multiple accept=".pdf,.docx,.xlsx,.xls,.txt,.md,.csv,.json,.log,.xml,.html,.htm,.yaml,.yml,.js,.py,.java,.cpp,.sql" class="hidden" onchange="handleFiles(this.files)">
+          <input type="file" id="fileInput" multiple accept=".pdf,.docx,.xlsx,.xls,.txt,.md,.csv,.json,.log,.xml,.html,.htm,.yaml,.yml,.js,.py,.java,.cpp,.sql,.png,.jpeg,.jpg,.webp" class="hidden" onchange="handleFiles(this.files)">
+          <div class="mt-2 flex items-center gap-3 text-[10px] text-gray-600">
+            <button id="sampleBtn" onclick="loadCourseSample()" class="btn rounded bg-blue-50 px-2 py-1 font-medium text-[#165DFF] disabled:opacity-50">加载空气动力学示例</button>
+            <label class="flex items-center gap-1 cursor-pointer"><input id="figureToggle" type="checkbox" class="accent-[#165DFF]" checked>检索图像说明</label>
+          </div>
           <div id="fileList" class="mt-2 space-y-1 overflow-y-auto flex-1 min-h-[40px] max-h-[72px]">
             <p class="text-[10px] text-gray-300 text-center py-2" id="fileEmpty">尚未上传知识库文件</p>
           </div>
@@ -427,7 +433,7 @@
     }
 
     let asr=null, llm=null, embed=null, gpu=false;
-    let KB=[]; // [{text, source, embedding: number[]}]
+    let KB=[]; // 正文和图像说明共用向量索引，图像条目保留原图和书页号。
 
     function report(p){
       if(!p) return;
@@ -437,6 +443,19 @@
     }
     let pendingModel="";
     function cosine(a,b){let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s;}
+
+    async function indexChunks(chunks,collection){
+      if(!embed) throw new Error('向量模型未加载');
+      const entries=[];
+      for(const [i,chunk] of chunks.entries()){
+        const out=await embed(FigureRag.embeddingText(chunk),{pooling:'mean',normalize:true});
+        entries.push({...chunk,collection,embedding:Array.from(out.data)});
+        if((i+1)%3===0||i===chunks.length-1) emit({type:'index-progress',done:i+1,total:chunks.length});
+      }
+      if(collection) KB=KB.filter(entry=>entry.collection!==collection);
+      KB.push(...entries);
+      emit({type:'index-done',added:entries.length,total:KB.length,collection});
+    }
 
     async function handle(m){
       const type=m.type;
@@ -574,14 +593,26 @@
         }
 
         if(type==="index-docs"){
-          if(!embed) throw new Error("向量模型未加载");
-          const chunks=m.chunks, total=chunks.length;
-          for(let i=0;i<total;i++){
-            const out=await embed(chunks[i].text,{pooling:"mean",normalize:true});
-            KB.push({text:chunks[i].text,source:chunks[i].source,embedding:Array.from(out.data)});
-            if((i+1)%3===0||i===total-1) emit({type:"index-progress",done:i+1,total});
+          await indexChunks(m.chunks,m.collection);
+          return;
+        }
+
+        if(type==="index-image"){
+          if(!isLocalSrc()) throw new Error("图片理解需先选择本地模型源");
+          if(!embed) throw new Error("请先加载向量模型");
+          await ensureHF();
+          emit({type:"note",message:"正在本地读取图片，首次加载视觉模型较慢…"});
+          const text=await VisionEvidence.describe(HF,m.file);
+          const image=URL.createObjectURL(m.file);
+          try{
+            await indexChunks([{kind:"figure",source:m.file.name+" · 自动读图（待核对）",text,image}],
+              m.collection);
+            emit({type:"image-indexed",name:m.file.name,text,collection:m.collection});
+          }catch(err){
+            URL.revokeObjectURL(image);
+            throw err;
           }
-          emit({type:"index-done",added:total,total:KB.length}); return;
+          return;
         }
 
         if(type==="clear-kb"){ KB=[]; emit({type:"kb-cleared"}); return; }
@@ -599,10 +630,11 @@
           if(m.useRag && KB.length && embed){
             const out=await embed("为这个句子生成表示以用于检索相关文章："+q,{pooling:"mean",normalize:true});
             const qv=Array.from(out.data);
-            const ranked=KB.map(k=>({k,score:cosine(qv,k.embedding)})).sort((a,b)=>b.score-a.score).slice(0,3);
-            const ctx=ranked.map((r,i)=>"["+(i+1)+"] "+r.k.text).join("\n");
-            sources=ranked.map(r=>({source:r.k.source,score:r.score,text:r.k.text}));
-            system="你是专业问答助手。请严格依据下方参考资料回答，简明扼要（两三句、不超过120字）。若资料不足以回答，请说明“资料中未提及”，不要编造。只输出最终答案，不要输出思考过程。\n\n参考资料：\n"+ctx;
+            sources=FigureRag.selectSources(KB,q,qv,m.useFigures,cosine);
+            if(sources.length){
+              const ctx=sources.map(FigureRag.contextFor).join("\n");
+              system="依据资料用中文直接回答问题。若资料未明确给出答案，只回答“资料中未提及”。只输出简短答案，不要解释推理。\n\n资料：\n"+ctx;
+            }
           }
           // Qwen3 系列需关闭思考（/no_think）；Qwen2.5 非思考模型显式追加中文指令
           const isThink=String(activeModel.llm).indexOf("qwen3")>=0;
@@ -613,7 +645,7 @@
           let promptStr=null, tok=llm&&llm.tokenizer;
           try{
             if(tok && tok.apply_chat_template){
-              promptStr=tok.apply_chat_template(messages,{tokenize:false,add_generation_prompt:true});
+              promptStr=tok.apply_chat_template(messages,{tokenize:false,add_generation_prompt:true,enable_thinking:false});
             }
           }catch(_){ promptStr=null; }
           emit({type:"note",message:"生成准备：prompt="+(promptStr?promptStr.length:"无")+" tokenizer="+(tok?"OK":"无")});
@@ -643,11 +675,11 @@
           }
           answer=cleanAnswer(answer);
           if(!answer) answer="（模型未返回有效内容，请换个说法重试）";
-          emit({type:"answer",text:answer,sources,usedRag:!!(m.useRag&&KB.length)}); return;
+          emit({type:"answer",text:answer,sources,usedRag:sources.length>0}); return;
         }
 
       }catch(err){
-        emit({type:"error",stage:type,message:String((err&&err.message)||err)});
+        emit({type:"error",stage:type,collection:m.collection,message:String((err&&err.message)||err)});
       }
     }
 
@@ -750,6 +782,8 @@
         const q=__pending.splice(0);q.forEach(m=>window.EnginePost(m));
       }
     });
+    let courseSample=null;
+    const pendingImages=new Map();
     const state={asr:'idle',llm:'idle',emb:'idle',gpu:false,files:{},fileProgress:{},pendingModel:''};
     const chatBox=$('chatBox');
     let currentAnswer='';
@@ -831,14 +865,25 @@
         const pct=Math.round(m.done/m.total*100);$('kbProgress').style.width=pct+'%';$('kbProgressPct').textContent=pct+'%';$('kbProgressText').textContent='建立向量索引 '+m.done+'/'+m.total;return;
       }
       if(m.type==='index-done'){
+        if(m.collection==='aerodynamics' && courseSample){
+          state.files[courseSample.title]={chunks:m.added, figures:courseSample.figureCount};
+          finishCourseSample();
+          renderFileList();
+        }
         $('kbProgressWrap').classList.add('hidden');updateKBStat();
         $('downloadInfo').textContent='知识库索引完成，共 '+m.total+' 个向量块';return;
+      }
+      if(m.type==='image-indexed'){
+        finishImage(m.collection);
+        return;
       }
       if(m.type==='kb-cleared'){updateKBStat();return;}
       if(m.type==='transcript'){onTranscript(m.text);return;}
       if(m.type==='answer-delta'){onAnswerDelta(m.text);return;}
       if(m.type==='answer'){onAnswer(m.text,m.sources,m.usedRag);return;}
       if(m.type==='error'){
+        if(m.collection==='aerodynamics') finishCourseSample();
+        if(m.stage==='index-image') finishImage(m.collection,m.message);
         const sw=$('streamWrap');if(sw)sw.remove();
         setStatus('出错','bg-red-50 text-red-600');$('downloadInfo').textContent=m.stage+' 失败：'+m.message;
         const keys=['load-asr','load-llm','load-embed'];
@@ -875,6 +920,8 @@
       $(s.btn).innerHTML='<i class="fas fa-download mr-1"></i>加载';
       $(s.wrap).classList.add('hidden');
       if(kind==='emb'&&Object.values(state.files).some(f=>f.chunks>0)){
+        state.files={};
+        renderFileList();
         $('downloadInfo').textContent='已切换向量模型为 '+label+'，知识库需重新建立索引';
       }else{
         $('downloadInfo').textContent='已切换为 '+label+'，点击「加载」生效';
@@ -952,12 +999,51 @@
       if(cur.trim())out.push(cur.trim());
       return out.filter(c=>c.length>=8).map(c=>({text:c,source}));
     }
+    function finishCourseSample(){
+      courseSample=null;
+      for(const id of ['sampleBtn','clearKbBtn','embModel']) $(id).disabled=false;
+      $('kbProgressWrap').classList.add('hidden');
+    }
+    async function loadCourseSample(){
+      if($('sampleBtn').disabled) return;
+      if(state.emb!=='ready'){
+        $('downloadInfo').textContent='请先加载向量模型，再加载课件示例';
+        return;
+      }
+      for(const id of ['sampleBtn','clearKbBtn','embModel']) $(id).disabled=true;
+      $('kbProgressWrap').classList.remove('hidden');
+      $('kbProgress').style.width='0%';
+      $('kbProgressPct').textContent='0%';
+      $('kbProgressText').textContent='读取课件示例…';
+      try{
+        courseSample=await FigureRag.loadSample();
+        configure();
+        worker.postMessage({type:'index-docs',collection:'aerodynamics',chunks:courseSample.chunks});
+      }catch(err){
+        finishCourseSample();
+        $('downloadInfo').textContent='课件示例加载失败：'+err.message;
+      }
+    }
+    function finishImage(collection,error){
+      const name=pendingImages.get(collection);
+      if(!name) return;
+      pendingImages.delete(collection);
+      if(!pendingImages.size) $('kbProgressWrap').classList.add('hidden');
+      state.files[name]=error ? {chunks:0,error} : {chunks:1,figures:1};
+      renderFileList();
+    }
     async function handleFiles(files){
+      if($('sampleBtn').disabled) return;
       const arr=Array.from(files);if(!arr.length)return;
       if(state.emb!=='ready'){alert('请先加载向量模型（bge-small-zh）');return;}
       $('kbProgressWrap').classList.remove('hidden');$('kbProgress').style.width='0%';$('kbProgressPct').textContent='0%';$('kbProgressText').textContent='解析文件中…';
       const allChunks=[];
+      const images=[];
       for(const f of arr){
+        if(VisionEvidence.accepts(f)){
+          images.push(f);
+          continue;
+        }
         try{
           const txt=await parseFile(f);
           const chunks=chunkText(txt,f.name);
@@ -966,8 +1052,19 @@
           renderFileList();
         }catch(err){state.files[f.name]={chunks:0,error:err.message};renderFileList();}
       }
-      if(!allChunks.length){$('kbProgressWrap').classList.add('hidden');$('downloadInfo').textContent='未从文件中提取到可索引文本';return;}
-      configure();worker.postMessage({type:'index-docs',chunks:allChunks});
+      if(!allChunks.length&&!images.length){
+        $('kbProgressWrap').classList.add('hidden');
+        $('downloadInfo').textContent='未从文件中提取到可索引文本';
+        return;
+      }
+      configure();
+      if(allChunks.length) worker.postMessage({type:'index-docs',chunks:allChunks});
+      for(const file of images){
+        const collection='image:'+file.name;
+        if(pendingImages.has(collection)) continue;
+        pendingImages.set(collection,file.name);
+        worker.postMessage({type:'index-image',file,collection});
+      }
     }
     function renderFileList(){
       const box=$('fileList');box.innerHTML='';
@@ -977,12 +1074,12 @@
         const d=document.createElement('div');d.className='flex items-center justify-between text-[10px] bg-gray-50 rounded px-2 py-1';
         const icon=name.toLowerCase().endsWith('.pdf')?'fa-file-pdf':name.toLowerCase().endsWith('.docx')?'fa-file-word':name.toLowerCase().endsWith('.xlsx')?'fa-file-excel':'fa-file-alt';
         d.innerHTML='<span class="truncate text-gray-700 max-w-[75%]"><i class="fas '+icon+' text-[#165DFF] mr-1"></i>'+escHtml(name)+'</span>'+
-          '<span class="'+(info.error?'text-red-500':'text-green-600')+'">'+(info.error?'解析失败':info.chunks+' 块')+'</span>';
+          '<span class="'+(info.error?'text-red-500':'text-green-600')+'">'+(info.error?'解析失败':info.chunks+' 块'+(info.figures?' · '+info.figures+' 张图':''))+'</span>';
         box.appendChild(d);
       });
       updateKBStat();
     }
-    function clearKB(){state.files={};renderFileList();configure();worker.postMessage({type:'clear-kb'});$('downloadInfo').textContent='知识库已清空';}
+    function clearKB(){pendingImages.clear();state.files={};renderFileList();configure();worker.postMessage({type:'clear-kb'});$('downloadInfo').textContent='知识库已清空';}
 
     /* ===== 录音（Web Audio 直采 16kHz 单声道 PCM，绕开 webm 编解码兼容问题）===== */
     let recording=false, audioCtx=null, mediaStream=null, srcNode=null, procNode=null, gainNode=null, silentNode=null;
@@ -1107,7 +1204,7 @@
       if($('ragToggle').checked&&state.emb==='ready'&&Object.keys(state.files).length)pipe(3,'active');
       pipe(4,'active');setStatus('模型生成中…','bg-blue-50 text-[#165DFF]');
       window._t0=performance.now();window._streamRaw='';
-      configure();worker.postMessage({type:'generate',system:SYSTEM,question:q,useRag:$('ragToggle').checked});
+      configure();worker.postMessage({type:'generate',system:SYSTEM,question:q,useRag:$('ragToggle').checked,useFigures:$('figureToggle').checked});
     }
     // 流式增量渲染：首次片段创建"生成中"气泡，后续片段实时追加
     function onAnswerDelta(chunk){
@@ -1140,13 +1237,31 @@
       const d=document.createElement('div');d.className='flex justify-start';
       let srcHtml='';
       if(sources&&sources.length&&usedRag){
-        srcHtml='<details class="mt-1.5 pt-1.5 border-t border-gray-200"><summary class="text-[9px] text-[#165DFF] cursor-pointer"><i class="fas fa-quote-left mr-1"></i>RAG 引用来源（'+sources.length+' 条）</summary>'+
-          sources.map(s=>'<div class="mt-1 text-[9px] text-gray-500 bg-white rounded px-1.5 py-1"><span class="text-green-600">'+escHtml(s.source)+'</span> · 相似度 '+(s.score||0).toFixed(2)+'<div class="text-gray-400 mt-0.5 line-clamp-2">'+escHtml(s.text.slice(0,100))+'…</div></div>').join('')+'</details>';
+        const figure=sources.find(source=>source.kind==='figure');
+        const otherSources=sources.filter(source=>source!==figure);
+        if(figure) srcHtml=renderEvidence(figure);
+        if(otherSources.length){
+          const label=figure?'查看其他检索证据':'RAG 引用来源';
+          srcHtml+='<details class="mt-1.5 pt-1.5 border-t border-gray-200"><summary class="cursor-pointer text-[10px] text-[#165DFF]">'+label+'（'+otherSources.length+' 条）</summary>'+
+            otherSources.map(renderEvidence).join('')+'</details>';
+        }
       }
       d.innerHTML='<div class="bg-gray-100 text-gray-800 text-[13px] leading-relaxed rounded-lg rounded-bl-sm px-3 py-2.5 max-w-[88%]">'+
         (usedRag?'<span class="text-[9px] px-1 py-0.5 rounded bg-green-50 text-green-600 mr-1">RAG</span>':'')+escHtml(t)+
         srcHtml+'<div class="mt-1.5 pt-1.5 border-t border-gray-200"><button onclick="speakAnswer(this)" data-answer="'+escAttr(t)+'" class="text-[#165DFF] text-[9px]"><i class="fas fa-volume-up mr-1"></i>播报</button></div></div>';
       chatBox.appendChild(d);chatBox.scrollTop=chatBox.scrollHeight;
+    }
+    function renderEvidence(source){
+      const title=escHtml(source.source);
+      const text=escHtml(source.text);
+      const box='<div class="mt-1.5 rounded-md border border-gray-200 bg-white p-2 text-[11px] text-gray-600">';
+      if(source.kind==='figure'){
+        const image=escAttr(source.image);
+        return box+'<strong class="text-[#165DFF]">'+title+'</strong><p class="my-1">'+text+'</p>'+
+          '<a href="'+image+'" target="_blank" rel="noopener" title="查看原图">'+
+          '<img data-rag-evidence class="max-h-32 max-w-full rounded border border-gray-100 object-contain" src="'+image+'" alt="'+escAttr(source.source)+'"></a></div>';
+      }
+      return box+'<strong class="text-gray-700">'+title+'</strong><p class="mt-1">'+text+'</p></div>';
     }
     function speakAnswer(btn){
       const t=btn?btn.getAttribute('data-answer'):currentAnswer;if(!t){alert('暂无答案');return;}
@@ -1173,7 +1288,7 @@
         const w=$('protoWarn');
         w.classList.remove('hidden');
         w.innerHTML='<i class="fas fa-triangle-exclamation mr-1"></i>当前以 file:// 方式打开，浏览器禁止读取本地模型文件。'
-          +'请双击目录中的「启动本地服务.bat」，再访问 http://localhost:8000/voice_qa_assistant_local.html';
+          +'请双击目录中的「启动本地服务.bat」，再访问 http://127.0.0.1:8000/voice_qa_assistant_local.html';
       }
       const dz=$('dropZone');
       ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('dragover');}));

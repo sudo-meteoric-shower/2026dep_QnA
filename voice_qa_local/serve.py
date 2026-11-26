@@ -31,8 +31,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     socketserver.ThreadingTCPServer.allow_reuse_address = True
-    with socketserver.ThreadingTCPServer(("0.0.0.0", 8000), Handler) as httpd:
-        print("本地服务已启动: http://localhost:8000/voice_qa_assistant_local.html", flush=True)
+    with socketserver.ThreadingTCPServer(("127.0.0.1", 8000), Handler) as httpd:
+        print("本地服务已启动: http://127.0.0.1:8000/voice_qa_assistant_local.html", flush=True)
         print("关闭本窗口或按 Ctrl+C 停止服务", flush=True)
         try:
             httpd.serve_forever()

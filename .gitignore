@@ -2,3 +2,8 @@
 /reproduction_check/edge-profile-*/
 /reproduction_check/*.log
 __pycache__/
+
+/voice_qa_local/models/SmolVLM-256M-Instruct/
+/voice_qa_local/course_sample/
+/voice_qa_local/validation/
+/voice_qa_local/tmp/
