@@ -7,8 +7,12 @@ Windows 的 Python MIME 表跟随系统注册表，.mjs 未注册会被当成 te
 （no available backend found / Failed to fetch dynamically imported module）。
 """
 import http.server
+import json
 import socketserver
+import subprocess
 import sys
+
+from windows_ocr import recognize
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     extensions_map = {
@@ -19,6 +23,47 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         ".json": "application/json",
         ".html": "text/html",
     }
+
+    def do_POST(self):
+        if self.path != "/api/ocr":
+            self.send_error(404)
+            return
+        host = self.headers.get("Host")
+        origin = self.headers.get("Origin")
+        if host not in {"127.0.0.1:8000", "localhost:8000"} or origin != f"http://{host}":
+            self.send_error(403)
+            return
+        if self.headers.get_content_type() != "image/png":
+            self.send_error(415)
+            return
+        length = self.headers.get("Content-Length", "")
+        if not length.isascii() or not length.isdigit() or len(length) > 8:
+            self.send_error(411)
+            return
+        length = int(length)
+        if not 0 < length <= 12 * 1024 * 1024:
+            self.send_error(413)
+            return
+        self.connection.settimeout(15)
+        try:
+            image = self.rfile.read(length)
+            if len(image) != length or not image.startswith(b"\x89PNG\r\n\x1a\n"):
+                self._json(400, {"error": "图像数据无效"})
+                return
+            self._json(200, recognize(image))
+        except TimeoutError:
+            self._json(408, {"error": "发送图片超时"})
+        except (OSError, RuntimeError, subprocess.SubprocessError, ValueError) as error:
+            self.log_error("OCR unavailable: %s", type(error).__name__)
+            self._json(503, {"error": "本地 OCR 不可用，请检查 Windows 识别语言或开启视觉说明"})
+
+    def _json(self, status, payload):
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def log_message(self, fmt, *args):
         sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))

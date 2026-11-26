@@ -192,7 +192,8 @@
           <input type="file" id="fileInput" multiple accept=".pdf,.docx,.xlsx,.xls,.txt,.md,.csv,.json,.log,.xml,.html,.htm,.yaml,.yml,.js,.py,.java,.cpp,.sql,.png,.jpeg,.jpg,.webp" class="hidden" onchange="handleFiles(this.files)">
           <div class="mt-2 flex items-center gap-3 text-[10px] text-gray-600">
             <button id="sampleBtn" onclick="loadCourseSample()" class="btn rounded bg-blue-50 px-2 py-1 font-medium text-[#165DFF] disabled:opacity-50">加载空气动力学示例</button>
-            <label class="flex items-center gap-1 cursor-pointer"><input id="figureToggle" type="checkbox" class="accent-[#165DFF]" checked>检索图像说明</label>
+            <label class="flex items-center gap-1 cursor-pointer"><input id="figureToggle" type="checkbox" class="accent-[#165DFF]" checked>检索图像证据</label>
+            <label class="flex items-center gap-1 cursor-pointer" title="上传图片时额外运行本地视觉模型，会延长入库时间"><input id="visualToggle" type="checkbox" class="accent-[#165DFF]">附加视觉说明</label>
           </div>
           <div id="fileList" class="mt-2 space-y-1 overflow-y-auto flex-1 min-h-[40px] max-h-[72px]">
             <p class="text-[10px] text-gray-300 text-center py-2" id="fileEmpty">尚未上传知识库文件</p>
@@ -600,14 +601,30 @@
         if(type==="index-image"){
           if(!isLocalSrc()) throw new Error("图片理解需先选择本地模型源");
           if(!embed) throw new Error("请先加载向量模型");
-          await ensureHF();
-          emit({type:"note",message:"正在本地读取图片，首次加载视觉模型较慢…"});
-          const text=await VisionEvidence.describe(HF,m.file);
+          emit({type:"note",message:"正在本机读取图片文字…"});
+          let ocr=null,text="";
+          const issues=[];
+          try{
+            ocr=await VisionEvidence.readText(m.file);
+          }catch(error){
+            issues.push(error.message);
+          }
+          if(m.useVision){
+            emit({type:"note",message:"正在生成本地视觉说明…"});
+            try{
+              await ensureHF();
+              text=await VisionEvidence.describe(HF,m.file);
+            }catch(error){
+              issues.push(error.message);
+            }
+          }
+          if(!ocr?.lines.length&&!text){
+            throw new Error(issues.join("；")||"未读到文字，可开启「附加视觉说明」后重试");
+          }
           const image=URL.createObjectURL(m.file);
           try{
-            await indexChunks([{kind:"figure",source:m.file.name+" · 自动读图（待核对）",text,image}],
-              m.collection);
-            emit({type:"image-indexed",name:m.file.name,text,collection:m.collection});
+            await indexChunks([{kind:"figure",source:m.file.name,text,ocr,image}],m.collection);
+            emit({type:"image-indexed",name:m.file.name,text,ocr,issues,collection:m.collection});
           }catch(err){
             URL.revokeObjectURL(image);
             throw err;
@@ -626,14 +643,23 @@
         if(type==="generate"){
           if(!llm) throw new Error("问答模型未加载");
           const q=String(m.question||"").trim();
+          const lookup=m.useRag && m.useFigures ? FigureRag.printedField(KB,q) : null;
+          if(lookup){
+            emit({type:"answer",...lookup,usedRag:true,method:"ocr-field"});
+            return;
+          }
           let system=m.system, sources=[];
           if(m.useRag && KB.length && embed){
             const out=await embed("为这个句子生成表示以用于检索相关文章："+q,{pooling:"mean",normalize:true});
             const qv=Array.from(out.data);
             sources=FigureRag.selectSources(KB,q,qv,m.useFigures,cosine);
             if(sources.length){
-              const ctx=sources.map(FigureRag.contextFor).join("\n");
-              system="依据资料用中文直接回答问题。若资料未明确给出答案，只回答“资料中未提及”。只输出简短答案，不要解释推理。\n\n资料：\n"+ctx;
+              const ctx=sources.map((entry,index)=>FigureRag.contextFor(entry,index,q)).join("\n");
+              const imageRule=sources.some(entry=>entry.ocr?.lines.length)
+                ? "OCR 是图中可见文字与文字所在区域，标签和数值请原样回答。OCR 位置不能证明连线和箭头的方向。视觉模型描述只作待核对线索。"
+                : "";
+              system="依据资料用中文直接回答问题。"+imageRule+
+                "若资料未明确给出答案，只回答“资料中未提及”。只输出简短答案。\n\n资料：\n"+ctx;
             }
           }
           // Qwen3 系列需关闭思考（/no_think）；Qwen2.5 非思考模型显式追加中文指令
@@ -875,6 +901,8 @@
       }
       if(m.type==='image-indexed'){
         finishImage(m.collection);
+        const summary=[m.ocr?.lines.length ? 'OCR '+m.ocr.lines.length+' 行' : '',m.text ? '视觉说明' : ''].filter(Boolean).join('、');
+        $('downloadInfo').textContent='图片已入库 · '+summary+(m.issues.length?' · '+m.issues.join('；'):'');
         return;
       }
       if(m.type==='kb-cleared'){updateKBStat();return;}
@@ -959,8 +987,7 @@
       state[kind]='loading';
       const s=statusMap[kind];$(s.btn).disabled=true;$(s.btn).innerHTML='<i class="fas fa-spinner spin"></i>';
       $(s.badge).className='text-[9px] px-1.5 py-0.5 rounded-full bg-blue-50 text-[#165DFF]';$(s.badge).textContent='加载中';
-      // WebGPU 已禁用：本机无独立 GPU，且 WebGPU 所需 q4f16/q4 量化权重未下载到本地，
-      // 启用会导致每次加载回退到联网下载。强制走本地 WASM + q8（文件齐全、已验证）。
+      // 固定使用已随项目验证的本地 WASM 与默认 q8 权重。
       configure();worker.postMessage({type:({asr:'load-asr',llm:'load-llm',emb:'load-embed'})[kind],gpu:false,precision:$('precisionSelect').value});
     }
     const loadASR=()=>startLoad('asr'),loadLLM=()=>startLoad('llm'),loadEmb=()=>startLoad('emb');
@@ -1057,13 +1084,14 @@
         $('downloadInfo').textContent='未从文件中提取到可索引文本';
         return;
       }
+      const useVision=$('visualToggle').checked;
       configure();
       if(allChunks.length) worker.postMessage({type:'index-docs',chunks:allChunks});
       for(const file of images){
         const collection='image:'+file.name;
         if(pendingImages.has(collection)) continue;
         pendingImages.set(collection,file.name);
-        worker.postMessage({type:'index-image',file,collection});
+        worker.postMessage({type:'index-image',file,collection,useVision});
       }
     }
     function renderFileList(){
@@ -1254,10 +1282,14 @@
     function renderEvidence(source){
       const title=escHtml(source.source);
       const text=escHtml(source.text);
+      const ocrLines=FigureRag.ocrLines(source);
+      const visibleText=ocrLines.length ? '<p class="my-1"><strong>OCR 识别文字</strong><br>'+
+        ocrLines.map(escHtml).join('<br>')+'</p>' : '';
       const box='<div class="mt-1.5 rounded-md border border-gray-200 bg-white p-2 text-[11px] text-gray-600">';
       if(source.kind==='figure'){
         const image=escAttr(source.image);
-        return box+'<strong class="text-[#165DFF]">'+title+'</strong><p class="my-1">'+text+'</p>'+
+        const description=text ? '<p class="my-1">'+(source.figure?'':'<strong>视觉说明（待核对）</strong><br>')+text+'</p>' : '';
+        return box+'<strong class="text-[#165DFF]">'+title+'</strong>'+visibleText+description+
           '<a href="'+image+'" target="_blank" rel="noopener" title="查看原图">'+
           '<img data-rag-evidence class="max-h-32 max-w-full rounded border border-gray-100 object-contain" src="'+image+'" alt="'+escAttr(source.source)+'"></a></div>';
       }
