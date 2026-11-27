@@ -7,11 +7,17 @@ const high=process.argv.includes('--high');
 const matrix=process.argv.includes('--matrix');
 const comparison = process.argv.find(arg => arg.startsWith('--compare='))?.split('=')[1];
 const holdout=process.argv.includes('--holdout');
+const fresh=process.argv.includes('--fresh');
+const resultTag=process.argv.find(arg=>arg.startsWith('--result-tag='))?.split('=')[1];
+if(resultTag && !/^[a-z0-9-]+$/.test(resultTag)) throw new Error('结果标签只支持字母、数字和连字符');
 const comparisonModes = ['teacher', 'current', 'single', 'small', 'candidate', 'candidate-small'];
 if (comparison && !comparisonModes.includes(comparison)) throw new Error('未知对照模式');
-const audit=Boolean(comparison) || matrix || process.argv.includes('--audit');
+const diagnostic=process.argv.find(arg=>arg.startsWith('--diagnose='))?.split('=')[1];
+if(diagnostic && !['default','single-thread','context','context-cleanup'].includes(diagnostic)) throw new Error('未知 1.5B 诊断模式');
+const audit=Boolean(diagnostic) || Boolean(comparison) || matrix || process.argv.includes('--audit');
 const auditDir=path.join(runDir,'静音评测');
-const resultFile=path.join(auditDir,comparison?(comparison+(holdout?'-holdout':'')+'.json'):matrix?'模型切换.json':high?'高精度.json':'实测.json');
+const resultName=diagnostic?'1.5B-'+diagnostic:comparison?comparison+(fresh?'-fresh':holdout?'-holdout':''):matrix?'模型切换':high?'高精度':'实测';
+const resultFile=path.join(auditDir,resultName+(resultTag?'-'+resultTag:'')+'.json');
 const gpuMemory=execFileSync('nvidia-smi',['--query-gpu=memory.free','--format=csv,noheader,nounits'],{encoding:'utf8',windowsHide:true}).trim();
 const freeRam=require('node:os').freemem();
 console.log('启动前可用资源',gpuMemory+' MiB 显存',Math.round(freeRam/2**20)+' MiB 内存');
@@ -24,7 +30,7 @@ const voiceOnly = shortVoiceRun || classroomVoiceRun;
 const fixture = audit || classroomVoiceRun ? 'voice_classroom.wav' : shortVoiceRun ? 'voice_short.wav' : 'voice_fixture.wav';
 const hostname = '127.0.0.1';
 const url = 'http://' + hostname + ':8000/voice_qa_assistant_local.html';
-const summary = {comparison,resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
+const summary = {comparison,diagnostic,loadedModelFiles:[],resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
 const edgeArgs = [
   '--headless=new','--mute-audio','--disable-gpu', '--window-size=1450,950', '--remote-debugging-port=0', '--user-data-dir=' + profile,
   '--no-first-run', '--disable-background-networking', '--disable-component-update',
@@ -147,7 +153,14 @@ async function run() {
     if (event.method === 'Network.requestWillBeSent') {
       const {requestId, request} = event.params;
       requests.set(requestId, request.url);
+      if(diagnostic) requests.set(requestId+':method', request.method);
       if (/^https?:/.test(request.url) && !request.url.startsWith('http://127.0.0.1:8000/')) summary.remoteRequests.push(request.url);
+    }
+    if (diagnostic && event.method === 'Network.responseReceived' &&
+        event.params.response.url.includes('/models/Qwen2.5-1.5B-Instruct/')){
+      const {url,status}=event.params.response;
+      const method=requests.get(event.params.requestId+':method');
+      summary.loadedModelFiles.push({url,status,method});
     }
     if (event.method === 'Network.responseReceived' && event.params.response.status >= 400)
       summary.failedRequests.push({status:event.params.response.status,url:event.params.response.url});
@@ -175,17 +188,21 @@ async function run() {
       return speak(utterance);
     };
   },audit)});
-  if(comparison){
-    let html = comparison==='teacher'
+  if(comparison || diagnostic){
+    let html = diagnostic ? require('./verify_1_5b.cjs').instrument(
+      fs.readFileSync(path.join(app,'voice_qa_assistant_local.html'),'utf8'),diagnostic==='single-thread'?1:null)
+      : comparison==='teacher'
       ? execFileSync('git',['show','7279dec:voice_qa_local/voice_qa_assistant_local.html'],
           {cwd:path.dirname(app),encoding:'utf8',windowsHide:true}).replaceAll('./ort2/','./ort/')
       : comparison.startsWith('candidate')
         ? fs.readFileSync(path.join(app,'voice_qa_assistant_local.html'),'utf8')
         : execFileSync('git',['show','76367a2:voice_qa_local/voice_qa_assistant_local.html'],
             {cwd:path.dirname(app),encoding:'utf8',windowsHide:true});
-    const cleanup = 'answer=cleanAnswer(answer);';
-    assert(html.includes(cleanup),'找不到答案清洗入口');
-    html=html.replace(cleanup,'emit({type:"raw-answer",text:answer});'+cleanup);
+    if(!diagnostic){
+      const cleanup = 'answer=cleanAnswer(answer);';
+      assert(html.includes(cleanup),'找不到答案清洗入口');
+      html=html.replace(cleanup,'emit({type:"raw-answer",text:answer});'+cleanup);
+    }
     if(comparison==='single'){
       const marker='const ranked=KB.map';
       assert(html.includes(marker),'找不到证据排序入口');
@@ -213,6 +230,26 @@ async function run() {
   const selfCheck = await waitEvent('local-checked');
   log('selfCheck',selfCheck.result);
   assert(Object.values(selfCheck.result).every(v=>v.ok),'local default weights missing');
+  if(diagnostic){
+    await button('#llmBtn');
+    await waitEvent('llm-ready');
+    for(const test of require('./verify_1_5b.cjs').cases(diagnostic)){
+      await evaluate(expression(data=>{
+        window.diagnosticRun=data;
+        window.testEvents.length=0;
+        document.getElementById('questionInput').value=data.question;
+      },test));
+      await button('button[title="发送问题"]');
+      const result=await waitEvent('answer',240000);
+      const trace=await waitEvent('diagnostic-answer');
+      const {type,ts,...fields}=trace;
+      summary.checks[test.id]={...fields,cleaned:result.text,expected:test.expected};
+      console.log(test.id,JSON.stringify({expected:test.expected,firstDifference:fields.firstDifference,
+        threads:fields.wasmThreads,count:fields.outputIDs.length,hitCap:fields.hitCap,
+        returnedMatchesRaw:fields.returned===fields.raw,cleaned:result.text}));
+    }
+    return;
+  }
   if(comparison==='small' || comparison==='candidate-small') await evaluate("document.getElementById('llmModel').value='qwen3_06b';onModelChange('llm')");
   if(high) await evaluate("document.getElementById('precisionSelect').value='high';onPrecisionChange()");
   await button('button[onclick="loadAll()"]');
@@ -221,9 +258,9 @@ async function run() {
     log('environment',await evaluate('({isolated:crossOriginIsolated, browser:navigator.userAgent, model:document.querySelector("#llmModel").value})'));
     const {root}=await cdp('DOM.getDocument');
     const {nodeId}=await cdp('DOM.querySelector',{nodeId:root.nodeId,selector:'#fileInput'});
-    const fixtures=holdout?['留出资料.txt','留出采样.xlsx','留出干扰项.txt']:['记录器说明.docx','采样参数.xlsx','校准卡.pdf'];
+    const fixtures=fresh?['新题设备说明.txt','新题巡检记录.txt','新题备用设备.txt']:holdout?['留出资料.txt','留出采样.xlsx','留出干扰项.txt']:['记录器说明.docx','采样参数.xlsx','校准卡.pdf'];
     const files=fixtures.map(f=>path.join(auditDir,f));
-    if(!holdout) files.push(path.join(runDir,'课堂复现测试资料.txt'));
+    if(!holdout && !fresh) files.push(path.join(runDir,'课堂复现测试资料.txt'));
     await cdp('DOM.setFileInputFiles',{nodeId,files});
     log('index',await waitEvent('index-done'));
     const parsed=await evaluate("Object.values(state.files).filter(file=>file.chunks>0).length");
@@ -251,7 +288,7 @@ async function run() {
       }
       return;
     }
-    const questionFile = holdout ? '留出题目.json' : '题目.json';
+    const questionFile = fresh ? '新题题目.json' : holdout ? '留出题目.json' : '题目.json';
     const rubric=JSON.parse(fs.readFileSync(path.join(auditDir,questionFile),'utf8'));
     for(const [key,question,,expectedSource] of rubric){
       if(comparison==='single'){

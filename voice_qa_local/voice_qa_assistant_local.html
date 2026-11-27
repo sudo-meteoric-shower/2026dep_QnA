@@ -432,6 +432,20 @@
       s=s.replace(/<\|[a-z_]+\|>/gi,"");
       s=s.replace(/^\s*#{1,6}\s*/gm,"").replace(/\*\*/g,"").replace(/`/g,"");
       s=s.replace(/[ \t]+/g," ").replace(/\n{3,}/g,"\n\n").trim();
+      // 列表前若只有套话，保留前几条正文，再由句数和长度限制裁剪。
+      const lines=s.split("\n").map(line=>line.trim()).filter(Boolean);
+      const bullet=/^(?:[-•]\s+|\d{1,2}[.、)]\s+)/;
+      const firstBullet=lines.findIndex(line=>bullet.test(line));
+      const filler=/^(?:答案|回答|(?:请提供一个完整的答案)|根据(?:提供的)?(?:信息|资料)[，,]?(?:我们)?(?:可以|可)得出以下结论)[。：:]*$/;
+      if(firstBullet>0 && lines.slice(0,firstBullet).every(line=>filler.test(line))){
+        const items=[];
+        for(const line of lines.slice(firstBullet)){
+          if(!bullet.test(line) || items.length===3) break;
+          const item=line.replace(bullet,"").trim();
+          items.push(/[。！？.!?]$/.test(item)?item:item+"。");
+        }
+        s=items.join("\n");
+      }
       // 先去开头孤立标点，确保重复句 key 一致
       s=s.replace(/^[，,、；;：:\s]+/,"");
       // 去重：按句子切分，去除连续/循环重复的句子（小模型确定性解码常见）
