@@ -95,8 +95,8 @@
             <div class="rounded-lg border border-gray-100 bg-gray-50/60 p-2 flex flex-col items-center gap-1.5">
               <div class="flex items-center gap-1"><i class="fas fa-brain text-purple-600 text-xs"></i><span class="text-[10px] font-medium text-gray-700 truncate">问答生成</span></div>
               <select id="llmModel" onchange="onModelChange('llm')" title="选择问答大模型" class="w-full text-[9px] border border-gray-200 rounded px-1 py-0.5 text-gray-700 bg-white outline-none focus:border-[#165DFF]">
-                <option value="qwen3_06b">Qwen3-0.6B</option>
-                <option value="qwen25_15b" selected>Qwen2.5-1.5B</option>
+                <option value="qwen3_06b" selected>Qwen3-0.6B</option>
+                <option value="qwen25_15b">Qwen2.5-1.5B</option>
                 <option value="qwen3_17b">Qwen3-1.7B</option>
               </select>
               <span id="llmBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">未加载</span>
@@ -244,11 +244,11 @@
       }
     };
     // 当前选中的模型 key（由界面下拉框驱动）
-    const activeModel={asr:"base",llm:"qwen25_15b",emb:"small"};
+    const activeModel={asr:"base",llm:"qwen3_06b",emb:"small"};
     // MODEL_FILES 始终指向当前选中的模型定义，供 fullUrl / check-local / load 使用
     const MODEL_FILES={
       asr:MODEL_CATALOG.asr.base,
-      llm:MODEL_CATALOG.llm.qwen25_15b,
+      llm:MODEL_CATALOG.llm.qwen3_06b,
       emb:MODEL_CATALOG.emb.small
     };
     const LOCAL_BASE="./models/";

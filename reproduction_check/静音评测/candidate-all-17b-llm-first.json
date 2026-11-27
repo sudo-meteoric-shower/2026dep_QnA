@@ -1,0 +1,38 @@
+{
+  "comparison": "candidate",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 12745
+  },
+  "errors": [
+    "Aborted()"
+  ],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "fast"
+    }
+  },
+  "failure": "Error: load-llm: Aborted(). Build with -sASSERTIONS for more info.\n    at D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:91:37\n    at async run (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:279:15)"
+}

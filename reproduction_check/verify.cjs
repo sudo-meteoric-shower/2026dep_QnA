@@ -6,6 +6,9 @@ const app = path.join(runDir, '..', 'voice_qa_local');
 const high=process.argv.includes('--high');
 const matrix=process.argv.includes('--matrix');
 const comparison = process.argv.find(arg => arg.startsWith('--compare='))?.split('=')[1];
+const requestedModel=process.argv.find(arg=>arg.startsWith('--model='))?.split('=')[1];
+const supportedModels=['qwen3_06b','qwen25_15b','qwen3_17b'];
+if(requestedModel && !supportedModels.includes(requestedModel)) throw new Error('未知问答模型');
 const holdout=process.argv.includes('--holdout');
 const fresh=process.argv.includes('--fresh');
 const resultTag=process.argv.find(arg=>arg.startsWith('--result-tag='))?.split('=')[1];
@@ -231,6 +234,15 @@ async function run() {
   log('selfCheck',selfCheck.result);
   assert(Object.values(selfCheck.result).every(v=>v.ok),'local default weights missing');
   if(diagnostic){
+    await evaluate(`(() => {
+      const select=document.getElementById('llmModel');
+      if(select.value==='qwen25_15b') return;
+      window.testEvents.length=0;
+      select.value='qwen25_15b';
+      onModelChange('llm');
+    })()`);
+    const selectedCheck=await waitEvent('local-checked');
+    assert(selectedCheck.result.llm.ok && selectedCheck.result.llm.label==='Qwen2.5-1.5B','1.5B 诊断模型自检失败');
     await button('#llmBtn');
     await waitEvent('llm-ready');
     for(const test of require('./verify_1_5b.cjs').cases(diagnostic)){
@@ -250,10 +262,26 @@ async function run() {
     }
     return;
   }
-  if(comparison==='small' || comparison==='candidate-small') await evaluate("document.getElementById('llmModel').value='qwen3_06b';onModelChange('llm')");
+  const modelChoice=requestedModel || (comparison==='small' || comparison==='candidate-small' ? 'qwen3_06b' : null);
+  if(modelChoice){
+    await evaluate(expression(model=>{
+      window.testEvents.length=0;
+      document.getElementById('llmModel').value=model;
+      onModelChange('llm');
+    },modelChoice));
+    const selected=await waitEvent('local-checked');
+    log('requestedModel', {model:modelChoice,files:selected.result.llm,precision:high?'high':'fast'});
+    assert(selected.result.llm.ok,'所选问答模型文件未就绪');
+  }
   if(high) await evaluate("document.getElementById('precisionSelect').value='high';onPrecisionChange()");
+  if(process.argv.includes('--llm-first')){
+    await button('#llmBtn');
+    log('llm',await waitEvent('llm-ready'));
+  }
   await button('button[onclick="loadAll()"]');
-  for (const kind of ['asr','llm','emb']) log(kind, await waitEvent(kind+'-ready'));
+  for (const kind of ['asr','llm','emb']) {
+    if(!summary.checks[kind]) log(kind,await waitEvent(kind+'-ready'));
+  }
   if (audit) {
     log('environment',await evaluate('({isolated:crossOriginIsolated, browser:navigator.userAgent, model:document.querySelector("#llmModel").value})'));
     const {root}=await cdp('DOM.getDocument');

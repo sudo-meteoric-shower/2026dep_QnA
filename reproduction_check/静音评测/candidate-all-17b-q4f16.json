@@ -1,0 +1,40 @@
+{
+  "comparison": "candidate",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 12669
+  },
+  "errors": [],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "high"
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 2584.3349999785423
+    }
+  },
+  "failure": "Error: load-llm: 155996408\n    at D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:91:37\n    at async run (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:278:53)"
+}
