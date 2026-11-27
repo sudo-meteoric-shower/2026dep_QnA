@@ -1,0 +1,230 @@
+[
+  {
+    "before": {
+      "energySaver": false,
+      "chargePercent": 59,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:14:46.817002+08:00",
+      "ac": true
+    },
+    "suite": "original",
+    "after": {
+      "energySaver": false,
+      "chargePercent": 65,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:17:07.9974444+08:00",
+      "ac": true
+    },
+    "exitCode": 0,
+    "group": "teacher"
+  },
+  {
+    "before": {
+      "energySaver": false,
+      "chargePercent": 65,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:17:08.0800986+08:00",
+      "ac": true
+    },
+    "suite": "fresh",
+    "after": {
+      "energySaver": false,
+      "chargePercent": 69,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:19:22.5196433+08:00",
+      "ac": true
+    },
+    "exitCode": 0,
+    "group": "teacher"
+  },
+  {
+    "before": {
+      "energySaver": false,
+      "chargePercent": 69,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:19:22.5771809+08:00",
+      "ac": true
+    },
+    "suite": "original",
+    "after": {
+      "energySaver": false,
+      "chargePercent": 73,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:21:21.6683068+08:00",
+      "ac": true
+    },
+    "exitCode": 0,
+    "group": "06"
+  },
+  {
+    "before": {
+      "energySaver": false,
+      "chargePercent": 73,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:21:21.728607+08:00",
+      "ac": true
+    },
+    "suite": "fresh",
+    "after": {
+      "energySaver": false,
+      "chargePercent": 75,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:40.3612887+08:00",
+      "ac": true
+    },
+    "exitCode": 0,
+    "group": "06"
+  },
+  {
+    "before": {
+      "energySaver": false,
+      "chargePercent": 75,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:40.4105911+08:00",
+      "ac": true
+    },
+    "suite": "original",
+    "after": {
+      "energySaver": false,
+      "chargePercent": 76,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:50.9370703+08:00",
+      "ac": true
+    },
+    "exitCode": 1,
+    "group": "17-4"
+  },
+  {
+    "before": {
+      "energySaver": false,
+      "chargePercent": 76,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:51.0035999+08:00",
+      "ac": true
+    },
+    "suite": "fresh",
+    "after": {
+      "energySaver": false,
+      "chargePercent": 76,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:51.3225939+08:00",
+      "ac": true
+    },
+    "exitCode": 1,
+    "group": "17-4"
+  },
+  {
+    "before": {
+      "energySaver": false,
+      "chargePercent": 76,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:51.3889785+08:00",
+      "ac": true
+    },
+    "suite": "original",
+    "after": {
+      "energySaver": false,
+      "chargePercent": 76,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:51.6864354+08:00",
+      "ac": true
+    },
+    "exitCode": 1,
+    "group": "17-16"
+  },
+  {
+    "before": {
+      "energySaver": false,
+      "chargePercent": 76,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:51.7352256+08:00",
+      "ac": true
+    },
+    "suite": "fresh",
+    "after": {
+      "energySaver": false,
+      "chargePercent": 76,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-27T19:22:52.003966+08:00",
+      "ac": true
+    },
+    "exitCode": 1,
+    "group": "17-16"
+  },
+  {
+    "exitCode": 0,
+    "before": {
+      "time": "2026-11-27T19:24:54.7510699+08:00",
+      "energySaver": false,
+      "ac": true,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "chargePercent": 79
+    },
+    "suite": "original",
+    "group": "17-4",
+    "after": {
+      "time": "2026-11-27T19:31:38.7697598+08:00",
+      "energySaver": false,
+      "ac": true,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "chargePercent": 88
+    }
+  },
+  {
+    "exitCode": 0,
+    "before": {
+      "time": "2026-11-27T19:31:38.8668748+08:00",
+      "energySaver": false,
+      "ac": true,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "chargePercent": 88
+    },
+    "suite": "fresh",
+    "group": "17-4",
+    "after": {
+      "time": "2026-11-27T19:36:13.3208869+08:00",
+      "energySaver": false,
+      "ac": true,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "chargePercent": 91
+    }
+  },
+  {
+    "exitCode": 0,
+    "before": {
+      "time": "2026-11-27T19:36:13.3684613+08:00",
+      "energySaver": false,
+      "ac": true,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "chargePercent": 91
+    },
+    "suite": "original",
+    "group": "17-16",
+    "after": {
+      "time": "2026-11-27T19:40:51.8334739+08:00",
+      "energySaver": false,
+      "ac": true,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "chargePercent": 94
+    }
+  },
+  {
+    "exitCode": 0,
+    "before": {
+      "time": "2026-11-27T19:40:51.8844941+08:00",
+      "energySaver": false,
+      "ac": true,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "chargePercent": 94
+    },
+    "suite": "fresh",
+    "group": "17-16",
+    "after": {
+      "time": "2026-11-27T19:46:24.3068168+08:00",
+      "energySaver": false,
+      "ac": true,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "chargePercent": 96
+    }
+  }
+]

@@ -1,0 +1,144 @@
+{
+  "comparison": "candidate",
+  "requestedThreads": "4",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 9217
+  },
+  "errors": [],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "fast"
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 2670.3650000095367
+    }
+  },
+  "runtimeResources": {
+    "samples": [
+      {
+        "elapsedMs": 1038,
+        "cpuPercent": 36,
+        "freeRamMiB": 8910,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 2047,
+        "cpuPercent": 15,
+        "freeRamMiB": 8811,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 3053,
+        "cpuPercent": 26,
+        "freeRamMiB": 8250,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 4054,
+        "cpuPercent": 22,
+        "freeRamMiB": 7986,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 5064,
+        "cpuPercent": 43,
+        "freeRamMiB": 7282,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 6067,
+        "cpuPercent": 29,
+        "freeRamMiB": 6635,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 7065,
+        "cpuPercent": 21,
+        "freeRamMiB": 6309,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 8078,
+        "cpuPercent": 22,
+        "freeRamMiB": 4996,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 9092,
+        "cpuPercent": 19,
+        "freeRamMiB": 3422,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      },
+      {
+        "elapsedMs": 10090,
+        "cpuPercent": 27,
+        "freeRamMiB": 2676,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 55
+      }
+    ],
+    "safetyStop": {
+      "elapsedMs": 10090,
+      "cpuPercent": 27,
+      "freeRamMiB": 2676,
+      "gpuUsedMiB": 0,
+      "gpuFreeMiB": 7957,
+      "gpuPercent": 0,
+      "gpuTempC": 55
+    }
+  },
+  "failure": "Error: {\"message\":\"连续两次资源采样低于保护阈值\"}\n    at D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:93:30\n    at D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:78:45\n    at Timeout._onTimeout (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify_resource_monitor.cjs:45:7)\n    at listOnTimeout (node:internal/timers:635:17)\n    at process.processTimers (node:internal/timers:571:7)"
+}

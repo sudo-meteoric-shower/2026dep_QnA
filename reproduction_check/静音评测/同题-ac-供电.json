@@ -1,0 +1,19 @@
+[
+  {
+    "after": {
+      "time": "2026-11-27T19:11:16.1533666+08:00",
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "ac": true,
+      "chargePercent": 47
+    },
+    "exitCode": 0,
+    "before": {
+      "time": "2026-11-27T19:09:48.2692060+08:00",
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "ac": true,
+      "chargePercent": 42
+    },
+    "suite": "original",
+    "group": "teacher"
+  }
+]

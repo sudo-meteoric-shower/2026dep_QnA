@@ -1,0 +1,19 @@
+[
+  {
+    "after": {
+      "time": "2026-11-27T19:09:48.1516353+08:00",
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "ac": true,
+      "chargePercent": 42
+    },
+    "exitCode": 0,
+    "before": {
+      "time": "2026-11-27T19:08:35.6660800+08:00",
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "ac": true,
+      "chargePercent": 38
+    },
+    "suite": "power-pair",
+    "group": "17-4"
+  }
+]

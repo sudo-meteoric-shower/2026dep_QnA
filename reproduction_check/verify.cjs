@@ -64,6 +64,16 @@ server.stderr.pipe(fs.createWriteStream(path.join(runDir,'http.log')));
 const edge = spawn('C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', edgeArgs, {windowsHide:true, stdio:['ignore','ignore','pipe']});
 edge.stderr.pipe(fs.createWriteStream(path.join(runDir,'browser.log')));
 for (const child of [server,edge]) child.on('error', e => summary.errors.push(e.message));
+function stopBrowser() {
+  if (!edge.pid || edge.exitCode !== null) return;
+  try {
+    execFileSync('taskkill.exe', ['/PID', String(edge.pid), '/T', '/F'], {
+      windowsHide: true, stdio: 'ignore', timeout: 10000,
+    });
+  } catch {
+    edge.kill();
+  }
+}
 let ws, resourceAbort;
 const pending = new Map();
 let stopMonitoring;
@@ -72,7 +82,7 @@ if(monitorResources){
   stopMonitoring=require('./verify_resource_monitor.cjs').startResourceMonitor(summary.runtimeResources,message=>{
     resourceAbort=new Error(message);
     // 仅关闭为本次评测新建的浏览器和服务器。
-    edge.kill();
+    stopBrowser();
     server.kill();
     ws?.close();
     for(const callback of pending.values()) callback({error:{message}});
@@ -469,7 +479,7 @@ run().catch(e => {summary.failure=e.stack;console.error(e);process.exitCode=1;})
     await cdp('Browser.close').catch(()=>{});
     ws.close();
   }
-  edge.kill();
+  stopBrowser();
   server.kill();
   console.log('结束',summary.failure||'完成');
 });

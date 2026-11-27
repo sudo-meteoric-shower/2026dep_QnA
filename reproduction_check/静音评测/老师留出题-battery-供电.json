@@ -1,0 +1,19 @@
+[
+  {
+    "suite": "fresh",
+    "group": "teacher",
+    "after": {
+      "chargePercent": 36,
+      "time": "2026-11-27T19:07:36.7370132+08:00",
+      "ac": false,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e"
+    },
+    "exitCode": 0,
+    "before": {
+      "chargePercent": 38,
+      "time": "2026-11-27T19:06:24.6066839+08:00",
+      "ac": false,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e"
+    }
+  }
+]
