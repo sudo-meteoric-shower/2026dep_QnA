@@ -5,9 +5,13 @@ const runDir = path.resolve(__dirname);
 const app = path.join(runDir, '..', 'voice_qa_local');
 const high=process.argv.includes('--high');
 const matrix=process.argv.includes('--matrix');
-const audit=matrix || process.argv.includes('--audit');
+const comparison = process.argv.find(arg => arg.startsWith('--compare='))?.split('=')[1];
+const holdout=process.argv.includes('--holdout');
+const comparisonModes = ['teacher', 'current', 'single', 'small', 'candidate', 'candidate-small'];
+if (comparison && !comparisonModes.includes(comparison)) throw new Error('未知对照模式');
+const audit=Boolean(comparison) || matrix || process.argv.includes('--audit');
 const auditDir=path.join(runDir,'静音评测');
-const resultFile=path.join(auditDir,matrix?'模型切换.json':high?'高精度.json':'实测.json');
+const resultFile=path.join(auditDir,comparison?(comparison+(holdout?'-holdout':'')+'.json'):matrix?'模型切换.json':high?'高精度.json':'实测.json');
 const gpuMemory=execFileSync('nvidia-smi',['--query-gpu=memory.free','--format=csv,noheader,nounits'],{encoding:'utf8',windowsHide:true}).trim();
 const freeRam=require('node:os').freemem();
 console.log('启动前可用资源',gpuMemory+' MiB 显存',Math.round(freeRam/2**20)+' MiB 内存');
@@ -20,7 +24,7 @@ const voiceOnly = shortVoiceRun || classroomVoiceRun;
 const fixture = audit || classroomVoiceRun ? 'voice_classroom.wav' : shortVoiceRun ? 'voice_short.wav' : 'voice_fixture.wav';
 const hostname = '127.0.0.1';
 const url = 'http://' + hostname + ':8000/voice_qa_assistant_local.html';
-const summary = {resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
+const summary = {comparison,resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
 const edgeArgs = [
   '--headless=new','--mute-audio','--disable-gpu', '--window-size=1450,950', '--remote-debugging-port=0', '--user-data-dir=' + profile,
   '--no-first-run', '--disable-background-networking', '--disable-component-update',
@@ -101,10 +105,11 @@ async function collectAnswer(label) {
     const deltas = window.testEvents.filter(e => e.type === 'answer-delta');
     return {deltas:deltas.length,firstMs:deltas.length ? Math.round(deltas[0].ts - window._t0) : null,
       totalMs:Math.round(window.testEvents.find(e => e.type === 'answer').ts - window._t0),
+      raw: window.testEvents.find(e=>e.type==='raw-answer')?.text,
       sourceShown:[...document.querySelectorAll('details > summary')].some(el => el.textContent.includes('RAG 引用来源'))};
   }));
   log(label, {...metrics, text:result.text, usedRag:result.usedRag, sources:result.sources});
-  assert(result.text && !result.text.includes('模型未返回有效内容'), label + ' returned no usable answer');
+  if(!comparison) assert(result.text && !result.text.includes('模型未返回有效内容'), label + ' returned no usable answer');
   return result;
 }
 function getLocal(url){
@@ -170,6 +175,36 @@ async function run() {
       return speak(utterance);
     };
   },audit)});
+  if(comparison){
+    let html = comparison==='teacher'
+      ? execFileSync('git',['show','7279dec:voice_qa_local/voice_qa_assistant_local.html'],
+          {cwd:path.dirname(app),encoding:'utf8',windowsHide:true}).replaceAll('./ort2/','./ort/')
+      : comparison.startsWith('candidate')
+        ? fs.readFileSync(path.join(app,'voice_qa_assistant_local.html'),'utf8')
+        : execFileSync('git',['show','76367a2:voice_qa_local/voice_qa_assistant_local.html'],
+            {cwd:path.dirname(app),encoding:'utf8',windowsHide:true});
+    const cleanup = 'answer=cleanAnswer(answer);';
+    assert(html.includes(cleanup),'找不到答案清洗入口');
+    html=html.replace(cleanup,'emit({type:"raw-answer",text:answer});'+cleanup);
+    if(comparison==='single'){
+      const marker='const ranked=KB.map';
+      assert(html.includes(marker),'找不到证据排序入口');
+      html=html.replace(marker,'const ranked=KB.filter(k=>k.source===window.testExpectedSource).map');
+    }
+    const body=Buffer.from(html,'utf8').toString('base64');
+    ws.addEventListener('message',({data})=>{
+      const event=JSON.parse(data);
+      if(event.method==='Fetch.requestPaused'){
+        cdp('Fetch.fulfillRequest',{requestId:event.params.requestId,responseCode:200,
+          responseHeaders:[
+            {name:'Content-Type',value:'text/html; charset=utf-8'},
+            {name:'Cross-Origin-Opener-Policy',value:'same-origin'},
+            {name:'Cross-Origin-Embedder-Policy',value:'require-corp'}
+          ],body}).catch(error=>summary.errors.push(error.message));
+      }
+    });
+    await cdp('Fetch.enable',{patterns:[{urlPattern:url,resourceType:'Document'}]});
+  }
   await cdp('Page.navigate',{url});
   await poll(async () => {
     try {return await evaluate('document.readyState === "complete" && typeof window.EnginePost === "function"');}
@@ -178,6 +213,7 @@ async function run() {
   const selfCheck = await waitEvent('local-checked');
   log('selfCheck',selfCheck.result);
   assert(Object.values(selfCheck.result).every(v=>v.ok),'local default weights missing');
+  if(comparison==='small' || comparison==='candidate-small') await evaluate("document.getElementById('llmModel').value='qwen3_06b';onModelChange('llm')");
   if(high) await evaluate("document.getElementById('precisionSelect').value='high';onPrecisionChange()");
   await button('button[onclick="loadAll()"]');
   for (const kind of ['asr','llm','emb']) log(kind, await waitEvent(kind+'-ready'));
@@ -185,12 +221,15 @@ async function run() {
     log('environment',await evaluate('({isolated:crossOriginIsolated, browser:navigator.userAgent, model:document.querySelector("#llmModel").value})'));
     const {root}=await cdp('DOM.getDocument');
     const {nodeId}=await cdp('DOM.querySelector',{nodeId:root.nodeId,selector:'#fileInput'});
-    const files=[path.join(runDir,'课堂复现测试资料.txt'),...['记录器说明.docx','采样参数.xlsx','校准卡.pdf'].map(f=>path.join(auditDir,f))];
+    const fixtures=holdout?['留出资料.txt','留出采样.xlsx','留出干扰项.txt']:['记录器说明.docx','采样参数.xlsx','校准卡.pdf'];
+    const files=fixtures.map(f=>path.join(auditDir,f));
+    if(!holdout) files.push(path.join(runDir,'课堂复现测试资料.txt'));
     await cdp('DOM.setFileInputFiles',{nodeId,files});
     log('index',await waitEvent('index-done'));
-    assert(summary.checks.index.added===4,'四种格式未全部建库');
-    const chunks=await evaluate("chunkText('甲'.repeat(300)+'乙'.repeat(60)+'丙'.repeat(340),'测试').map(x=>x.text)");
-    log('chunks',{lengths:chunks.map(c=>c.length),overlap:chunks[0].slice(-60)===chunks[1].slice(0,60)});
+    const parsed=await evaluate("Object.values(state.files).filter(file=>file.chunks>0).length");
+    assert(parsed===files.length,'测试资料未全部建库');
+    const chunks=await evaluate("chunkText('甲'.repeat(300)+'乙'.repeat(60)+'丙'.repeat(340),'测试').map(x=>typeof x==='string'?x:x.text)");
+    log('chunks',{lengths:chunks.map(c=>c.length),overlap:chunks.length>1 && chunks[0].slice(-60)===chunks[1].slice(0,60)});
     if(matrix){
       for(const [asr,llm,emb,precision] of [
         ['tiny','qwen3_06b','base','fast'],['small','qwen3_17b','small','fast'],
@@ -212,11 +251,17 @@ async function run() {
       }
       return;
     }
-    const rubric=JSON.parse(fs.readFileSync(path.join(auditDir,'题目.json'),'utf8'));
-    for(const [key,question] of rubric){
+    const questionFile = holdout ? '留出题目.json' : '题目.json';
+    const rubric=JSON.parse(fs.readFileSync(path.join(auditDir,questionFile),'utf8'));
+    for(const [key,question,,expectedSource] of rubric){
+      if(comparison==='single'){
+        if(!expectedSource) continue;
+        await evaluate(expression(source=>{window.testExpectedSource=source;},expectedSource));
+      }
       await answer(key,question,key!=='general');
       fs.writeFileSync(resultFile,JSON.stringify(summary,null,2));
     }
+    if(comparison) return;
     await evaluate('window.testEvents.length=0;document.querySelector("#ragToggle").checked=false');
     await button('#micBtn');
     await pause(6500);

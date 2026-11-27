@@ -1,0 +1,48 @@
+diff --git a/voice_qa_local/voice_qa_assistant_local.html b/voice_qa_local/voice_qa_assistant_local.html
+index fdd249e..fa16caf 100644
+--- a/voice_qa_local/voice_qa_assistant_local.html
++++ b/voice_qa_local/voice_qa_assistant_local.html
+@@ -370,19 +370,17 @@
+         if(type==="generate"){
+           if(!llm) throw new Error("问答模型未加载");
+           const q=String(m.question||"").trim();
+-          let system=m.system, sources=[], evidence="";
++          let system=m.system, sources=[];
+           if(m.useRag && KB.length && embed){
+             const out=await embed("为这个句子生成表示以用于检索相关文章："+q,{pooling:"mean",normalize:true});
+             const qv=Array.from(out.data);
+             const ranked=KB.map(k=>({k,score:cosine(qv,k.embedding)})).sort((a,b)=>b.score-a.score).slice(0,3);
+             sources=ranked.map(r=>({source:r.k.source,score:r.score,text:r.k.text}));
+-            evidence=ranked.map((r,i)=>"资料"+(i+1)+"（"+r.k.source+"）："+r.k.text).join("\n");
+-            system="你负责阅读理解。只回答所问，保留原文的数值、单位和条件。用简体中文简答；没有依据就答“资料中未提及”。";
++            const evidence=sources.map(({text},i)=>"["+(i+1)+"] "+text).join("\n");
++            system="根据参考资料回答问题。用简体中文直接作答，保留所问的数值、单位和条件。资料无依据时答“资料中未提及”。\n\n参考资料：\n"+evidence;
+           }
+-          // Qwen3 系列需关闭思考（/no_think）；Qwen2.5 非思考模型显式追加中文指令
+-          const isThink=String(activeModel.llm).indexOf("qwen3")>=0;
+-          const task=evidence ? evidence+"\n\n问题："+q+"\n请只给出有依据的答案。" : q+"\n请用简体中文简明回答。";
+-          const userContent=isThink ? task+"\n/no_think" : task;
++          const isQwen3=activeModel.llm.startsWith("qwen3");
++          const userContent=isQwen3 ? q+"\n/no_think" : q+"\n请用简体中文简明回答。";
+           const messages=[{role:"system",content:system},{role:"user",content:userContent}];
+           const tok=llm.tokenizer;
+           const prompt=tok.apply_chat_template(messages,{tokenize:false,add_generation_prompt:true,enable_thinking:false});
+@@ -655,7 +653,17 @@
+       }
+       if(['xlsx','xls'].includes(ext)){
+         const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});let out='';
+-        wb.SheetNames.forEach(sn=>{out+='[工作表 '+sn+']\n'+XLSX.utils.sheet_to_csv(wb.Sheets[sn])+'\n';});
++        for(const name of wb.SheetNames){
++          const sheet=wb.Sheets[name];
++          const [header=[], ...rows]=XLSX.utils.sheet_to_json(sheet,{header:1,raw:false,defval:"",blankrows:false});
++          const hasHeader=header.length>1 && header.every(cell=>cell.trim() && !/^[-+]?\d+(?:\.\d+)?$/.test(cell.trim()))
++            && new Set(header).size===header.length
++            && rows.length>0 && rows.every(row=>row.length===header.length);
++          const text=hasHeader
++            ? rows.map(row=>row.map((cell,index)=>cell.trim()?header[index]+"："+cell:"").filter(Boolean).join("，")).join("\n")
++            : XLSX.utils.sheet_to_csv(sheet);
++          out+='[工作表 '+name+']\n'+text+'\n';
++        }
+         return out;
+       }
+       throw new Error('不支持的格式：'+ext);
