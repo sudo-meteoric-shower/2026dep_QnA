@@ -16,8 +16,12 @@ if(questionId && !comparison) throw new Error('单题测试需要指定对照模
 const cdpTimeout=requestedModel==='qwen3_17b'?180000:60000;
 const switchAfterLoad=process.argv.includes('--switch-after-load');
 if(switchAfterLoad && (!comparison || !requestedModel)) throw new Error('切换测试需要指定对照模式和目标模型');
+const promptProbe=process.argv.find(arg=>arg.startsWith('--prompt-probe='))?.split('=')[1];
+if(promptProbe && !['evidence-last','brief'].includes(promptProbe)) throw new Error('未知提示词探测模式');
+const requestedThreads=process.argv.find(arg=>arg.startsWith('--wasm-threads='))?.split('=')[1];
+if(requestedThreads && !['2','4','8'].includes(requestedThreads)) throw new Error('未知 WASM 线程数');
 const contextTrial=process.argv.includes('--context-trial');
-if(contextTrial && comparison!=='candidate') throw new Error('上下文试验需要本地候选页面');
+if((contextTrial || promptProbe || requestedThreads) && comparison!=='candidate') throw new Error('上下文试验需要本地候选页面');
 const holdout=process.argv.includes('--holdout');
 const fresh=process.argv.includes('--fresh');
 const resultTag=process.argv.find(arg=>arg.startsWith('--result-tag='))?.split('=')[1];
@@ -42,7 +46,7 @@ const voiceOnly = shortVoiceRun || classroomVoiceRun;
 const fixture = audit || classroomVoiceRun ? 'voice_classroom.wav' : shortVoiceRun ? 'voice_short.wav' : 'voice_fixture.wav';
 const hostname = '127.0.0.1';
 const url = 'http://' + hostname + ':8000/voice_qa_assistant_local.html';
-const summary = {comparison,diagnostic,ortProbe,loadedModelFiles:[],resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
+const summary = {comparison,diagnostic,ortProbe,promptProbe,requestedThreads,loadedModelFiles:[],resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
 if(ortProbe) summary.wasmTrace=[];
 const edgeArgs = [
   '--headless=new','--mute-audio','--disable-gpu', '--window-size=1450,950', '--remote-debugging-port=0', '--user-data-dir=' + profile,
@@ -236,7 +240,14 @@ async function run() {
       assert(html.includes(marker),'找不到证据排序入口');
       html=html.replace(marker,'const ranked=KB.filter(k=>k.source===window.testExpectedSource).map');
     }
-    if(contextTrial) html=require('./verify_context_trial.cjs').instrument(html);
+    if(contextTrial || promptProbe || requestedThreads){
+      html=require('./verify_context_trial.cjs').instrument(html,promptProbe);
+      if(requestedThreads){
+        const threadOption='wasm.numThreads = window.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;';
+        assert(html.includes(threadOption),'找不到 WASM 线程配置');
+        html=html.replace(threadOption,'wasm.numThreads = '+Number(requestedThreads)+';');
+      }
+    }
     const body=Buffer.from(html,'utf8').toString('base64');
     ws.addEventListener('message',({data})=>{
       const event=JSON.parse(data);
@@ -351,9 +362,12 @@ async function run() {
     }
     const questionFile = fresh ? '新题题目.json' : holdout ? '留出题目.json' : '题目.json';
     const rubric=JSON.parse(fs.readFileSync(path.join(auditDir,questionFile),'utf8'));
-    if(questionId) assert(rubric.some(([key])=>key===questionId),'本次题集中没有所选题目');
+    const selectedQuestions=questionId?.split(',');
+    if(selectedQuestions){
+      assert(selectedQuestions.every(id=>rubric.some(([key])=>key===id)),'本次题集中没有所选题目');
+    }
     for(const [index,[key,question,,expectedSource]] of rubric.entries()){
-      if(questionId && key!==questionId) continue;
+      if(selectedQuestions && !selectedQuestions.includes(key)) continue;
       if(switchAfterLoad && !questionId && key!=='charge') continue;
       if(comparison==='single'){
         if(!expectedSource) continue;

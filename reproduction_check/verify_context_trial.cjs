@@ -19,7 +19,7 @@ function selectEvidence(text, question){
   return scored.filter(item=>item.score===best).map(item=>item.sentence).join("");
 }
 
-function instrument(html){
+function instrument(html,promptProbe){
   const line='            evidence=ranked.map((r,i)=>"资料"+(i+1)+"（"+r.k.source+"）："+r.k.text).join("\\n");';
   if(!html.includes(line)) throw new Error('找不到候选证据注入点');
   html=html.replace(line,()=>[
@@ -28,6 +28,16 @@ function instrument(html){
     '            evidence=ranked.map((r,i)=>"资料"+(i+1)+"（"+r.k.source+"）："+',
     '              (window.useCompactEvidence?selectEvidence(r.k.text,q):r.k.text)).join("\\n");'
   ].join('\n'));
+  if(promptProbe==='evidence-last'){
+    const render='evidence=ranked.map';
+    if(!html.includes(render)) throw new Error('找不到证据顺序注入点');
+    html=html.replace(render,'evidence=[...ranked.slice(1),ranked[0]].map');
+  }
+  if(promptProbe==='brief'){
+    const original='请只给出有依据的答案。';
+    if(!html.includes(original)) throw new Error('找不到回答指令注入点');
+    html=html.replace(original,'第一句直接给出有依据的答案，保留全部条件、数值和单位。必要时用一句话说明计算。');
+  }
   const call='await llm(prompt,{max_new_tokens:80,do_sample:false,repetition_penalty:1.15,streamer,return_full_text:false});';
   if(!html.includes(call)) throw new Error('找不到试验计量入口');
   return html.replace(call,()=>[
@@ -40,7 +50,7 @@ function instrument(html){
     '            return result;',
     '          };',
     '          try{'+call+'}finally{llm.model.generate=generate;}',
-    '          emit({type:"context-trial",inputTokens,outputTokens,evidence});'
+    '          emit({type:"context-trial",inputTokens,outputTokens,evidence,wasmThreads:HF.env.backends.onnx.wasm.numThreads});'
   ].join('\n'));
 }
 
