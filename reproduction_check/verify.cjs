@@ -19,7 +19,9 @@ if(switchAfterLoad && (!comparison || !requestedModel)) throw new Error('切换�
 const promptProbe=process.argv.find(arg=>arg.startsWith('--prompt-probe='))?.split('=')[1];
 if(promptProbe && !['evidence-last','brief'].includes(promptProbe)) throw new Error('未知提示词探测模式');
 const requestedThreads=process.argv.find(arg=>arg.startsWith('--wasm-threads='))?.split('=')[1];
-if(requestedThreads && !['2','4','8'].includes(requestedThreads)) throw new Error('未知 WASM 线程数');
+if(requestedThreads && !['2','4','8','12','16'].includes(requestedThreads)) throw new Error('未知 WASM 线程数');
+const monitorResources=process.argv.includes('--monitor-resources');
+if(monitorResources && !requestedThreads) throw new Error('资源对照需要指定线程数');
 const contextTrial=process.argv.includes('--context-trial');
 if((contextTrial || promptProbe || requestedThreads) && comparison!=='candidate') throw new Error('上下文试验需要本地候选页面');
 const holdout=process.argv.includes('--holdout');
@@ -37,7 +39,7 @@ const resultFile=path.join(auditDir,resultName+(resultTag?'-'+resultTag:'')+'.js
 const gpuMemory=execFileSync('nvidia-smi',['--query-gpu=memory.free','--format=csv,noheader,nounits'],{encoding:'utf8',windowsHide:true}).trim();
 const freeRam=require('node:os').freemem();
 console.log('启动前可用资源',gpuMemory+' MiB 显存',Math.round(freeRam/2**20)+' MiB 内存');
-if(Number(gpuMemory)<512 || freeRam<7*2**30) throw new Error('可用资源不足，本轮未启动模型');
+if(Number(gpuMemory)<512 || freeRam<(monitorResources?8:7)*2**30) throw new Error('可用资源不足，本轮未启动模型');
 const profile = fs.mkdtempSync(path.join(runDir, 'edge-profile-'));
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const shortVoiceRun = process.argv.includes('--short-voice');
@@ -62,15 +64,29 @@ server.stderr.pipe(fs.createWriteStream(path.join(runDir,'http.log')));
 const edge = spawn('C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', edgeArgs, {windowsHide:true, stdio:['ignore','ignore','pipe']});
 edge.stderr.pipe(fs.createWriteStream(path.join(runDir,'browser.log')));
 for (const child of [server,edge]) child.on('error', e => summary.errors.push(e.message));
-let ws;
+let ws, resourceAbort;
 const pending = new Map();
+let stopMonitoring;
+if(monitorResources){
+  summary.runtimeResources={samples:[]};
+  stopMonitoring=require('./verify_resource_monitor.cjs').startResourceMonitor(summary.runtimeResources,message=>{
+    resourceAbort=new Error(message);
+    // 仅关闭为本次评测新建的浏览器和服务器。
+    edge.kill();
+    server.kill();
+    ws?.close();
+    for(const callback of pending.values()) callback({error:{message}});
+    pending.clear();
+  });
+}
 let id = 0;
 function cdp(method, params = {}) {
+  if(resourceAbort) return Promise.reject(resourceAbort);
   return new Promise((resolve, reject) => {
     const requestId = ++id;
     const timer = setTimeout(() => {
       pending.delete(requestId);
-      reject(new Error('CDP timeout: ' + method));
+      reject(resourceAbort || new Error('CDP timeout: ' + method));
     }, cdpTimeout);
     pending.set(requestId, data => {
       clearTimeout(timer);
@@ -85,6 +101,7 @@ async function poll(fn, ms, label) {
   do {
     const value = await fn();
     if (value) return value;
+    if(resourceAbort) throw resourceAbort;
     await pause(350);
   } while (Date.now() < limit);
   throw new Error('Timed out: ' + label);
@@ -446,6 +463,7 @@ async function run() {
   }
 }
 run().catch(e => {summary.failure=e.stack;console.error(e);process.exitCode=1;}).finally(async () => {
+  stopMonitoring?.();
   fs.writeFileSync(audit ? resultFile : path.join(runDir,classroomVoiceRun ? 'classroom_voice.json' : shortVoiceRun ? 'voice_followup.json' : 'result.json'),JSON.stringify(summary,null,2)+'\n');
   if (ws) {
     await cdp('Browser.close').catch(()=>{});
