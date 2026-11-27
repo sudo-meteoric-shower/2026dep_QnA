@@ -1,0 +1,70 @@
+{
+  "comparison": "candidate",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 12060
+  },
+  "errors": [
+    "An error occurred during model execution: \"314799656\".",
+    "Inputs given to model: Object"
+  ],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "high"
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 2228.3700000047684
+    },
+    "llm": {
+      "type": "llm-ready",
+      "ts": 5993.745000004768
+    },
+    "emb": {
+      "type": "emb-ready",
+      "ts": 6163.790000021458
+    },
+    "environment": {
+      "isolated": true,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "model": "qwen3_17b"
+    },
+    "index": {
+      "type": "index-done",
+      "added": 4,
+      "total": 4,
+      "ts": 6863.235000014305
+    },
+    "chunks": {
+      "lengths": [
+        360,
+        360,
+        100
+      ],
+      "overlap": true
+    }
+  },
+  "failure": "Error: generate: 314799656\n    at D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:99:37\n    at async collectAnswer (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:120:18)\n    at async run (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:356:7)"
+}

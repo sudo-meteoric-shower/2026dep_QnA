@@ -1,0 +1,271 @@
+{
+  "ortProbe": "trace",
+  "loadedModelFiles": [
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/onnx/model_quantized.onnx",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/generation_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer.json",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer_config.json",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/config.json",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/onnx/model_quantized.onnx",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/generation_config.json",
+      "status": 200,
+      "method": "GET"
+    }
+  ],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 12361
+  },
+  "errors": [
+    "2026-11-27 16:04:49.918614 [I:onnxruntime:, inference_session.cc:594 TraceSessionOptions] Session Options {  execution_mode:0 execution_order:DEFAULT enable_profiling:0 optimized_model_filepath:\"\" enable_mem_pattern:0 enable_mem_reuse:1 enable_cpu_mem_arena:0 profile_file_prefix: session_logid: session_log_severity_level:0 session_log_verbosity_level:1 max_num_graph_transformation_steps:10 graph_optimization_level:1 intra_op_param:OrtThreadPoolParams { thread_pool_size: 0 auto_set_affinity: 0 allow_spinning: 1 dynamic_block_base_: 0 stack_size: 0 affinity_str:  set_denormal_as_zero: 0 } inter_op_param:OrtThreadPoolParams { thread_pool_size: 0 auto_set_affinity: 0 allow_spinning: 1 dynamic_block_base_: 0 stack_size: 0 affinity_str:  set_denormal_as_zero: 0 } use_per_session_threads:0 thread_pool_allow_spinning:1 use_deterministic_compute:0 config_options: {   session.use_ort_model_bytes_directly: 1 } }",
+    "2026-11-27 16:04:49.941024 [I:onnxruntime:, inference_session.cc:414 operator()] Flush-to-zero and denormal-as-zero are off",
+    "2026-11-27 16:04:49.941365 [I:onnxruntime:, inference_session.cc:495 ConstructorCommon] Using global/env threadpools since use_per_session_threads_ is false",
+    "2026-11-27 16:04:51.186699 [I:onnxruntime:, inference_session.cc:1810 Initialize] Initializing session.",
+    "2026-11-27 16:04:51.187010 [I:onnxruntime:, inference_session.cc:1847 Initialize] Adding default CPU execution provider.",
+    "2026-11-27 16:04:51.255364 [I:onnxruntime:, graph_partitioner.cc:1070 InlineFunctionsAOT] This model does not have any local functions defined. AOT Inlining is not performed",
+    "2026-11-27 16:04:51.260550 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer EnsureUniqueDQForNodeUnit modified: 1 with status: OK",
+    "2026-11-27 16:04:51.282014 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer Level1_RuleBasedTransformer modified: 0 with status: OK",
+    "2026-11-27 16:04:51.283340 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer DoubleQDQPairsRemover modified: 0 with status: OK",
+    "2026-11-27 16:04:51.289224 [I:onnxruntime:, constant_sharing.cc:248 ApplyImpl] Total shared scalar initializer count: 33",
+    "2026-11-27 16:04:51.289634 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer ConstantSharing modified: 1 with status: OK",
+    "2026-11-27 16:04:51.310945 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer CommonSubexpressionElimination modified: 0 with status: OK",
+    "Aborted()"
+  ],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "fast"
+    }
+  },
+  "wasmTrace": [
+    {
+      "action": "grow",
+      "start": 16777216,
+      "requested": 1735065600,
+      "end": 1751842816
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:49.918614 [I:onnxruntime:, inference_session.cc:594 TraceSessionOptions] Session Options {  execution_mode:0 execution_order:DEFAULT enable_profiling:0 optimized_model_filepath:\"\" enable_mem_pattern:0 enable_mem_reuse:1 enable_cpu_mem_arena:0 profile_file_prefix: session_logid: session_log_severity_level:0 session_log_verbosity_level:1 max_num_graph_transformation_steps:10 graph_optimization_level:1 intra_op_param:OrtThreadPoolParams { thread_pool_size: 0 auto_set_affinity: 0 allow_spinning: 1 dynamic_block_base_: 0 stack_size: 0 affinity_str:  set_denormal_as_zero: 0 } inter_op_param:OrtThreadPoolParams { thread_pool_size: 0 auto_set_affinity: 0 allow_spinning: 1 dynamic_block_base_: 0 stack_size: 0 affinity_str:  set_denormal_as_zero: 0 } use_per_session_threads:0 thread_pool_allow_spinning:1 use_deterministic_compute:0 config_options: {   session.use_ort_model_bytes_directly: 1 } }"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:49.941024 [I:onnxruntime:, inference_session.cc:414 operator()] Flush-to-zero and denormal-as-zero are off"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:49.941365 [I:onnxruntime:, inference_session.cc:495 ConstructorCommon] Using global/env threadpools since use_per_session_threads_ is false"
+    },
+    {
+      "action": "grow",
+      "start": 1751842816,
+      "requested": 100728832,
+      "end": 1852571648
+    },
+    {
+      "action": "grow",
+      "start": 1852571648,
+      "requested": 333512704,
+      "end": 2186084352
+    },
+    {
+      "action": "grow",
+      "start": 2186084352,
+      "requested": 104857600,
+      "end": 2290941952
+    },
+    {
+      "action": "grow",
+      "start": 2290941952,
+      "requested": 102760448,
+      "end": 2393702400
+    },
+    {
+      "action": "grow",
+      "start": 2393702400,
+      "requested": 102760448,
+      "end": 2496462848
+    },
+    {
+      "action": "grow",
+      "start": 2496462848,
+      "requested": 100728832,
+      "end": 2597191680
+    },
+    {
+      "action": "grow",
+      "start": 2597191680,
+      "requested": 104857600,
+      "end": 2702049280
+    },
+    {
+      "action": "grow",
+      "start": 2702049280,
+      "requested": 113246208,
+      "end": 2815295488
+    },
+    {
+      "action": "grow",
+      "start": 2815295488,
+      "requested": 113246208,
+      "end": 2928541696
+    },
+    {
+      "action": "grow",
+      "start": 2928541696,
+      "requested": 113246208,
+      "end": 3041787904
+    },
+    {
+      "action": "grow",
+      "start": 3041787904,
+      "requested": 100728832,
+      "end": 3142516736
+    },
+    {
+      "action": "grow",
+      "start": 3142516736,
+      "requested": 104857600,
+      "end": 3247374336
+    },
+    {
+      "action": "grow",
+      "start": 3247374336,
+      "requested": 102760448,
+      "end": 3350134784
+    },
+    {
+      "action": "grow",
+      "start": 3350134784,
+      "requested": 102760448,
+      "end": 3452895232
+    },
+    {
+      "action": "grow",
+      "start": 3452895232,
+      "requested": 104857600,
+      "end": 3557752832
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.186699 [I:onnxruntime:, inference_session.cc:1810 Initialize] Initializing session."
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.187010 [I:onnxruntime:, inference_session.cc:1847 Initialize] Adding default CPU execution provider."
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.255364 [I:onnxruntime:, graph_partitioner.cc:1070 InlineFunctionsAOT] This model does not have any local functions defined. AOT Inlining is not performed"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.260550 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer EnsureUniqueDQForNodeUnit modified: 1 with status: OK"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.282014 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer Level1_RuleBasedTransformer modified: 0 with status: OK"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.283340 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer DoubleQDQPairsRemover modified: 0 with status: OK"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.289224 [I:onnxruntime:, constant_sharing.cc:248 ApplyImpl] Total shared scalar initializer count: 33"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.289634 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer ConstantSharing modified: 1 with status: OK"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:04:51.310945 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer CommonSubexpressionElimination modified: 0 with status: OK"
+    },
+    {
+      "action": "grow",
+      "start": 3557752832,
+      "requested": 352845824,
+      "end": 3910598656
+    },
+    {
+      "action": "grow",
+      "start": 3910598656,
+      "requested": 311164928,
+      "end": 4221763584
+    },
+    {
+      "type": "error",
+      "message": "Aborted()"
+    },
+    {
+      "action": "load-error",
+      "model": "Qwen3-1.7B-ONNX",
+      "dtype": "q8",
+      "threads": 4,
+      "detail": "RuntimeError: Aborted(). Build with -sASSERTIONS for more info.",
+      "stack": "RuntimeError: Aborted(). Build with -sASSERTIONS for more info.\n    at L (http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.mjs:22:101)\n    at tb (http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.mjs:60:98)\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[1255]:0x1365fa\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[303]:0x404b9\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[545]:0x75f9b\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[82]:0xd24b\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[690]:0x9d835\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[10708]:0xed51eb\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[1110]:0x114f19\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[2701]:0x33c7ab\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[1384]:0x170d1a\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[11276]:0xf4d91f\n    at http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.wasm:wasm-function[7427]:0xae2f36\n    at Hd.b.<computed> (http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.mjs:77:119)\n    at e._OrtCreateSession (http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.mjs:104:204)\n    at Object.<anonymous> (http://127.0.0.1:8000/ort/ort-wasm-simd-threaded.jsep.mjs:14:59)"
+    }
+  ],
+  "failure": "Error: load-llm: Aborted(). Build with -sASSERTIONS for more info.\n    at D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:94:37\n    at async run (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:294:15)"
+}

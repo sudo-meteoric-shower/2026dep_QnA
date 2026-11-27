@@ -1,0 +1,372 @@
+{
+  "comparison": "candidate",
+  "ortProbe": "no-opt",
+  "loadedModelFiles": [
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/onnx/model_quantized.onnx",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/generation_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/generation_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/onnx/model_q4f16.onnx",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/onnx/model_q4f16.onnx",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/generation_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/onnx/model_q4f16.onnx",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/generation_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/onnx/model_q4f16.onnx",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/generation_config.json",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer.json",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/tokenizer_config.json",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/config.json",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/onnx/model_q4f16.onnx",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "url": "http://127.0.0.1:8000/models/Qwen3-1.7B-ONNX/generation_config.json",
+      "status": 200,
+      "method": "GET"
+    }
+  ],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 12010
+  },
+  "errors": [
+    "An error occurred during model execution: \"2000938272\".",
+    "Inputs given to model: Object"
+  ],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "high"
+    },
+    "llm": {
+      "type": "llm-ready",
+      "ts": 5686.659999966621
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 7293.969999969006
+    },
+    "emb": {
+      "type": "emb-ready",
+      "ts": 7494.485000014305
+    },
+    "environment": {
+      "isolated": true,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "model": "qwen3_17b"
+    },
+    "index": {
+      "type": "index-done",
+      "added": 4,
+      "total": 4,
+      "ts": 8412.149999976158
+    },
+    "chunks": {
+      "lengths": [
+        360,
+        360,
+        100
+      ],
+      "overlap": true
+    }
+  },
+  "wasmTrace": [
+    {
+      "action": "grow",
+      "start": 16777216,
+      "requested": 1418788864,
+      "end": 1435566080
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.146488 [I:onnxruntime:, inference_session.cc:594 TraceSessionOptions] Session Options {  execution_mode:0 execution_order:DEFAULT enable_profiling:0 optimized_model_filepath:\"\" enable_mem_pattern:0 enable_mem_reuse:1 enable_cpu_mem_arena:0 profile_file_prefix: session_logid: session_log_severity_level:0 session_log_verbosity_level:1 max_num_graph_transformation_steps:10 graph_optimization_level:0 intra_op_param:OrtThreadPoolParams { thread_pool_size: 0 auto_set_affinity: 0 allow_spinning: 1 dynamic_block_base_: 0 stack_size: 0 affinity_str:  set_denormal_as_zero: 0 } inter_op_param:OrtThreadPoolParams { thread_pool_size: 0 auto_set_affinity: 0 allow_spinning: 1 dynamic_block_base_: 0 stack_size: 0 affinity_str:  set_denormal_as_zero: 0 } use_per_session_threads:0 thread_pool_allow_spinning:1 use_deterministic_compute:0 config_options: {   session.use_ort_model_bytes_directly: 1 } }"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.148643 [I:onnxruntime:, inference_session.cc:414 operator()] Flush-to-zero and denormal-as-zero are off"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.148898 [I:onnxruntime:, inference_session.cc:495 ConstructorCommon] Using global/env threadpools since use_per_session_threads_ is false"
+    },
+    {
+      "action": "grow",
+      "start": 1435566080,
+      "requested": 100728832,
+      "end": 1536294912
+    },
+    {
+      "action": "grow",
+      "start": 1536294912,
+      "requested": 522190848,
+      "end": 2058485760
+    },
+    {
+      "action": "grow",
+      "start": 2058485760,
+      "requested": 105906176,
+      "end": 2164391936
+    },
+    {
+      "action": "grow",
+      "start": 2164391936,
+      "requested": 103874560,
+      "end": 2268266496
+    },
+    {
+      "action": "grow",
+      "start": 2268266496,
+      "requested": 101974016,
+      "end": 2370240512
+    },
+    {
+      "action": "grow",
+      "start": 2370240512,
+      "requested": 103284736,
+      "end": 2473525248
+    },
+    {
+      "action": "grow",
+      "start": 2473525248,
+      "requested": 106233856,
+      "end": 2579759104
+    },
+    {
+      "action": "grow",
+      "start": 2579759104,
+      "requested": 101974016,
+      "end": 2681733120
+    },
+    {
+      "action": "grow",
+      "start": 2681733120,
+      "requested": 103284736,
+      "end": 2785017856
+    },
+    {
+      "action": "grow",
+      "start": 2785017856,
+      "requested": 106168320,
+      "end": 2891186176
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.814578 [I:onnxruntime:, inference_session.cc:1810 Initialize] Initializing session."
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.815099 [I:onnxruntime:, inference_session.cc:1847 Initialize] Adding default CPU execution provider."
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.900584 [I:onnxruntime:, graph_partitioner.cc:1070 InlineFunctionsAOT] This model does not have any local functions defined. AOT Inlining is not performed"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.903509 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer EnsureUniqueDQForNodeUnit modified: 0 with status: OK"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.946193 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer RemoveDuplicateCastTransformer modified: 1 with status: OK"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.956374 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer CastFloat16Transformer modified: 1 with status: OK"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.957594 [I:onnxruntime:, graph_transformer.cc:15 Apply] GraphTransformer MemcpyTransformer modified: 0 with status: OK"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.958963 [V:onnxruntime:, session_state.cc:1260 VerifyEachNodeIsAssignedToAnEp] Node placements"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.959163 [V:onnxruntime:, session_state.cc:1263 VerifyEachNodeIsAssignedToAnEp]  All nodes placed on [CPUExecutionProvider]. Number of nodes: 690"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.983889 [V:onnxruntime:, session_state.cc:144 CreateGraphInfo] SaveMLValueNameIndexMapping"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.985513 [V:onnxruntime:, session_state.cc:190 CreateGraphInfo] Done saving OrtValue mappings."
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.986129 [I:onnxruntime:, allocation_planner.cc:2574 CreateGraphPartitioner] Use DeviceBasedPartition as default"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:30.999363 [I:onnxruntime:, session_state_utils.cc:284 SaveInitializedTensors] Saving initialized tensors."
+    },
+    {
+      "action": "grow",
+      "start": 2891186176,
+      "requested": 616431616,
+      "end": 3507617792
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:31.310019 [I:onnxruntime:, session_state_utils.cc:451 SaveInitializedTensors] Done saving initialized tensors"
+    },
+    {
+      "type": "error",
+      "message": "2026-11-27 16:22:31.370868 [I:onnxruntime:, inference_session.cc:2269 Initialize] Session successfully initialized."
+    },
+    {
+      "action": "generate-error",
+      "detail": "2000938272"
+    }
+  ],
+  "failure": "Error: generate: 2000938272\n    at D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:99:37\n    at async collectAnswer (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:120:18)\n    at async run (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:358:7)"
+}

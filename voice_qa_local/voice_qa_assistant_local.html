@@ -267,7 +267,8 @@
       }
       const options={device:"wasm",dtype,progress_callback:report};
       if(model.local==="Qwen3-1.7B-ONNX"){
-        options.session_options={enableCpuMemArena:false,enableMemPattern:false,graphOptimizationLevel:"basic"};
+        // 浏览器初始化 1.7B 时，基础图优化将 WASM 内存推近 4 GiB 上限。
+        options.session_options={enableCpuMemArena:false,enableMemPattern:false,graphOptimizationLevel:"disabled"};
       }
       return HF.pipeline(task, model.local, options);
     }

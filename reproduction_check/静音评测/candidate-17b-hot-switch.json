@@ -1,0 +1,96 @@
+{
+  "comparison": "candidate",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 12242
+  },
+  "errors": [],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 3168.0750000476837
+    },
+    "llm": {
+      "type": "llm-ready",
+      "ts": 6470.160000026226
+    },
+    "emb": {
+      "type": "emb-ready",
+      "ts": 6656.490000009537
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "fast"
+    },
+    "switchedLLM": {
+      "type": "llm-ready",
+      "ts": 13114.615000009537
+    },
+    "environment": {
+      "isolated": true,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "model": "qwen3_17b"
+    },
+    "index": {
+      "type": "index-done",
+      "added": 4,
+      "total": 4,
+      "ts": 13692.400000035763
+    },
+    "chunks": {
+      "lengths": [
+        360,
+        360,
+        100
+      ],
+      "overlap": true
+    },
+    "charge": {
+      "deltas": 1,
+      "firstMs": 12087,
+      "totalMs": 13113,
+      "raw": "15分钟",
+      "sourceShown": true,
+      "text": "15分钟",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.7457827053137477,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "记录器说明.docx",
+          "score": 0.4971572065199181,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.4387693775936935,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        }
+      ]
+    }
+  }
+}

@@ -6,9 +6,16 @@ const app = path.join(runDir, '..', 'voice_qa_local');
 const high=process.argv.includes('--high');
 const matrix=process.argv.includes('--matrix');
 const comparison = process.argv.find(arg => arg.startsWith('--compare='))?.split('=')[1];
+const ortProbe=process.argv.find(arg=>arg.startsWith('--ort-probe='))?.split('=')[1];
+if(ortProbe && !['trace','single','no-opt','no-opt-single'].includes(ortProbe)) throw new Error('未知 WASM 探测模式');
 const requestedModel=process.argv.find(arg=>arg.startsWith('--model='))?.split('=')[1];
 const supportedModels=['qwen3_06b','qwen25_15b','qwen3_17b'];
 if(requestedModel && !supportedModels.includes(requestedModel)) throw new Error('未知问答模型');
+const questionId=process.argv.find(arg=>arg.startsWith('--question='))?.split('=')[1];
+if(questionId && !comparison) throw new Error('单题测试需要指定对照模式');
+const cdpTimeout=requestedModel==='qwen3_17b'?180000:60000;
+const switchAfterLoad=process.argv.includes('--switch-after-load');
+if(switchAfterLoad && (!comparison || !requestedModel)) throw new Error('切换测试需要指定对照模式和目标模型');
 const holdout=process.argv.includes('--holdout');
 const fresh=process.argv.includes('--fresh');
 const resultTag=process.argv.find(arg=>arg.startsWith('--result-tag='))?.split('=')[1];
@@ -17,9 +24,9 @@ const comparisonModes = ['teacher', 'current', 'single', 'small', 'candidate', '
 if (comparison && !comparisonModes.includes(comparison)) throw new Error('未知对照模式');
 const diagnostic=process.argv.find(arg=>arg.startsWith('--diagnose='))?.split('=')[1];
 if(diagnostic && !['default','single-thread','context','context-cleanup'].includes(diagnostic)) throw new Error('未知 1.5B 诊断模式');
-const audit=Boolean(diagnostic) || Boolean(comparison) || matrix || process.argv.includes('--audit');
+const audit=Boolean(ortProbe) || Boolean(diagnostic) || Boolean(comparison) || matrix || process.argv.includes('--audit');
 const auditDir=path.join(runDir,'静音评测');
-const resultName=diagnostic?'1.5B-'+diagnostic:comparison?comparison+(fresh?'-fresh':holdout?'-holdout':''):matrix?'模型切换':high?'高精度':'实测';
+const resultName=ortProbe?'1.7B-probe-'+ortProbe+(high?'-q4f16':'-q8'):diagnostic?'1.5B-'+diagnostic:comparison?comparison+(fresh?'-fresh':holdout?'-holdout':''):matrix?'模型切换':high?'高精度':'实测';
 const resultFile=path.join(auditDir,resultName+(resultTag?'-'+resultTag:'')+'.json');
 const gpuMemory=execFileSync('nvidia-smi',['--query-gpu=memory.free','--format=csv,noheader,nounits'],{encoding:'utf8',windowsHide:true}).trim();
 const freeRam=require('node:os').freemem();
@@ -33,7 +40,8 @@ const voiceOnly = shortVoiceRun || classroomVoiceRun;
 const fixture = audit || classroomVoiceRun ? 'voice_classroom.wav' : shortVoiceRun ? 'voice_short.wav' : 'voice_fixture.wav';
 const hostname = '127.0.0.1';
 const url = 'http://' + hostname + ':8000/voice_qa_assistant_local.html';
-const summary = {comparison,diagnostic,loadedModelFiles:[],resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
+const summary = {comparison,diagnostic,ortProbe,loadedModelFiles:[],resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
+if(ortProbe) summary.wasmTrace=[];
 const edgeArgs = [
   '--headless=new','--mute-audio','--disable-gpu', '--window-size=1450,950', '--remote-debugging-port=0', '--user-data-dir=' + profile,
   '--no-first-run', '--disable-background-networking', '--disable-component-update',
@@ -57,7 +65,7 @@ function cdp(method, params = {}) {
     const timer = setTimeout(() => {
       pending.delete(requestId);
       reject(new Error('CDP timeout: ' + method));
-    }, 60000);
+    }, cdpTimeout);
     pending.set(requestId, data => {
       clearTimeout(timer);
       if (data.error) reject(new Error(JSON.stringify(data.error)));
@@ -109,7 +117,7 @@ async function answer(label, question, useRag) {
   return collectAnswer(label);
 }
 async function collectAnswer(label) {
-  const result = await waitEvent('answer',240000);
+  const result = await waitEvent('answer',requestedModel==='qwen3_17b'?360000:240000);
   const metrics = await evaluate(expression(() => {
     const deltas = window.testEvents.filter(e => e.type === 'answer-delta');
     return {deltas:deltas.length,firstMs:deltas.length ? Math.round(deltas[0].ts - window._t0) : null,
@@ -148,19 +156,31 @@ async function run() {
       summary.errors.push(event.params.message);
       cdp('Page.handleJavaScriptDialog',{accept:true}).catch(e => summary.errors.push(e.message));
     }
-    if (event.method === 'Runtime.consoleAPICalled' && event.params.type === 'error')
-      summary.errors.push(event.params.args.map(a=>a.value||a.description).join(' '));
+    if(ortProbe && event.method==='Runtime.consoleAPICalled'){
+      const values=event.params.args.map(arg=>arg.value??arg.description);
+      const message=values.join(' ');
+      if(message.startsWith('ORT-PROBE ')){
+        summary.wasmTrace.push(JSON.parse(message.slice('ORT-PROBE '.length)));
+      }else if(/Session|onnxruntime|memory|wasm|kernel|Ort[A-Z]|allocat|Abort/i.test(message)){
+        summary.wasmTrace.push({type:event.params.type,message});
+      }
+    }
+    if (event.method === 'Runtime.consoleAPICalled' && event.params.type === 'error'){
+      const message=event.params.args.map(a=>a.value||a.description).join(' ');
+      if(!ortProbe || !/\[[IVW]:onnxruntime:/i.test(message)) summary.errors.push(message);
+    }
     if (event.method === 'Runtime.exceptionThrown') summary.errors.push(event.params.exceptionDetails.exception?.description || event.params.exceptionDetails.text);
     if (event.method === 'Log.entryAdded' && event.params.entry.level === 'error')
       summary.errors.push(event.params.entry.text + (event.params.entry.url ? ' ' + event.params.entry.url : ''));
     if (event.method === 'Network.requestWillBeSent') {
       const {requestId, request} = event.params;
       requests.set(requestId, request.url);
-      if(diagnostic) requests.set(requestId+':method', request.method);
+      if(diagnostic || ortProbe) requests.set(requestId+':method', request.method);
       if (/^https?:/.test(request.url) && !request.url.startsWith('http://127.0.0.1:8000/')) summary.remoteRequests.push(request.url);
     }
-    if (diagnostic && event.method === 'Network.responseReceived' &&
-        event.params.response.url.includes('/models/Qwen2.5-1.5B-Instruct/')){
+    if (event.method === 'Network.responseReceived' &&
+        ((diagnostic && event.params.response.url.includes('/models/Qwen2.5-1.5B-Instruct/')) ||
+         (ortProbe && event.params.response.url.includes('/models/Qwen3-1.7B-ONNX/')))){
       const {url,status}=event.params.response;
       const method=requests.get(event.params.requestId+':method');
       summary.loadedModelFiles.push({url,status,method});
@@ -191,8 +211,10 @@ async function run() {
       return speak(utterance);
     };
   },audit)});
-  if(comparison || diagnostic){
-    let html = diagnostic ? require('./verify_1_5b.cjs').instrument(
+  if(comparison || diagnostic || ortProbe){
+    let html = ortProbe ? require('./verify_1_7b.cjs').instrument(
+      fs.readFileSync(path.join(app,'voice_qa_assistant_local.html'),'utf8'),ortProbe)
+      : diagnostic ? require('./verify_1_5b.cjs').instrument(
       fs.readFileSync(path.join(app,'voice_qa_assistant_local.html'),'utf8'),diagnostic==='single-thread'?1:null)
       : comparison==='teacher'
       ? execFileSync('git',['show','7279dec:voice_qa_local/voice_qa_assistant_local.html'],
@@ -262,8 +284,8 @@ async function run() {
     }
     return;
   }
-  const modelChoice=requestedModel || (comparison==='small' || comparison==='candidate-small' ? 'qwen3_06b' : null);
-  if(modelChoice){
+  const modelChoice=(ortProbe?'qwen3_17b':null) || requestedModel || (comparison==='small' || comparison==='candidate-small' ? 'qwen3_06b' : null);
+  const chooseModel=async()=>{
     await evaluate(expression(model=>{
       window.testEvents.length=0;
       document.getElementById('llmModel').value=model;
@@ -272,15 +294,22 @@ async function run() {
     const selected=await waitEvent('local-checked');
     log('requestedModel', {model:modelChoice,files:selected.result.llm,precision:high?'high':'fast'});
     assert(selected.result.llm.ok,'所选问答模型文件未就绪');
-  }
+  };
+  if(modelChoice && !switchAfterLoad) await chooseModel();
   if(high) await evaluate("document.getElementById('precisionSelect').value='high';onPrecisionChange()");
-  if(process.argv.includes('--llm-first')){
+  if(ortProbe || process.argv.includes('--llm-first')){
     await button('#llmBtn');
     log('llm',await waitEvent('llm-ready'));
+    if(ortProbe && !comparison) return;
   }
   await button('button[onclick="loadAll()"]');
   for (const kind of ['asr','llm','emb']) {
     if(!summary.checks[kind]) log(kind,await waitEvent(kind+'-ready'));
+  }
+  if(switchAfterLoad){
+    await chooseModel();
+    await button('#llmBtn');
+    log('switchedLLM',await waitEvent('llm-ready'));
   }
   if (audit) {
     log('environment',await evaluate('({isolated:crossOriginIsolated, browser:navigator.userAgent, model:document.querySelector("#llmModel").value})'));
@@ -318,7 +347,10 @@ async function run() {
     }
     const questionFile = fresh ? '新题题目.json' : holdout ? '留出题目.json' : '题目.json';
     const rubric=JSON.parse(fs.readFileSync(path.join(auditDir,questionFile),'utf8'));
+    if(questionId) assert(rubric.some(([key])=>key===questionId),'本次题集中没有所选题目');
     for(const [key,question,,expectedSource] of rubric){
+      if(questionId && key!==questionId) continue;
+      if(switchAfterLoad && !questionId && key!=='charge') continue;
       if(comparison==='single'){
         if(!expectedSource) continue;
         await evaluate(expression(source=>{window.testExpectedSource=source;},expectedSource));

@@ -1,0 +1,145 @@
+{
+  "comparison": "candidate",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 12312
+  },
+  "errors": [],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "fast"
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 3851.9599999785423
+    },
+    "llm": {
+      "type": "llm-ready",
+      "ts": 9338.540000021458
+    },
+    "emb": {
+      "type": "emb-ready",
+      "ts": 9546.644999980927
+    },
+    "environment": {
+      "isolated": true,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "model": "qwen3_17b"
+    },
+    "index": {
+      "type": "index-done",
+      "added": 4,
+      "total": 4,
+      "ts": 10300.850000023842
+    },
+    "chunks": {
+      "lengths": [
+        360,
+        360,
+        100
+      ],
+      "overlap": true
+    },
+    "code": {
+      "deltas": 16,
+      "firstMs": 7494,
+      "totalMs": 24487,
+      "raw": "资料1中的青岚实验箱校验代号是松柏三七。",
+      "sourceShown": true,
+      "text": "资料1中的青岚实验箱校验代号是松柏三七。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.7454544775027475,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.43217794298602386,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        },
+        {
+          "source": "校准卡.pdf",
+          "score": 0.38376738927242454,
+          "text": "Calibration card: device ID NX-42."
+        }
+      ]
+    },
+    "charge": {
+      "deltas": 1,
+      "firstMs": 9003,
+      "totalMs": 9894,
+      "raw": "15分钟",
+      "sourceShown": true,
+      "text": "15分钟",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.7457827053137477,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "记录器说明.docx",
+          "score": 0.4971572065199181,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.4387693775936935,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        }
+      ]
+    },
+    "reserve": {
+      "deltas": 31,
+      "firstMs": 7360,
+      "totalMs": 35374,
+      "raw": "记录器在供电电压连续五秒低于九伏时进入备用模式。电压条件为连续五秒低于九伏，时间条件为持续五秒。",
+      "sourceShown": true,
+      "text": "记录器在供电电压连续五秒低于九伏时进入备用模式。电压条件为连续五秒低于九伏，时间条件为持续五秒。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "记录器说明.docx",
+          "score": 0.7033062380963453,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        },
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.5590189973947064,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.5388346662957036,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        }
+      ]
+    }
+  },
+  "failure": "Error: CDP timeout: Runtime.evaluate\n    at Timeout._onTimeout (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:62:14)\n    at listOnTimeout (node:internal/timers:635:17)\n    at process.processTimers (node:internal/timers:571:7)"
+}
