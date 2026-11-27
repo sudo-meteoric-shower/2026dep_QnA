@@ -1,91 +1,94 @@
-# -*- coding: utf-8 -*-
-"""Download models from ModelScope API endpoint with retry + resume."""
-import os, sys, time, urllib.request, urllib.error
+"""课前准备：从魔搭下载浏览器所需的离线文件，逐个核对大小和 SHA-256。"""
+import hashlib
+import json
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
-MS_API = "https://modelscope.cn/api/v1/models/{repo}/repo?Revision=master&FilePath={path}"
-BASE = os.path.dirname(os.path.abspath(__file__))
+ROOT = Path(__file__).resolve().parent / "models"
+MODELS = [
+    "onnx-community/Qwen2.5-1.5B-Instruct", "onnx-community/whisper-base",
+    "Xenova/bge-small-zh-v1.5", "onnx-community/whisper-tiny",
+    "onnx-community/whisper-small", "Xenova/bge-base-zh-v1.5",
+    "onnx-community/Qwen3-0.6B-ONNX", "onnx-community/Qwen3-1.7B-ONNX",
+]
 
-FILES = {
-    "onnx-community/whisper-base": [
-        "config.json", "preprocessor_config.json", "generation_config.json",
-        "tokenizer.json", "tokenizer_config.json",
-        "onnx/encoder_model_quantized.onnx",
-        "onnx/decoder_model_merged_quantized.onnx",
-    ],
-    "onnx-community/Qwen2.5-1.5B-Instruct": [
-        "config.json", "generation_config.json", "tokenizer.json",
-        "tokenizer_config.json", "special_tokens_map.json",
-        "onnx/model_quantized.onnx",
-    ],
-    "onnx-community/Qwen3-0.6B-ONNX": [
-        "config.json", "generation_config.json", "tokenizer.json",
-        "tokenizer_config.json", "special_tokens_map.json",
-        "onnx/model_quantized.onnx",
-    ],
-    "Xenova/bge-small-zh-v1.5": [
-        "config.json", "tokenizer.json", "tokenizer_config.json",
-        "onnx/model_quantized.onnx",
-    ],
-}
+def digest(path):
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
-def fetch(url, dest, tries=8):
-    tmp = dest + ".part"
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    for t in range(1, tries + 1):
+def download(repo, entry):
+    name, size, sha = entry["Path"], entry["Size"], entry["Sha256"]
+    dest = ROOT / repo.split("/")[-1] / name
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if dest.exists() and dest.stat().st_size == size and digest(dest) == sha:
+        return
+    temp = dest.with_suffix(dest.suffix + ".part")
+    endpoint = f"https://modelscope.cn/api/v1/models/{repo}/repo?"
+    for attempt in range(4):
         try:
-            resume_from = os.path.getsize(tmp) if os.path.exists(tmp) else 0
-            req = urllib.request.Request(url)
-            if resume_from:
-                req.add_header("Range", f"bytes={resume_from}-")
-            req.add_header("User-Agent", "Mozilla/5.0")
-            with urllib.request.urlopen(req, timeout=300) as r:
-                total = r.headers.get("Content-Length")
-                total = int(total) + resume_from if total else None
-                mode = "ab" if resume_from else "wb"
-                got = resume_from
-                with open(tmp, mode) as f:
-                    while True:
-                        chunk = r.read(1024 * 1024)
-                        if not chunk:
-                            break
-                        f.write(chunk)
-                        got += len(chunk)
-                        if total and got % (100 * 1024 * 1024) < len(chunk):
-                            print(f"  {os.path.basename(dest)}: {got/1e6:.0f}/{(total or 0)/1e6:.0f} MB", flush=True)
-            os.replace(tmp, dest)
-            return True
-        except Exception as e:
-            print(f"  try{t} error: {e}", flush=True)
-            time.sleep(min(10 * t, 60))
-    return False
+            offset = temp.stat().st_size if temp.exists() else 0
+            while offset < size:
+                end = min(size, offset + 32 * 2**20) - 1
+                partial = size > 32 * 2**20 or offset > 0
+                url = endpoint + urlencode({"Revision":entry["Revision"], "FilePath":name, "offset":offset})
+                req = Request(url, headers={"Range":f"bytes={offset}-{end}"} if partial else {})
+                with urlopen(req, timeout=60) as response:
+                    if partial and (response.status != 206 or not response.headers.get("Content-Range","").startswith(f"bytes {offset}-{end}/")):
+                        raise IOError("服务器未正确响应分段请求")
+                    with temp.open("ab" if offset else "wb") as stream:
+                        while block := response.read(2**20):
+                            stream.write(block)
+                new_offset = temp.stat().st_size
+                if new_offset <= offset:
+                    raise IOError("下载未取得新数据")
+                offset = new_offset
+            if temp.stat().st_size != size:
+                raise IOError("下载长度不符")
+            if digest(temp) != sha:
+                temp.unlink()
+                raise IOError("SHA-256 不符")
+            temp.replace(dest)
+            print("已核验", repo, name, size, flush=True)
+            return
+        except Exception as error:
+            print(repo, name, error, flush=True)
+            if attempt == 3:
+                raise
+            time.sleep(2 + attempt)
 
-def main():
-    failed = []
-    for repo, files in FILES.items():
-        for path in files:
-            # repo -> models/ 下的本地目录名
-            local_map = {
-                "onnx-community/whisper-base": "whisper-base",
-                "onnx-community/Qwen2.5-1.5B-Instruct": "Qwen2.5-1.5B-Instruct",
-                "onnx-community/Qwen3-0.6B-ONNX": "Qwen3-0.6B-ONNX",
-                "Xenova/bge-small-zh-v1.5": "bge-small-zh-v1.5",
-            }
-            dest = os.path.join(BASE, "models", local_map[repo], path)
-            if os.path.exists(dest) and os.path.getsize(dest) > 1000:
-                print(f"SKIP (exists) {dest}", flush=True)
-                continue
-            url = MS_API.format(repo=repo, path=urllib.parse.quote(path))
-            print(f"DOWNLOAD {repo}/{path}", flush=True)
-            ok = fetch(url, dest)
-            size = os.path.getsize(dest) if os.path.exists(dest) else 0
-            print(f"{'OK' if ok else 'FAIL'} {dest} {size/1e6:.1f} MB", flush=True)
-            if not ok:
-                failed.append(f"{repo}/{path}")
-            time.sleep(1)
-    if failed:
-        print("FAILED FILES:", failed, flush=True)
-        sys.exit(1)
-    print("=== ALL DONE ===", flush=True)
+def prepare(repo):
+    base = f"https://modelscope.cn/api/v1/models/{repo}/repo/files?Revision=master&Recursive=true"
+    with urlopen(base, timeout=40) as response:
+        entries = {f["Path"]: f for f in json.load(response)["Data"]["Files"]}
+    names = ["config.json", "tokenizer_config.json", "tokenizer.json"]
+    if "whisper" in repo:
+        names += ["preprocessor_config.json", "generation_config.json", "onnx/encoder_model_quantized.onnx",
+                  "onnx/decoder_model_merged_quantized.onnx", "onnx/encoder_model.onnx"]
+    else:
+        names += ["onnx/model_quantized.onnx"]
+        if "Qwen" in repo:
+            names += ["generation_config.json"]
+            if "Qwen3" in repo:
+                names.append("onnx/model_q4f16.onnx")
+        else:
+            names += ["onnx/model_q4.onnx"]
+    if "special_tokens_map.json" in entries:
+        names.append("special_tokens_map.json")
+    for name in names:
+        download(repo, entries[name])
+    return repo
 
-import urllib.parse
-main()
+if __name__ == "__main__":
+    failures = []
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        futures = {repo: pool.submit(prepare, repo) for repo in MODELS}
+        for repo, task in futures.items():
+            try:
+                task.result()
+            except Exception as error:
+                failures.append((repo, str(error)))
+    if failures:
+        raise SystemExit(str(failures))

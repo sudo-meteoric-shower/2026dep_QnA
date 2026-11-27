@@ -27,11 +27,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
         # 禁用浏览器缓存：本机服务读取极快，缓存只会带来旧 MIME/旧文件问题
         self.send_header("Cache-Control", "no-store")
+        self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+        self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
         super().end_headers()
 
 if __name__ == "__main__":
     socketserver.ThreadingTCPServer.allow_reuse_address = True
-    with socketserver.ThreadingTCPServer(("0.0.0.0", 8000), Handler) as httpd:
+    with socketserver.ThreadingTCPServer(("127.0.0.1", 8000), Handler) as httpd:
         print("本地服务已启动: http://localhost:8000/voice_qa_assistant_local.html", flush=True)
         print("关闭本窗口或按 Ctrl+C 停止服务", flush=True)
         try:

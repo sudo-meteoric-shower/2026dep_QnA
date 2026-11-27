@@ -1,9 +1,5 @@
 # 本地语音问答助手基础版
 
-本分支归档《深度学习基础》课堂原型及复现记录。默认使用本地 Whisper-base、Qwen3-0.6B 和 bge-small-zh-v1.5。
+本分支在课堂原型基础上按《提示词.txt》调整。打开 `voice_qa_local/启动本地服务.bat`，使用默认的 Whisper-base、Qwen2.5-1.5B 和 bge-small-zh-v1.5。首次取得代码后，使用 Git LFS 获取已收录的权重，再按需运行 `voice_qa_local/download_models.py` 补齐本地模型。
 
-1. 安装 Git LFS 后克隆仓库。已经克隆时，在仓库目录运行 git lfs pull，拉取 ONNX 模型权重。
-2. 双击 voice_qa_local/启动本地服务.bat，等页面打开。点击「全部加载」，确认三套模型就绪。
-3. 可上传 reproduction_check/课堂复现测试资料.txt，询问“青岚实验箱的校验代号是什么”，对照开关知识库前后的答案。
-
-原型文件在 voice_qa_local/。复现结果在 reproduction_check/，包括文字和语音验证的成功与失败记录。模型和运行库均随分支提供，权重通过 Git LFS 分发。
+使用步骤在 [运行说明](voice_qa_local/README.md)。原型测试记录保留在 reproduction_check 目录，本轮的预设题目、合成材料与逐题计时在 [静音评测](reproduction_check/静音评测)。

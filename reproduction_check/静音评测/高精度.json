@@ -1,0 +1,32 @@
+{
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 11710
+  },
+  "errors": [
+    "Aborted()"
+  ],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen2.5-1.5B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 2163.0849999785423
+    }
+  },
+  "failure": "Error: load-llm: Aborted(). Build with -sASSERTIONS for more info.\n    at D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:78:37\n    at async run (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:183:53)"
+}

@@ -1,58 +1,17 @@
 <!DOCTYPE html>
-<!--
-  笔记本语音问答助手 · RAG 知识库增强版（浏览器端本地推理）
-  ============================================================
-  相对「真实模型版」的增强：
-    1. 界面更紧凑：模型区与知识库区并排、间距与内边距收紧、信息密度提高；
-    2. 新增「知识库上传」：支持多文件、多格式，本地解析后分块并建立向量索引；
-    3. RAG 检索增强：提问时先用中文向量模型检索知识库相关片段，注入 Qwen3 上下文，
-       使模型能基于专业知识作答，并返回引用来源。
-
-  支持的知识库格式：
-    PDF、DOCX、XLSX/XLS、TXT、MD、CSV、JSON、LOG、XML、HTML、YAML、常见代码文本
-    解析库（本地 lib/）：pdf.js / mammoth.js / SheetJS，纯前端解析，文件不上传。
-
-  模型（首次下载后浏览器缓存）：
-    - 语音识别 onnx-community/whisper-tiny（~60-75MB，中文转写）
-    - 向量模型 Xenova/bge-small-zh-v1.5（中文句向量，512 维）
-    - 问答模型 onnx-community/Qwen3-0.6B-ONNX（本地 q8/int8，~590MB）
-    - 语音播报 Web Speech API（浏览器原生）
-  【v16 彻底重构版】针对「识别/输出乱糟糟 + 响应慢」：
-    1) 默认改为质量档：Whisper-base / Qwen2.5-1.5B / bge-small（开箱即用即高质量）；
-    2) 录音链路重构：关闭浏览器AGC避免削波、VAD裁剪首尾静音（消除Whisper幻觉）、RMS归一化、时长20s；
-    3) 转录清洗 cleanTranscript：去时间戳/幻觉短语/重复句；
-    4) 流式输出：TextStreamer 逐字呈现，首字亚秒级（消除分钟级空白等待）；
-    5) 答案清洗强化：去套话/去重/去列表/限长，用 pipeline 自带 tokenizer 确保流式可靠。
-  【v14 多模型版】针对「识别/回答不准」，在纯浏览器离线架构内新增开源免费模型下拉切换，不删除任何旧模型：
-    语音识别：Whisper-tiny(最快) / Whisper-base(均衡) / Whisper-small(更准)
-    问答生成：Qwen3-0.6B(最快) / Qwen2.5-1.5B-Instruct(推荐·非思考输出干净) / Qwen3-1.7B(最强)
-    知识库向量：bge-small-zh(快) / bge-base-zh(更准)
-    切换下拉后点「加载」生效；换向量模型会提示重建索引。Qwen2.5 不加 /no_think，Qwen3 系列自动关闭思考。
-  【v11 离线版 · 界面优化】三个模型已下载到本目录 models/ 下，页面直接从本地读取，无需联网：
-    修复：原 testSource 按钮标签残缺会导致 customHost 输入框丢失、configure() 抛错、
-          进而使所有模型加载按钮失效（点了没反应）。本版已补全标签并校验全部 DOM 引用。
-    界面：重排为「顶部状态栏 + 模型/知识库双卡片 + 处理流水线 + 满高对话区」，
-          模型链接改为可折叠区，输入区并入对话卡底部，页面不留大片空白。
-    models/whisper-tiny/        语音识别（q8 量化，约 41MB）
-    models/Qwen3-0.6B-ONNX/     问答生成（int8 量化，约 590MB）
-    models/bge-small-zh-v1.5/   中文向量（q8 量化，约 24MB）
-  推理库与 ONNX 运行时同样本地化：lib/transformers.min.js、ort/*.wasm，全程不访问 CDN。
-  必须经本地 HTTP 服务访问：双击「启动本地服务.bat」，浏览器打开 http://localhost:8000/
-  （直接双击 html 用 file:// 打开时，浏览器禁止读取本地模型文件）。
-  仍保留远程源（魔搭 → hf-mirror → 官方）作为兜底，可在界面切换。
--->
+<!-- 浏览器离线语音问答助手 -->
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>语音问答助手 · RAG 知识库增强版</title>
   <link rel="icon" href="data:,">
-  <!-- 样式库与解析库全部本地化（lib/），缺失时自动回退 CDN -->
-  <script src="./lib/tailwind.js" onerror="var _s=document.createElement('script');_s.src='https://cdn.tailwindcss.com';document.head.appendChild(_s);"></script>
-  <link rel="stylesheet" href="./lib/fa/all.min.css" onerror="this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'">
-  <script src="./lib/pdf.min.js" onerror="var _p=document.createElement('script');_p.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';document.head.appendChild(_p);"></script>
-  <script src="./lib/mammoth.browser.min.js" onerror="var _m=document.createElement('script');_m.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';document.head.appendChild(_m);"></script>
-  <script src="./lib/xlsx.full.min.js" onerror="var _x=document.createElement('script');_x.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';document.head.appendChild(_x);"></script>
+  <!-- 样式库与解析库全部本地化（lib/） -->
+  <script src="./lib/tailwind.js"></script>
+  <link rel="stylesheet" href="./lib/fa/all.min.css">
+  <script src="./lib/pdf.min.js"></script>
+  <script src="./lib/mammoth.browser.min.js"></script>
+  <script src="./lib/xlsx.full.min.js"></script>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; overflow: hidden; }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -98,7 +57,9 @@
         <h1 class="text-sm font-semibold text-gray-800">语音问答助手 <span class="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 align-middle ml-1">RAG 知识库增强</span> <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 align-middle ml-1" id="verTag">v16</span></h1>
       </div>
       <div class="flex items-center gap-4 text-[10px] text-gray-500">
-        <span id="engineText"><i class="fas fa-circle text-[8px] mr-1" style="color:#f59e0b"></i>检测中</span>
+        <span id="engineText">WASM</span>
+        <span id="sourceTag" class="text-[9px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 whitespace-nowrap shrink-0">源：本地模型</span>
+        <span id="checkStatus">待自检</span>
         <span id="kbStat"><i class="fas fa-book text-[#165DFF] mr-1"></i>知识库 0 块</span>
       </div>
     </header>
@@ -112,28 +73,20 @@
           <div class="flex items-center justify-between mb-2.5">
             <h2 class="text-xs font-semibold text-gray-800"><i class="fas fa-cubes text-[#165DFF] mr-1.5"></i>模型状态</h2>
             <div class="flex items-center gap-1">
-              <select id="sourceSelect" onchange="onSourceChange()" class="text-[10px] border border-gray-200 rounded px-1.5 py-1 text-gray-700 bg-white outline-none focus:border-[#165DFF]" title="选择模型下载源">
-                <option value="local" selected>本地模型（离线）</option>
-                <option value="modelscope">魔搭 ModelScope</option>
-                <option value="mirror">hf-mirror</option>
-                <option value="official">HuggingFace 官方</option>
-                <option value="custom">自定义地址</option>
-              </select>
               <select id="precisionSelect" onchange="onPrecisionChange()" class="text-[10px] border border-gray-200 rounded px-1.5 py-1 text-gray-700 bg-white outline-none focus:border-[#165DFF]" title="使用本地量化权重（q8）">
-                <option value="fast" selected>快速·量化</option>
+                <option value="fast" selected>快速·量化（q8）</option>
+                <option value="high">高精度</option>
               </select>
               <button onclick="checkLocal()" title="检查 models/ 目录三个模型是否齐全" class="btn text-[10px] text-green-600 hover:bg-green-50 px-1.5 py-1 rounded"><i class="fas fa-hard-drive mr-0.5"></i>自检</button>
-              <button onclick="testSource()" title="测试当前源可访问性" class="btn text-[10px] text-blue-600 hover:bg-blue-50 px-1.5 py-1 rounded"><i class="fas fa-plug mr-0.5"></i>测试</button>
             </div>
-          </div>
-          <div id="customHostWrap" class="hidden mb-2">
-            <input id="customHost" type="text" placeholder="https://your-mirror.com （模型仓库遵循 HF 目录结构）" class="w-full text-[10px] border border-gray-200 rounded px-2 py-1.5 outline-none focus:border-[#165DFF]">
           </div>
           <div class="grid grid-cols-3 gap-2">
             <div class="rounded-lg border border-gray-100 bg-gray-50/60 p-2 flex flex-col items-center gap-1.5">
               <div class="flex items-center gap-1"><i class="fas fa-ear-listen text-[#165DFF] text-xs"></i><span class="text-[10px] font-medium text-gray-700 truncate">语音识别</span></div>
               <select id="asrModel" onchange="onModelChange('asr')" title="选择语音识别模型" class="w-full text-[9px] border border-gray-200 rounded px-1 py-0.5 text-gray-700 bg-white outline-none focus:border-[#165DFF]">
+                <option value="tiny">Whisper-tiny</option>
                 <option value="base" selected>Whisper-base</option>
+                <option value="small">Whisper-small</option>
               </select>
               <span id="asrBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">未加载</span>
               <button id="asrBtn" onclick="loadASR()" class="btn w-full bg-[#165DFF] text-white py-1 rounded text-[10px]">加载</button>
@@ -142,7 +95,9 @@
             <div class="rounded-lg border border-gray-100 bg-gray-50/60 p-2 flex flex-col items-center gap-1.5">
               <div class="flex items-center gap-1"><i class="fas fa-brain text-purple-600 text-xs"></i><span class="text-[10px] font-medium text-gray-700 truncate">问答生成</span></div>
               <select id="llmModel" onchange="onModelChange('llm')" title="选择问答大模型" class="w-full text-[9px] border border-gray-200 rounded px-1 py-0.5 text-gray-700 bg-white outline-none focus:border-[#165DFF]">
-                <option value="qwen3_06b" selected>Qwen3-0.6B</option>
+                <option value="qwen3_06b">Qwen3-0.6B</option>
+                <option value="qwen25_15b" selected>Qwen2.5-1.5B</option>
+                <option value="qwen3_17b">Qwen3-1.7B</option>
               </select>
               <span id="llmBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">未加载</span>
               <button id="llmBtn" onclick="loadLLM()" class="btn w-full bg-[#165DFF] text-white py-1 rounded text-[10px]">加载</button>
@@ -152,6 +107,7 @@
               <div class="flex items-center gap-1"><i class="fas fa-vector-square text-green-600 text-xs"></i><span class="text-[10px] font-medium text-gray-700 truncate">知识库向量</span></div>
               <select id="embModel" onchange="onModelChange('emb')" title="选择向量模型" class="w-full text-[9px] border border-gray-200 rounded px-1 py-0.5 text-gray-700 bg-white outline-none focus:border-[#165DFF]">
                 <option value="small" selected>bge-small-zh</option>
+                <option value="base">bge-base-zh</option>
               </select>
               <span id="embBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">未加载</span>
               <button id="embBtn" onclick="loadEmb()" class="btn w-full bg-[#165DFF] text-white py-1 rounded text-[10px]">加载</button>
@@ -160,13 +116,12 @@
           </div>
           <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
             <div class="flex items-center gap-1.5 min-w-0">
-              <span id="sourceTag" class="text-[9px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 whitespace-nowrap shrink-0">源：本地模型</span>
-              <p class="text-[9px] text-gray-400 truncate" id="downloadInfo">本地模型就绪，点击「全部加载」即可离线运行</p>
+              <p class="text-[9px] text-gray-400 truncate" id="downloadInfo">点击「全部加载」以启用本地模型</p>
             </div>
             <button onclick="loadAll()" class="btn bg-gray-800 text-white px-2.5 py-1 rounded text-[10px] whitespace-nowrap shrink-0"><i class="fas fa-download mr-1"></i>全部加载</button>
           </div>
           <details class="mt-1.5 group">
-            <summary class="text-[9px] text-gray-400 cursor-pointer select-none hover:text-[#165DFF]"><i class="fas fa-chevron-right mr-1 inline-block transition-transform group-open:rotate-90"></i>本地模型文件路径 / 下载链接 <button onclick="event.stopPropagation();copyLinks()" class="ml-1 text-[#165DFF] hover:underline">复制全部</button></summary>
+            <summary class="text-[9px] text-gray-400 cursor-pointer select-none hover:text-[#165DFF]"><i class="fas fa-chevron-right mr-1 inline-block transition-transform group-open:rotate-90"></i>本地模型文件路径</summary>
             <div id="modelUrls" class="mt-1.5 text-[9px] text-gray-500 leading-relaxed space-y-0.5">
               <div class="flex items-start gap-1"><span class="w-8 flex-shrink-0 text-gray-400">识别</span><a href="./models/whisper-tiny/onnx/encoder_model_quantized.onnx" target="_blank" rel="noopener" class="text-[#165DFF] hover:underline break-all">./models/whisper-tiny/onnx/encoder_model_quantized.onnx</a></div>
               <div class="flex items-start gap-1"><span class="w-8 flex-shrink-0 text-gray-400">问答</span><a href="./models/Qwen3-0.6B-ONNX/onnx/model_quantized.onnx" target="_blank" rel="noopener" class="text-[#165DFF] hover:underline break-all">./models/Qwen3-0.6B-ONNX/onnx/model_quantized.onnx</a></div>
@@ -185,9 +140,9 @@
             </div>
           </div>
           <div id="dropZone" class="border border-dashed border-gray-300 rounded-lg px-2 py-2.5 text-center cursor-pointer hover:border-[#165DFF] transition-colors shrink-0" onclick="document.getElementById('fileInput').click()">
-            <p class="text-[10px] text-gray-400"><i class="fas fa-cloud-upload-alt mr-1"></i>点击或拖入多个文件 · PDF / DOCX / XLSX / TXT / MD / CSV / JSON / HTML 等</p>
+            <p class="text-[10px] text-gray-400"><i class="fas fa-cloud-upload-alt mr-1"></i>点击或拖入多个文件 · PDF / DOCX / XLSX / TXT</p>
           </div>
-          <input type="file" id="fileInput" multiple accept=".pdf,.docx,.xlsx,.xls,.txt,.md,.csv,.json,.log,.xml,.html,.htm,.yaml,.yml,.js,.py,.java,.cpp,.sql" class="hidden" onchange="handleFiles(this.files)">
+          <input type="file" id="fileInput" multiple accept=".pdf,.docx,.xlsx,.xls,.txt" class="hidden" onchange="handleFiles(this.files)">
           <div id="fileList" class="mt-2 space-y-1 overflow-y-auto flex-1 min-h-[40px] max-h-[72px]">
             <p class="text-[10px] text-gray-300 text-center py-2" id="fileEmpty">尚未上传知识库文件</p>
           </div>
@@ -249,184 +204,73 @@
 
   <!-- ============ Worker：真实模型推理 + RAG 检索 ============ -->
   <script type="module" id="engine-src">
-    // 推理引擎运行在【主线程】：不使用 Worker，规避预览/沙箱环境对 Blob Worker 的安全策略限制。
-    const emit=(msg)=>{ try{ window.dispatchEvent(new CustomEvent('engine-msg',{detail:msg})); }catch(e){} };
-    // ============================================================
-    // 关键设计：引擎顶层【不写任何 import / await】，推理库改为按需懒加载。
-    // 这样即使 CDN 暂时不可达，页面与界面仍正常，失败只影响单次模型加载并可重试。
-    // ============================================================
-    let HF=null, pipeline=null, env=null, hfLoading=null;
-
-    // 关键：模板必须与 transformers.js v3.8.x 匹配——其内部只替换 {model}/{revision}，
-    // 文件名由库自动拼接。若模板含 {file}，请求 URL 会出现字面量 "%7Bfile%7D" 导致 404。
-    const PATH_TEMPLATE="{model}/resolve/{revision}/";
-
-    // ===== 下载源定义（每个源有独立的 host / 修订名）=====
-    // 国内首推【魔搭 ModelScope】：响应头 Access-Control-Allow-Origin: *，浏览器可直接跨域拉取；
-    // 且其仓库名与 HuggingFace 完全一致（onnx-community/*、Xenova/*），可直接作为 HF 兼容源，
-    // 仅修订名用 master（HF 为 main，实测 ModelScope 两者都可用）。
-    const SOURCE_DEFS={
-      local:{name:"本地模型",host:"",revision:"",local:true},
-      modelscope:{name:"魔搭ModelScope",host:"https://modelscope.cn/models",revision:"master"},
-      mirror:{name:"hf-mirror",host:"https://hf-mirror.com",revision:"main"},
-      official:{name:"HuggingFace官方",host:"https://huggingface.co",revision:"main"}
-    };
-    // 三个模型的具体权重文件（仓库 + 相对路径），已逐一实测存在；用于生成完整下载地址并展示。
-    // ===== 多模型目录：每类提供多个开源免费选项（均已下载到本地 models/）=====
+    const emit = msg => window.dispatchEvent(new CustomEvent("engine-msg", {detail:msg}));
+    let HF;
     const MODEL_CATALOG={
       asr:{
-        tiny:{repo:"onnx-community/whisper-tiny",local:"whisper-tiny",label:"Whisper-tiny",
-              file:"onnx/encoder_model_quantized.onnx",remoteFile:"onnx/encoder_model.onnx",
+        tiny:{local:"whisper-tiny",label:"Whisper-tiny",
+              file:"onnx/encoder_model_quantized.onnx",
               hiFile:"onnx/encoder_model.onnx",size:"40MB",
               dtFast:{encoder_model:"q8",decoder_model_merged:"q8"},
               dtHigh:{encoder_model:"fp32",decoder_model_merged:"q8"}},
-        base:{repo:"onnx-community/whisper-base",local:"whisper-base",label:"Whisper-base",
-              file:"onnx/encoder_model_quantized.onnx",remoteFile:"onnx/encoder_model.onnx",
+        base:{local:"whisper-base",label:"Whisper-base",
+              file:"onnx/encoder_model_quantized.onnx",
               hiFile:"onnx/encoder_model.onnx",size:"77MB",
               dtFast:{encoder_model:"q8",decoder_model_merged:"q8"},
               dtHigh:{encoder_model:"fp32",decoder_model_merged:"q8"}},
-        small:{repo:"onnx-community/whisper-small",local:"whisper-small",label:"Whisper-small",
-              file:"onnx/encoder_model_quantized.onnx",remoteFile:"onnx/encoder_model.onnx",
+        small:{local:"whisper-small",label:"Whisper-small",
+              file:"onnx/encoder_model_quantized.onnx",
               hiFile:"onnx/encoder_model.onnx",size:"241MB",
               dtFast:{encoder_model:"q8",decoder_model_merged:"q8"},
               dtHigh:{encoder_model:"fp32",decoder_model_merged:"q8"}}
       },
       llm:{
-        qwen3_06b:{repo:"onnx-community/Qwen3-0.6B-ONNX",local:"Qwen3-0.6B-ONNX",label:"Qwen3-0.6B",
-              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4f16.onnx",
+        qwen3_06b:{local:"Qwen3-0.6B-ONNX",label:"Qwen3-0.6B",
+              file:"onnx/model_quantized.onnx",
               hiFile:"onnx/model_q4f16.onnx",size:"617MB"},
-        qwen25_15b:{repo:"onnx-community/Qwen2.5-1.5B-Instruct",local:"Qwen2.5-1.5B-Instruct",label:"Qwen2.5-1.5B",
-              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4f16.onnx",
-              hiFile:"onnx/model_q4f16.onnx",size:"1.5GB"},
-        qwen3_17b:{repo:"onnx-community/Qwen3-1.7B-ONNX",local:"Qwen3-1.7B-ONNX",label:"Qwen3-1.7B",
-              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4f16.onnx",
+        qwen25_15b:{local:"Qwen2.5-1.5B-Instruct",label:"Qwen2.5-1.5B",
+              file:"onnx/model_quantized.onnx",size:"1.5GB"},
+        qwen3_17b:{local:"Qwen3-1.7B-ONNX",label:"Qwen3-1.7B",
+              file:"onnx/model_quantized.onnx",
               hiFile:"onnx/model_q4f16.onnx",size:"1.7GB"}
       },
       emb:{
-        small:{repo:"Xenova/bge-small-zh-v1.5",local:"bge-small-zh-v1.5",label:"bge-small-zh",
-              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4.onnx",
+        small:{local:"bge-small-zh-v1.5",label:"bge-small-zh",
+              file:"onnx/model_quantized.onnx",
               hiFile:"onnx/model_q4.onnx",size:"24MB"},
-        base:{repo:"Xenova/bge-base-zh-v1.5",local:"bge-base-zh-v1.5",label:"bge-base-zh",
-              file:"onnx/model_quantized.onnx",remoteFile:"onnx/model_q4.onnx",
+        base:{local:"bge-base-zh-v1.5",label:"bge-base-zh",
+              file:"onnx/model_quantized.onnx",
               hiFile:"onnx/model_q4.onnx",size:"98MB"}
       }
     };
     // 当前选中的模型 key（由界面下拉框驱动）
-    const activeModel={asr:"base",llm:"qwen3_06b",emb:"small"};
+    const activeModel={asr:"base",llm:"qwen25_15b",emb:"small"};
     // MODEL_FILES 始终指向当前选中的模型定义，供 fullUrl / check-local / load 使用
     const MODEL_FILES={
       asr:MODEL_CATALOG.asr.base,
-      llm:MODEL_CATALOG.llm.qwen3_06b,
+      llm:MODEL_CATALOG.llm.qwen25_15b,
       emb:MODEL_CATALOG.emb.small
     };
     const LOCAL_BASE="./models/";
-    const isLocalSrc=()=>!!(sources[0]&&sources[0].local);
-    function resolveDef(key,customHost){
-      if(key==="custom"){
-        const h=String(customHost||"").trim().replace(/\/+$/,"");
-        if(!h) throw new Error("自定义地址为空，请填写镜像根地址（如 https://modelscope.cn/models）");
-        return {name:"自定义",host:h,revision:"main"};
+    let asr=null, llm=null, embed=null;
+    let precision="fast";
+    async function loadLocal(task, model, dtype) {
+      if (!HF) {
+        HF = await import("./lib/transformers.min.js");
+        HF.env.localModelPath = LOCAL_BASE;
+        HF.env.allowLocalModels = true;
+        HF.env.allowRemoteModels = false;
+        HF.env.useBrowserCache = false;
+        const wasm = HF.env.backends.onnx.wasm;
+        wasm.wasmPaths = new URL("./ort/", location.href).href;
+        wasm.numThreads = window.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
       }
-      return SOURCE_DEFS[key]||SOURCE_DEFS.modelscope;
-    }
-    function modelIdFor(def,m){ return def.local ? m.local : m.repo; }
-    function fullUrl(def,m){
-      if(def.local) return LOCAL_BASE+m.local+"/"+m.file;
-      return String(def.host).replace(/\/+$/,"")+"/"+m.repo+"/resolve/"+def.revision+"/"+(m.remoteFile||m.file);
-    }
-    // 回退链（按序尝试）：默认 魔搭 → hf-mirror → 官方
-    let sources=[SOURCE_DEFS.local,SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror];
-
-    // 懒加载推理库（多个 CDN 依次尝试），只在此处动态 import
-    const HF_VER="3.8.1";
-    const LOCAL_LIB="./lib/transformers.min.js";
-    // 本地推理库优先；缺失时才回退 CDN（离线部署只用第一项）
-    const CDN_LIST=[
-      LOCAL_LIB,
-      "https://cdn.jsdelivr.net/npm/@huggingface/transformers@"+HF_VER,
-      "https://fastly.jsdelivr.net/npm/@huggingface/transformers@"+HF_VER,
-      "https://unpkg.com/@huggingface/transformers@"+HF_VER+"/+esm"
-    ];
-    // ONNX Runtime 的 wasm 需从 CDN 单独下载，必须与推理库同源，否则换 CDN 后仍会卡住
-    function wasmPathsFor(url){
-      // 本地推理库 → ONNX 运行时同样取本地 ort2/ 目录，彻底不联网
-      // （目录名用 ort2：旧 ort/ 的 jsep.mjs 曾被浏览器以错误 MIME 缓存，换名强制重新拉取）
-      if(String(url).indexOf("./lib/")===0){ try{ return new URL("./ort2/",location.href).href; }catch(_){} }
-      const re=new RegExp("^(https://[^/]+)/npm/@huggingface/transformers@([^/]+)");
-      const m=String(url).match(re);
-      if(m) return m[1]+"/npm/@huggingface/transformers@"+m[2]+"/dist/";
-      return "https://cdn.jsdelivr.net/npm/@huggingface/transformers@"+HF_VER+"/dist/";
-    }
-    async function ensureHF(){
-      if(HF) return HF;
-      if(hfLoading) return hfLoading;
-      hfLoading=(async()=>{
-        let lastErr=null;
-        for(const url of CDN_LIST){
-          try{
-            const mod=await import(/* webpackIgnore: true */ url);
-            const p=mod.pipeline||(mod.default&&mod.default.pipeline);
-            const e=mod.env||(mod.default&&mod.default.env);
-            if(typeof p==="function"&&e){
-              HF=mod; pipeline=p; env=e;
-              env.remotePathTemplate=PATH_TEMPLATE;
-              try{ if(env.backends&&env.backends.onnx&&env.backends.onnx.wasm) env.backends.onnx.wasm.wasmPaths=wasmPathsFor(url); }catch(_){}
-              applySource(sources[0]); // 本地：开 allowLocalModels；远程：设 remoteHost
-              let host=""; try{ host=new URL(url).host; }catch(_){}
-              emit({type:"note",message:"推理库已加载："+(host||url)});
-              return HF;
-            }
-            lastErr=new Error("该地址返回的不是 Transformers.js 模块");
-          }catch(err){ lastErr=err; }
-        }
-        throw new Error("推理库 CDN 全部不可达（jsdelivr/unpkg/esm.sh）。请检查网络，或改用配套 Python 版。"+String(lastErr&&lastErr.message||lastErr||""));
-      })();
-      hfLoading.catch(()=>{ hfLoading=null; }); // 失败后允许重试
-      return hfLoading;
-    }
-
-    function applySource(def){
-      if(!def) throw new Error("下载源为空");
-      if(!env) return def; // 推理库未加载，留待 ensureHF 应用
-      if(def.local){
-        env.allowLocalModels=true;
-        env.allowRemoteModels=false;
-        env.localModelPath=LOCAL_BASE;
-        // 本地模型不写入浏览器缓存（Cache Storage 在 C 盘 AppData，会占用约等于模型体积的空间）
-        env.useBrowserCache=false;
-      }else{
-        const h=String(def.host||"").trim().replace(/\/+$/,"");
-        if(!h) throw new Error("下载源地址为空");
-        env.allowLocalModels=false;
-        env.allowRemoteModels=true;
-        env.remoteHost=h;
-        env.remotePathTemplate=PATH_TEMPLATE;
-        env.useBrowserCache=true; // 远程下载仍走缓存
+      const options={device:"wasm",dtype,progress_callback:report};
+      if(model.local==="Qwen3-1.7B-ONNX"){
+        options.session_options={enableCpuMemArena:false,enableMemPattern:false,graphOptimizationLevel:"basic"};
       }
-      return def;
+      return HF.pipeline(task, model.local, options);
     }
-
-    // 带多源回退的 pipeline 加载；device/dtype 逐级降级由调用方负责
-    async function pipelineWithFallback(task,m,options,label){
-      await ensureHF(); // 确保推理库就绪
-      let lastErr;
-      for(let i=0;i<sources.length;i++){
-        const def=applySource(sources[i]);
-        const modelId=modelIdFor(def,m);
-        if(i>0) emit({type:"note",message:label+"：切换到备用源 "+def.name});
-        try{
-          const pipe=await pipeline(task,modelId,options);
-          emit({type:"note",message:label+" 已从 "+def.name+" 加载成功"});
-          return pipe;
-        }catch(err){
-          lastErr=err;
-          emit({type:"note",message:label+" 从 "+def.name+" 加载失败："+String(err&&err.message||err).slice(0,120)});
-        }
-      }
-      throw new Error(label+" 全部来源失败："+String(lastErr&&lastErr.message||lastErr||""));
-    }
-
-    let asr=null, llm=null, embed=null, gpu=false;
     let KB=[]; // [{text, source, embedding: number[]}]
 
     function report(p){
@@ -442,22 +286,18 @@
       const type=m.type;
       try{
         if(type==="config"){
-          const sel=m.source||"local";
-          let chain;
-          if(sel==="local") chain=[SOURCE_DEFS.local,SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror];
-          else if(sel==="modelscope") chain=[SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror,SOURCE_DEFS.official];
-          else if(sel==="mirror") chain=[SOURCE_DEFS.mirror,SOURCE_DEFS.modelscope,SOURCE_DEFS.official];
-          else if(sel==="official") chain=[SOURCE_DEFS.official,SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror];
-          else chain=[resolveDef("custom",m.customHost),SOURCE_DEFS.modelscope,SOURCE_DEFS.mirror];
-          sources=chain;
+          const precisionChanged = precision !== m.precision;
+          precision = m.precision;
           // 应用界面选择的模型；变更时释放已加载实例（向量模型变更还需重建索引）
           if(m.models){
             for(const k of ["asr","llm","emb"]){
               const key=m.models[k];
               const cat=MODEL_CATALOG[k];
-              if(key && cat[key] && key!==activeModel[k]){
+              if(key && cat[key] && (key!==activeModel[k] || precisionChanged)){
                 activeModel[k]=key;
                 MODEL_FILES[k]=cat[key];
+                const old = {asr, llm, emb:embed}[k];
+                if(old) await old.dispose();
                 if(k==="asr") asr=null;
                 else if(k==="llm") llm=null;
                 else if(k==="emb"){ embed=null; KB=[]; }
@@ -465,122 +305,57 @@
               }
             }
           }
-          const def=applySource(sources[0]);
-          // 回传三个模型的具体位置（本地为相对路径，远程为完整 URL）
-          const urls={};
-          for(const k in MODEL_FILES){ urls[k]=fullUrl(def,MODEL_FILES[k]); }
-          emit({type:"configured",source:sel,host:def.host,sourceName:def.name,local:!!def.local,urls,
-                fallback:sources.slice(1).map(s=>s.name)});
+          const urls = {};
+          for (const [key, model] of Object.entries(MODEL_FILES)) {
+            urls[key] = LOCAL_BASE + model.local + "/" + (precision==="high" && model.hiFile ? model.hiFile : model.file);
+          }
+          emit({type:"configured",urls});
           return;
         }
-
         if(type==="check-local"){
-          const res={};
-          for(const k in MODEL_FILES){
-            const M=MODEL_FILES[k], base=LOCAL_BASE+M.local+"/";
-            let cfgOk=false, onnxOk=false, size=0;
-            try{ const r=await fetch(base+"config.json",{cache:"no-store"}); cfgOk=r.ok; }catch(_){}
-            try{
-              const r2=await fetch(base+M.file,{method:"HEAD"});
-              onnxOk=r2.ok; size=parseInt(r2.headers.get("content-length")||"0",10)||0;
-            }catch(_){}
-            let hiOk=false;
-            if(M.hiFile){ try{ const r3=await fetch(base+M.hiFile,{method:"HEAD"}); hiOk=r3.ok; }catch(_){} }
-            res[k]={ok:cfgOk&&onnxOk,cfg:cfgOk,onnx:onnxOk,size,hi:hiOk,label:M.label};
+          const result={};
+          for (const [key, model] of Object.entries(MODEL_FILES)) {
+            const files = ["config.json", "tokenizer.json", "tokenizer_config.json",
+              precision==="high" && model.hiFile ? model.hiFile : model.file];
+            if(key !== "emb") files.push("generation_config.json");
+            if(key === "asr") files.push("preprocessor_config.json","onnx/decoder_model_merged_quantized.onnx");
+            const checks = await Promise.all(files.map(async file=>{
+              const r = await fetch(LOCAL_BASE + model.local + "/" + file, {method:"HEAD",cache:"no-store"});
+              return r.ok && Number(r.headers.get("content-length")) > 128;
+            }));
+            result[key] = {ok:checks.every(Boolean), label:model.label};
           }
-          emit({type:"local-checked",result:res}); return;
+          emit({type:"local-checked",result});
+          return;
         }
-
-        if(type==="test-source"){
-          const def=applySource(sources[0]);
-          const testUrl=def.local
-            ? LOCAL_BASE+MODEL_FILES.llm.local+"/config.json"
-            : String(def.host).replace(/\/+$/,"")+"/"+MODEL_FILES.llm.repo+"/resolve/"+def.revision+"/config.json";
-          let ok=false, status=0;
-          try{ const resp=await fetch(testUrl,{cache:"no-store"}); ok=resp.ok; status=resp.status; }catch(err){ status=String(err&&err.message||err).slice(0,40); }
-          emit({type:"source-tested",host:def.host,name:def.name,ok,status,url:testUrl}); return;
-        }
-
-        if(type==="load-asr"){
-          pendingModel="asr";
-          const common={progress_callback:report};
-          const task="automatic-speech-recognition", M=MODEL_FILES.asr;
-          const high = isLocalSrc() && m.precision==="high" && !!M.hiFile;
-          // WebGPU 下 q8 权重输出乱码（int8 MatMul 与 WebGPU EP 不兼容），
-          // WebGPU 一律使用 fp32 encoder + q4 decoder（官方 whisper-webgpu 配置）；
-          // 本地缺少 fp32/q4 文件时自动退回 WASM+q8。
-          const dtGpu={encoder_model:"fp32",decoder_model_merged:"q4"};
-          const dtWasm = high?M.dtHigh:(isLocalSrc()?M.dtFast:{encoder_model:"fp32",decoder_model_merged:"q4"});
-          emit({type:"note",message:M.label+" 精度档："+(m.gpu?"WebGPU fp32+q4":(high?"高精度(encoder fp32)":"快速(q8)"))});
-          if(m.gpu){
-            try{ asr=await pipelineWithFallback(task,M,{...common,device:"webgpu",dtype:dtGpu},"Whisper/WebGPU"); gpu=true; }
-            catch(err){
-              emit({type:"note",message:"WebGPU 加载失败，改用 WASM："+String(err.message||err).slice(0,80)}); gpu=false;
-              asr=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtWasm},"Whisper/WASM");
-            }
-          } else asr=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtWasm},"Whisper/WASM");
-          emit({type:"asr-ready",gpu}); return;
-        }
-
-        if(type==="load-llm"){
-          pendingModel="llm";
-          const common={progress_callback:report};
-          const task="text-generation", M=MODEL_FILES.llm;
-          const high = isLocalSrc() && m.precision==="high" && !!M.hiFile;
-          // WebGPU 下 q8/int8 权重会输出乱码（int8 MatMul 与 WebGPU EP 兼容性差），
-          // WebGPU 一律使用 q4f16 权重；本地缺少 q4f16 文件时退回 WASM+q8。
-          const gpuQ4 = isLocalSrc() ? !!M.hiFile : true;
-          const dtGpu="q4f16";
-          const dtWasm=isLocalSrc()?(high?"q4f16":"q8"):"q4";
-          // WASM 回退：q8 大权重（>1GB）可能超出 WASM 内存上限，失败后自动改用 q4f16
-          const tryWasm=async()=>{
-            try{ llm=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtWasm},"Qwen/WASM"); }
-            catch(e1){
-              if(isLocalSrc()&&M.hiFile&&dtWasm!=="q4f16"){
-                emit({type:"note",message:"WASM q8 加载失败，改用 q4f16 权重重试"});
-                llm=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:"q4f16"},"Qwen/WASM-q4f16");
-              } else throw e1;
-            }
-          };
-          emit({type:"note",message:M.label+" 精度档："+(m.gpu?(gpuQ4?"WebGPU q4f16":"WASM "+(high?"q4f16":"q8")):(high?"高精度(q4f16)":"快速(q8/int8)"))});
-          if(m.gpu&&gpuQ4){
-            try{ llm=await pipelineWithFallback(task,M,{...common,device:"webgpu",dtype:dtGpu},"Qwen/WebGPU"); gpu=true; }
-            catch(err){
-              emit({type:"note",message:"WebGPU 加载失败，改用 WASM："+String(err.message||err).slice(0,80)}); gpu=false;
-              await tryWasm();
-            }
-          } else await tryWasm();
-          emit({type:"llm-ready",gpu}); return;
-        }
-
-        if(type==="load-embed"){
-          pendingModel="emb";
-          const common={progress_callback:report};
-          const task="feature-extraction", M=MODEL_FILES.emb;
-          const high = isLocalSrc() && m.precision==="high" && !!M.hiFile;
-          // WebGPU 下 q8 权重会输出异常向量，WebGPU 一律使用 q4（实测检索相似度正常）
-          const gpuQ4 = isLocalSrc() ? !!M.hiFile : true;
-          const dtGpu="q4";
-          const dtEmb=isLocalSrc()?(high?"q4":"q8"):"q8";
-          emit({type:"note",message:M.label+" 精度档："+(m.gpu?(gpuQ4?"WebGPU q4":"WASM "+(high?"q4":"q8")):(high?"高精度(q4)":"快速(q8)"))});
-          if(m.gpu&&gpuQ4){
-            try{ embed=await pipelineWithFallback(task,M,{...common,device:"webgpu",dtype:dtGpu},"bge-zh/WebGPU"); gpu=true; }
-            catch(err){
-              emit({type:"note",message:"WebGPU 加载失败，改用 WASM："+String(err.message||err).slice(0,80)}); gpu=false;
-              embed=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtEmb},"bge-zh/WASM");
-            }
-          } else embed=await pipelineWithFallback(task,M,{...common,device:"wasm",dtype:dtEmb},"bge-zh/WASM");
-          emit({type:"emb-ready",gpu}); return;
+        if(type==="load-asr" || type==="load-llm" || type==="load-embed"){
+          const high = precision==="high";
+          if(type==="load-asr"){
+            pendingModel="asr";
+            const model=MODEL_FILES.asr;
+            asr=await loadLocal("automatic-speech-recognition",model,high?model.dtHigh:model.dtFast);
+          }else if(type==="load-llm"){
+            pendingModel="llm";
+            llm=await loadLocal("text-generation",MODEL_FILES.llm,high && MODEL_FILES.llm.hiFile?"q4f16":"q8");
+          }else{
+            pendingModel="emb";
+            embed=await loadLocal("feature-extraction",MODEL_FILES.emb,high?"q4":"q8");
+          }
+          emit({type:pendingModel+"-ready"});
+          return;
         }
 
         if(type==="index-docs"){
           if(!embed) throw new Error("向量模型未加载");
           const chunks=m.chunks, total=chunks.length;
+          const incoming=new Set(chunks.map(chunk=>chunk.source));
+          const next=KB.filter(chunk=>!incoming.has(chunk.source));
           for(let i=0;i<total;i++){
             const out=await embed(chunks[i].text,{pooling:"mean",normalize:true});
-            KB.push({text:chunks[i].text,source:chunks[i].source,embedding:Array.from(out.data)});
+            next.push({text:chunks[i].text,source:chunks[i].source,embedding:Array.from(out.data)});
             if((i+1)%3===0||i===total-1) emit({type:"index-progress",done:i+1,total});
           }
+          KB=next;
           emit({type:"index-done",added:total,total:KB.length}); return;
         }
 
@@ -595,52 +370,35 @@
         if(type==="generate"){
           if(!llm) throw new Error("问答模型未加载");
           const q=String(m.question||"").trim();
-          let system=m.system, sources=[];
+          let system=m.system, sources=[], evidence="";
           if(m.useRag && KB.length && embed){
             const out=await embed("为这个句子生成表示以用于检索相关文章："+q,{pooling:"mean",normalize:true});
             const qv=Array.from(out.data);
             const ranked=KB.map(k=>({k,score:cosine(qv,k.embedding)})).sort((a,b)=>b.score-a.score).slice(0,3);
-            const ctx=ranked.map((r,i)=>"["+(i+1)+"] "+r.k.text).join("\n");
             sources=ranked.map(r=>({source:r.k.source,score:r.score,text:r.k.text}));
-            system="你是专业问答助手。请严格依据下方参考资料回答，简明扼要（两三句、不超过120字）。若资料不足以回答，请说明“资料中未提及”，不要编造。只输出最终答案，不要输出思考过程。\n\n参考资料：\n"+ctx;
+            evidence=ranked.map((r,i)=>"资料"+(i+1)+"（"+r.k.source+"）："+r.k.text).join("\n");
+            system="你负责阅读理解。只回答所问，保留原文的数值、单位和条件。用简体中文简答；没有依据就答“资料中未提及”。";
           }
           // Qwen3 系列需关闭思考（/no_think）；Qwen2.5 非思考模型显式追加中文指令
           const isThink=String(activeModel.llm).indexOf("qwen3")>=0;
-          const userContent = isThink ? (q+"/no_think") : (q+"\n请用中文简明回答。");
+          const task=evidence ? evidence+"\n\n问题："+q+"\n请只给出有依据的答案。" : q+"\n请用简体中文简明回答。";
+          const userContent=isThink ? task+"\n/no_think" : task;
           const messages=[{role:"system",content:system},{role:"user",content:userContent}];
-          let answer="";
-          // 流式输出：直接使用 pipeline 自带的 tokenizer（最可靠，无需重复加载）
-          let promptStr=null, tok=llm&&llm.tokenizer;
-          try{
-            if(tok && tok.apply_chat_template){
-              promptStr=tok.apply_chat_template(messages,{tokenize:false,add_generation_prompt:true});
+          const tok=llm.tokenizer;
+          const prompt=tok.apply_chat_template(messages,{tokenize:false,add_generation_prompt:true,enable_thinking:false});
+          let answer="", visible="";
+          const streamer=new HF.TextStreamer(tok,{skip_prompt:true,skip_special_tokens:true,
+            callback_function(chunk){
+              answer+=chunk;
+              const clean=answer.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi,"")
+                .replace(/<\|[^>]*?\|>|<\/?think>/gi,"").replace(/<[^>]*$/,"").trimStart();
+              if(clean.length>visible.length){
+                emit({type:"answer-delta",text:clean.slice(visible.length)});
+                visible=clean;
+              }
             }
-          }catch(_){ promptStr=null; }
-          emit({type:"note",message:"生成准备：prompt="+(promptStr?promptStr.length:"无")+" tokenizer="+(tok?"OK":"无")});
-          let streamBuf="", streamer=null;
-          if(promptStr && HF && HF.TextStreamer && tok){
-            try{
-              streamer=new HF.TextStreamer(tok,{skip_prompt:true,skip_special_tokens:true,
-                callback_function:(chunk)=>{ if(chunk){streamBuf+=chunk;emit({type:"answer-delta",text:chunk});} }
-              });
-            }catch(_){ streamer=null; }
-          }
-          if(streamer){
-            try{
-              await llm(promptStr,{max_new_tokens:110,do_sample:false,temperature:0,repetition_penalty:1.15,streamer});
-              answer=streamBuf;
-              emit({type:"note",message:"流式生成完成，片段="+streamBuf.length+"字"});
-            }catch(err){ answer=""; emit({type:"note",message:"流式失败改用整体生成："+String(err.message||err).slice(0,60)}); }
-          }
-          // 回退：一次性生成（chat 数组或字符串 prompt）
-          if(!answer){
-            try{
-              const out=await llm(promptStr?promptStr:messages,{max_new_tokens:110,do_sample:false,temperature:0,repetition_penalty:1.15});
-              const gen=(out&&out[0]&&out[0].generated_text)||[];
-              const last=gen[gen.length-1];
-              answer=(last&&typeof last.content==="string")?last.content:(typeof last==="string"?last:"");
-            }catch(err){ answer=""; }
-          }
+          });
+          await llm(prompt,{max_new_tokens:80,do_sample:false,repetition_penalty:1.15,streamer,return_full_text:false});
           answer=cleanAnswer(answer);
           if(!answer) answer="（模型未返回有效内容，请换个说法重试）";
           emit({type:"answer",text:answer,sources,usedRag:!!(m.useRag&&KB.length)}); return;
@@ -655,7 +413,7 @@
     function cleanTranscript(t){
       let s=String(t||"").trim();
       // 去时间戳标记与常见幻觉短语
-      s=s.replace(/\[\d{2}:\d{2}(:\d{2})?\->\d{2}:\d{2}(:\d{2})?\]/g,"");
+      s=s.replace(/<\|\d+(?:\.\d+)?\|>/g,"").replace(/\[\d{2}:\d{2}(:\d{2})?\->\d{2}:\d{2}(:\d{2})?\]/g,"");
       s=s.replace(/(谢谢观看|感谢观看|字幕由.*?提供|请不吝点赞|订阅.*?频道|转载请注明|www\.\S+|HTTP\S*)/gi,"");
       // 连续重复句/短语去重（Whisper 在小音频上易循环）
       const seg=s.split(/(?<=[。！？!?，,])/).map(x=>x.trim()).filter(Boolean);
@@ -688,7 +446,7 @@
       s=uniq.join("").trim();
       // 去掉开头的孤立标点/连接词与末尾未完句、免责声明、自我提示
       s=s.replace(/^[，,、；;：:\s]+/,"");
-      s=s.replace(/(请提供|请记住|请注意|作为一个?AI|我的知识是有限的?).*$/s,"");
+      s=s.replace(/(?:作为一个?AI|我的知识是有限的?).*$/s,"");
       s=s.replace(/[，,、；;：:]+$/,"");
       const lastPunn=s.search(/[。！？.!?]$/);
       if(lastPunn<0){ const cut=Math.max(s.lastIndexOf("。"),s.lastIndexOf("！"),s.lastIndexOf("？"),s.lastIndexOf("."));
@@ -750,36 +508,21 @@
         const q=__pending.splice(0);q.forEach(m=>window.EnginePost(m));
       }
     });
-    const state={asr:'idle',llm:'idle',emb:'idle',gpu:false,files:{},fileProgress:{},pendingModel:''};
+    const state={asr:'idle',llm:'idle',emb:'idle',files:{},fileProgress:{},pendingModel:''};
     const chatBox=$('chatBox');
     let currentAnswer='';
     const statusMap={asr:{badge:'asrBadge',btn:'asrBtn',bar:'asrProgress',wrap:'asrProgressWrap'},llm:{badge:'llmBadge',btn:'llmBtn',bar:'llmProgress',wrap:'llmProgressWrap'},emb:{badge:'embBadge',btn:'embBtn',bar:'embProgress',wrap:'embProgressWrap'}};
 
     worker.onmessage=(e)=>{
       const m=e.data;
-      if(m.type==='worker-ready'){ configure(); checkGPU(); return; }
+      if(m.type==='worker-ready'){ configure(); return; }
       if(m.type==='configured'){
-        const nm=m.sourceName||'模型源';
-        $('sourceTag').textContent='源：'+nm;
-        $('sourceTag').className='text-[9px] px-1.5 py-0.5 rounded-full '+(m.local?'bg-green-50 text-green-600':'bg-blue-50 text-[#165DFF]');
-        if(m.local){
-          $('downloadInfo').textContent='本地模型就绪，全程离线（models/ 目录）';
-        }else{
-          let host=''; try{ host=new URL(m.host).host; }catch(_){ host=m.host||''; }
-          $('downloadInfo').textContent=nm+'（'+host+'）已就绪'+(m.fallback&&m.fallback.length?'，失败自动切换：'+m.fallback.join(' → '):'');
-        }
         if(m.urls){
           const u=m.urls;
           const row=(k,t)=>'<div class="flex items-start gap-1"><span class="w-8 flex-shrink-0 text-gray-400">'+t+'</span><a href="'+u[k]+'" target="_blank" rel="noopener" class="text-[#165DFF] hover:underline break-all">'+u[k]+'</a></div>';
           $('modelUrls').innerHTML=row('asr','识别')+row('llm','问答')+row('emb','向量');
           $('modelUrls').classList.remove('hidden');
         }
-        return;
-      }
-      if(m.type==='source-tested'){
-        const nm=m.name||m.host||'当前源';
-        $('downloadInfo').textContent=nm+'：'+(m.ok?'可访问（HTTP '+m.status+'）':'不可访问（'+m.status+'）');
-        $('sourceTag').className='text-[9px] px-1.5 py-0.5 rounded-full '+(m.ok?'bg-green-50 text-green-600':'bg-red-50 text-red-600');
         return;
       }
       if(m.type==='local-checked'){
@@ -795,12 +538,11 @@
             if(b){ b.textContent='本地缺失'; b.className='text-[9px] px-1.5 py-0.5 rounded-full bg-red-50 text-red-600'; }
           }
         });
-        if(miss.length) $('downloadInfo').textContent='本地缺少：'+miss.join('、')+'（可点下方链接下载，或切换联网源）';
+        $('checkStatus').textContent=miss.length?'自检：文件缺失':'自检：3/3 就绪';
+        if(miss.length) $('downloadInfo').textContent='本地缺少：'+miss.join('、')+'，请用配套脚本补齐本地文件';
         else {
-          const hiCount=['asr','llm','emb'].filter(k=>r[k]&&r[k].hi).length;
-          const nm=['asr','llm','emb'].map(k=>r[k]&&r[k].label).filter(Boolean).join(' / ');
-          $('downloadInfo').textContent='当前模型（'+nm+'）均已在本地就绪（全程离线）'
-            +(hiCount?'，其中 '+hiCount+' 个含高精度权重':'');
+          const nm=['asr','llm','emb'].map(k=>r[k].label).join(' / ');
+          $('downloadInfo').textContent='本地文件已就绪：'+nm;
         }
         return;
       }
@@ -814,16 +556,16 @@
         $(s.bar).style.width=(t?pct+'%':'35%')+'%';
         // 部分源（如魔搭）可能不回 content-length，此时显示已下载体积而非百分比
         $('downloadInfo').textContent=t
-          ? '下载 '+m.file.split('/').pop()+' '+pct+'%'
-          : '下载 '+m.file.split('/').pop()+' 已获取 '+(l/1048576).toFixed(1)+' MB';
+          ? '读取 '+m.file.split('/').pop()+' '+pct+'%'
+          : '读取 '+m.file.split('/').pop()+' 已获取 '+(l/1048576).toFixed(1)+' MB';
         return;
       }
       if(m.type==='note'){$('downloadInfo').textContent=m.message;return;}
       ['asr','llm','emb'].forEach(k=>{
         if(m.type===k+'-ready'){
-          state[k]='ready';state.gpu=m.gpu;
+          state[k]='ready';
           const s=statusMap[k];$(s.badge).className='text-[9px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-600';$(s.badge).textContent='已就绪';
-          $(s.btn).disabled=true;$(s.btn).textContent='已加载';$(s.bar).style.width='100%';updateEngine();
+          $(s.btn).disabled=true;$(s.btn).textContent='已加载';$(s.bar).style.width='100%';
           $('downloadInfo').textContent=k.toUpperCase()+' 模型已就绪';
         }
       });
@@ -849,22 +591,17 @@
     // 引擎异常兜底（主线程模式，仅作最后防线，正常不会触发）
     worker.onerror=(err)=>{
       const detail=(err&&err.message)?err.message:'推理引擎异常';
-      $('downloadInfo').textContent='引擎提示：'+detail+'。可点击下方模型链接手动下载后重试。';
+      $('downloadInfo').textContent='引擎提示：'+detail+'。请检查本地模型文件后重试。';
     };
 
-    function updateEngine(){$('engineText').innerHTML='<i class="fas fa-circle text-[8px] mr-1" style="color:'+(state.gpu?'#00B42A':'#165DFF')+'"></i>'+(state.gpu?'WebGPU':'WASM');}
     function updateKBStat(){const n=Object.values(state.files).reduce((a,b)=>a+b.chunks,0);$('kbStat').innerHTML='<i class="fas fa-book text-[#165DFF] mr-1"></i>知识库 '+n+' 块';}
-    async function checkGPU(){state.gpu=false;updateEngine();} // 强制 WASM（见 startLoad 注释）
-    function onSourceChange(){
-      $('customHostWrap').classList.toggle('hidden',$('sourceSelect').value!=='custom');
-      configure(); // 立即应用新源，界面上的下载链接随之更新
-    }
     function configure(){
-      worker.postMessage({type:'config',source:$('sourceSelect').value,customHost:$('customHost').value,
+      worker.postMessage({type:'config',
         models:{asr:$('asrModel').value,llm:$('llmModel').value,emb:$('embModel').value},
         precision:$('precisionSelect').value});
     }
     function onModelChange(kind){
+      $('checkStatus').textContent='待自检';
       const sel=$(kind+'Model');
       const label=sel.selectedOptions[0].textContent;
       const s=statusMap[kind];
@@ -875,36 +612,20 @@
       $(s.btn).innerHTML='<i class="fas fa-download mr-1"></i>加载';
       $(s.wrap).classList.add('hidden');
       if(kind==='emb'&&Object.values(state.files).some(f=>f.chunks>0)){
-        $('downloadInfo').textContent='已切换向量模型为 '+label+'，知识库需重新建立索引';
+        state.files={};renderFileList();$('fileInput').value='';
+        $('fileList').textContent='向量配置已切换，请重新上传文件建立索引。';
+        $('downloadInfo').textContent='已切换向量模型为 '+label+'，请重新上传文件建立索引';
       }else{
         $('downloadInfo').textContent='已切换为 '+label+'，点击「加载」生效';
       }
-      configure();
-    }
-    function copyLinks(){
-      const links=[].slice.call(document.querySelectorAll('#modelUrls a')).map(a=>a.href).join('\n');
-      const done=()=>{$('downloadInfo').textContent='已复制 '+document.querySelectorAll('#modelUrls a').length+' 个模型下载链接';};
-      if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(links).then(done).catch(()=>{$('downloadInfo').textContent='复制失败，请手动选择链接';});
-      else { const ta=document.createElement('textarea');ta.value=links;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){$('downloadInfo').textContent='复制失败，请手动选择链接';}ta.remove(); }
-    }
-    function testSource(){
-      configure();
-      setTimeout(()=>worker.postMessage({type:'test-source'}),50);
+      configure();checkLocal();
     }
     function checkLocal(){
       worker.postMessage({type:'check-local'});
     }
     function onPrecisionChange(){
-      const hi=$('precisionSelect').value==='high';
-      const hasHi={
-        asr:!!MODEL_CATALOG.asr[$('asrModel').value].hiFile,
-        llm:!!MODEL_CATALOG.llm[$('llmModel').value].hiFile,
-        emb:!!MODEL_CATALOG.emb[$('embModel').value].hiFile
-      };
-      const anyHi=hasHi.asr||hasHi.llm||hasHi.emb;
-      $('downloadInfo').textContent=hi
-        ?(anyHi?'高精度档：对含原始权重的模型启用高精度，其余模型自动用 q8，需重新加载':'当前所选模型均无高精度权重，将统一使用 q8')
-        :'快速档：使用量化权重（q8），需重新加载模型';
+      for (const kind of ['asr','llm','emb']) onModelChange(kind);
+      checkLocal();
     }
 
     function startLoad(kind){
@@ -912,9 +633,7 @@
       state[kind]='loading';
       const s=statusMap[kind];$(s.btn).disabled=true;$(s.btn).innerHTML='<i class="fas fa-spinner spin"></i>';
       $(s.badge).className='text-[9px] px-1.5 py-0.5 rounded-full bg-blue-50 text-[#165DFF]';$(s.badge).textContent='加载中';
-      // WebGPU 已禁用：本机无独立 GPU，且 WebGPU 所需 q4f16/q4 量化权重未下载到本地，
-      // 启用会导致每次加载回退到联网下载。强制走本地 WASM + q8（文件齐全、已验证）。
-      configure();worker.postMessage({type:({asr:'load-asr',llm:'load-llm',emb:'load-embed'})[kind],gpu:false,precision:$('precisionSelect').value});
+      configure();worker.postMessage({type:({asr:'load-asr',llm:'load-llm',emb:'load-embed'})[kind],precision:$('precisionSelect').value});
     }
     const loadASR=()=>startLoad('asr'),loadLLM=()=>startLoad('llm'),loadEmb=()=>startLoad('emb');
     function loadAll(){configure();['asr','llm','emb'].forEach((k,i)=>setTimeout(()=>startLoad(k),i*200));}
@@ -922,7 +641,7 @@
     /* ===== 文件解析与分块（主线程） ===== */
     async function parseFile(file){
       const ext=file.name.split('.').pop().toLowerCase();
-      if(['txt','md','csv','json','log','xml','html','htm','yaml','yml','js','py','java','cpp','sql','c','h','css'].includes(ext)) return await file.text();
+      if(ext==='txt') return await file.text();
       if(ext==='pdf'){
         const buf=await file.arrayBuffer();
         pdfjsLib.GlobalWorkerOptions.workerSrc='./lib/pdf.worker.min.js';
@@ -942,19 +661,16 @@
       throw new Error('不支持的格式：'+ext);
     }
     function chunkText(text,source,size=360,overlap=60){
-      let segs=text.split(/\n\s*\n+/).map(s=>s.trim()).filter(Boolean);
-      if(segs.length<=1) segs=text.split(/(?<=[。！？；.!?\n])/).map(s=>s.trim()).filter(Boolean);
-      const out=[];let cur='';
-      for(const s of segs){
-        if(cur.length+s.length>size){if(cur)out.push(cur);cur=cur.slice(-overlap)+s;}
-        else cur+=(cur?' ':'')+s;
+      const chars=Array.from(text.trim()), out=[];
+      for(let start=0; start<chars.length; start+=size-overlap){
+        out.push({text:chars.slice(start,start+size).join(''),source});
+        if(start+size>=chars.length) break;
       }
-      if(cur.trim())out.push(cur.trim());
-      return out.filter(c=>c.length>=8).map(c=>({text:c,source}));
+      return out;
     }
     async function handleFiles(files){
       const arr=Array.from(files);if(!arr.length)return;
-      if(state.emb!=='ready'){alert('请先加载向量模型（bge-small-zh）');return;}
+      if(state.emb!=='ready'){alert('请先加载向量模型');return;}
       $('kbProgressWrap').classList.remove('hidden');$('kbProgress').style.width='0%';$('kbProgressPct').textContent='0%';$('kbProgressText').textContent='解析文件中…';
       const allChunks=[];
       for(const f of arr){
@@ -967,12 +683,12 @@
         }catch(err){state.files[f.name]={chunks:0,error:err.message};renderFileList();}
       }
       if(!allChunks.length){$('kbProgressWrap').classList.add('hidden');$('downloadInfo').textContent='未从文件中提取到可索引文本';return;}
-      configure();worker.postMessage({type:'index-docs',chunks:allChunks});
+      $('fileInput').value='';configure();worker.postMessage({type:'index-docs',chunks:allChunks});
     }
     function renderFileList(){
       const box=$('fileList');box.innerHTML='';
       const entries=Object.entries(state.files);
-      if(!entries.length){box.innerHTML='<p class="text-[10px] text-gray-300 text-center py-2">尚未上传知识库文件</p>';return;}
+      if(!entries.length){updateKBStat();box.innerHTML='<p class="text-[10px] text-gray-300 text-center py-2">尚未上传知识库文件</p>';return;}
       entries.forEach(([name,info])=>{
         const d=document.createElement('div');d.className='flex items-center justify-between text-[10px] bg-gray-50 rounded px-2 py-1';
         const icon=name.toLowerCase().endsWith('.pdf')?'fa-file-pdf':name.toLowerCase().endsWith('.docx')?'fa-file-word':name.toLowerCase().endsWith('.xlsx')?'fa-file-excel':'fa-file-alt';
@@ -1016,7 +732,7 @@
       if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('当前浏览器不支持麦克风采集，请在 localhost 或 HTTPS 下使用');return;}
       try{
         // 关键：关闭 autoGainControl（与浏览器AGC叠加会削波失真）；保留基础降噪与回声消除
-        mediaStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false}});
+        mediaStream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:false}});
       }catch(err){
         alert('无法访问麦克风：'+err.message+'。请在地址栏允许麦克风权限，并确认使用 localhost 或 HTTPS 访问。');return;
       }
@@ -1152,7 +868,10 @@
       const t=btn?btn.getAttribute('data-answer'):currentAnswer;if(!t){alert('暂无答案');return;}
       if(!('speechSynthesis' in window)){alert('浏览器不支持语音合成');return;}
       window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';u.rate=1;
-      const vs=window.speechSynthesis.getVoices()||[];const v=vs.find(v=>/zh[-_]?CN/i.test(v.lang))||vs.find(v=>/zh/i.test(v.lang));if(v)u.voice=v;
+      const vs=window.speechSynthesis.getVoices().filter(v=>v.localService);
+      const v=vs.find(v=>/^zh[-_]CN/i.test(v.lang))||vs.find(v=>/^zh/i.test(v.lang));
+      if(!v){setStatus('未找到本地中文语音','bg-amber-50 text-amber-600');return;}
+      u.voice=v;
       window.speechSynthesis.speak(u);
     }
     function escHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
@@ -1168,7 +887,7 @@
     }
     /* 拖拽上传 */
     document.addEventListener('DOMContentLoaded',()=>{
-      configure();checkGPU();checkLocal();
+      configure();checkLocal();
       if(location.protocol==='file:'){
         const w=$('protoWarn');
         w.classList.remove('hidden');

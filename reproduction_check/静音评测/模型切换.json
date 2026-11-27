@@ -1,0 +1,82 @@
+{
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 11523
+  },
+  "errors": [],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen2.5-1.5B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 2179.6549999713898
+    },
+    "llm": {
+      "type": "llm-ready",
+      "ts": 5949.100000023842
+    },
+    "emb": {
+      "type": "emb-ready",
+      "ts": 6039.110000014305
+    },
+    "environment": {
+      "isolated": true,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "model": "qwen25_15b"
+    },
+    "index": {
+      "type": "index-done",
+      "added": 4,
+      "total": 4,
+      "ts": 6596.725000023842
+    },
+    "chunks": {
+      "lengths": [
+        360,
+        360,
+        100
+      ],
+      "overlap": true
+    },
+    "tiny/qwen3_06b/base/fast": {
+      "states": [
+        "ready",
+        "ready",
+        "ready"
+      ],
+      "errors": [],
+      "reindex": "向量配置已切换，请重新上传文件建立索引。"
+    },
+    "small/qwen3_17b/small/fast": {
+      "states": [
+        "ready",
+        "idle",
+        "loading"
+      ],
+      "errors": [
+        {
+          "type": "error",
+          "stage": "load-llm",
+          "message": "3230417120",
+          "ts": 12980.555000007153
+        }
+      ],
+      "reindex": "向量配置已切换，请重新上传文件建立索引。"
+    }
+  },
+  "failure": "Error: 3230417120\n    at run (D:\\deep_learning_basics_project\\version1\\reproduction_check\\verify.cjs:211:40)"
+}

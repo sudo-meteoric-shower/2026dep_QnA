@@ -1,19 +1,28 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const {spawn} = require('node:child_process');
+const {spawn,execFileSync} = require('node:child_process');
 const runDir = path.resolve(__dirname);
 const app = path.join(runDir, '..', 'voice_qa_local');
+const high=process.argv.includes('--high');
+const matrix=process.argv.includes('--matrix');
+const audit=matrix || process.argv.includes('--audit');
+const auditDir=path.join(runDir,'静音评测');
+const resultFile=path.join(auditDir,matrix?'模型切换.json':high?'高精度.json':'实测.json');
+const gpuMemory=execFileSync('nvidia-smi',['--query-gpu=memory.free','--format=csv,noheader,nounits'],{encoding:'utf8',windowsHide:true}).trim();
+const freeRam=require('node:os').freemem();
+console.log('启动前可用资源',gpuMemory+' MiB 显存',Math.round(freeRam/2**20)+' MiB 内存');
+if(Number(gpuMemory)<512 || freeRam<7*2**30) throw new Error('可用资源不足，本轮未启动模型');
 const profile = fs.mkdtempSync(path.join(runDir, 'edge-profile-'));
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const shortVoiceRun = process.argv.includes('--short-voice');
 const classroomVoiceRun = process.argv.includes('--classroom-voice');
 const voiceOnly = shortVoiceRun || classroomVoiceRun;
-const fixture = classroomVoiceRun ? 'voice_classroom.wav' : shortVoiceRun ? 'voice_short.wav' : 'voice_fixture.wav';
+const fixture = audit || classroomVoiceRun ? 'voice_classroom.wav' : shortVoiceRun ? 'voice_short.wav' : 'voice_fixture.wav';
 const hostname = '127.0.0.1';
 const url = 'http://' + hostname + ':8000/voice_qa_assistant_local.html';
-const summary = {errors: [], failedRequests: [], remoteRequests: [], checks: {}};
+const summary = {resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
 const edgeArgs = [
-  '--headless=new', '--window-size=1450,950', '--remote-debugging-port=0', '--user-data-dir=' + profile,
+  '--headless=new','--mute-audio','--disable-gpu', '--window-size=1450,950', '--remote-debugging-port=0', '--user-data-dir=' + profile,
   '--no-first-run', '--disable-background-networking', '--disable-component-update',
   '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1, EXCLUDE localhost',
   '--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream',
@@ -98,13 +107,23 @@ async function collectAnswer(label) {
   assert(result.text && !result.text.includes('模型未返回有效内容'), label + ' returned no usable answer');
   return result;
 }
+function getLocal(url){
+  return new Promise((resolve,reject)=>{
+    require('node:http').get(url,res=>{
+      const parts=[];
+      res.on('data',part=>parts.push(part));
+      res.on('end',()=>resolve({ok:res.statusCode===200,body:Buffer.concat(parts).toString('utf8')}));
+      res.on('error',reject);
+    }).on('error',reject);
+  });
+}
 async function run() {
-  await poll(async () => {try{return (await fetch(url)).ok;} catch {return false;}},15000,'HTTP');
+  await poll(async () => {try{return (await getLocal(url)).ok;} catch {return false;}},15000,'HTTP');
   const debugFile = path.join(profile,'DevToolsActivePort');
   const port = await poll(() => {
     try {return fs.readFileSync(debugFile,'utf8').split(/\s/)[0];} catch {return null;}
   },20000,'Edge remote debug port');
-  const target = (await (await fetch('http://' + hostname + ':' + port + '/json/list')).json()).find(t => t.type === 'page');
+  const target = JSON.parse((await getLocal('http://' + hostname + ':' + port + '/json/list')).body).find(t => t.type === 'page');
   ws = new WebSocket(target.webSocketDebuggerUrl);
   await new Promise((resolve,reject) => {ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
   const requests = new Map();
@@ -115,6 +134,8 @@ async function run() {
       summary.errors.push(event.params.message);
       cdp('Page.handleJavaScriptDialog',{accept:true}).catch(e => summary.errors.push(e.message));
     }
+    if (event.method === 'Runtime.consoleAPICalled' && event.params.type === 'error')
+      summary.errors.push(event.params.args.map(a=>a.value||a.description).join(' '));
     if (event.method === 'Runtime.exceptionThrown') summary.errors.push(event.params.exceptionDetails.exception?.description || event.params.exceptionDetails.text);
     if (event.method === 'Log.entryAdded' && event.params.entry.level === 'error')
       summary.errors.push(event.params.entry.text + (event.params.entry.url ? ' ' + event.params.entry.url : ''));
@@ -132,7 +153,7 @@ async function run() {
   await cdp('Network.enable');
   await cdp('Runtime.enable');
   await cdp('Log.enable');
-  await cdp('Page.addScriptToEvaluateOnNewDocument',{source:expression(() => {
+  await cdp('Page.addScriptToEvaluateOnNewDocument',{source:expression(silent => {
     window.testEvents = [];
     window.testSpeech = [];
     window.addEventListener('engine-msg', e => {
@@ -144,9 +165,11 @@ async function run() {
     speechSynthesis.speak = utterance => {
       window.testSpeech.push({event:'queued',lang:utterance.lang,voice:utterance.voice?.name,text:utterance.text});
       for (const event of ['start','end','error']) utterance.addEventListener(event,e => window.testSpeech.push({event,error:e.error}));
+      if (silent) return;
+      utterance.volume=0;
       return speak(utterance);
     };
-  })});
+  },audit)});
   await cdp('Page.navigate',{url});
   await poll(async () => {
     try {return await evaluate('document.readyState === "complete" && typeof window.EnginePost === "function"');}
@@ -155,8 +178,61 @@ async function run() {
   const selfCheck = await waitEvent('local-checked');
   log('selfCheck',selfCheck.result);
   assert(Object.values(selfCheck.result).every(v=>v.ok),'local default weights missing');
+  if(high) await evaluate("document.getElementById('precisionSelect').value='high';onPrecisionChange()");
   await button('button[onclick="loadAll()"]');
   for (const kind of ['asr','llm','emb']) log(kind, await waitEvent(kind+'-ready'));
+  if (audit) {
+    log('environment',await evaluate('({isolated:crossOriginIsolated, browser:navigator.userAgent, model:document.querySelector("#llmModel").value})'));
+    const {root}=await cdp('DOM.getDocument');
+    const {nodeId}=await cdp('DOM.querySelector',{nodeId:root.nodeId,selector:'#fileInput'});
+    const files=[path.join(runDir,'课堂复现测试资料.txt'),...['记录器说明.docx','采样参数.xlsx','校准卡.pdf'].map(f=>path.join(auditDir,f))];
+    await cdp('DOM.setFileInputFiles',{nodeId,files});
+    log('index',await waitEvent('index-done'));
+    assert(summary.checks.index.added===4,'四种格式未全部建库');
+    const chunks=await evaluate("chunkText('甲'.repeat(300)+'乙'.repeat(60)+'丙'.repeat(340),'测试').map(x=>x.text)");
+    log('chunks',{lengths:chunks.map(c=>c.length),overlap:chunks[0].slice(-60)===chunks[1].slice(0,60)});
+    if(matrix){
+      for(const [asr,llm,emb,precision] of [
+        ['tiny','qwen3_06b','base','fast'],['small','qwen3_17b','small','fast'],
+        ['base','qwen25_15b','base','high'],['tiny','qwen3_06b','small','high'],
+        ['small','qwen3_17b','small','high']]){
+        const selection={asr,llm,emb,precision};
+        await evaluate(expression(({asr,llm,emb,precision})=>{
+          window.testEvents.length=0;
+          for(const [id,val] of Object.entries({asrModel:asr,llmModel:llm,embModel:emb,precisionSelect:precision})){
+            const sel=document.getElementById(id);
+            if(sel.value!==val){sel.value=val;sel.dispatchEvent(new Event('change'));}
+          }
+          loadAll();
+        },selection));
+        await poll(async()=>await evaluate("window.testEvents.find(e=>e.type==='error') || (['asr','llm','emb'].every(k=>state[k]==='ready') && !window.testEvents.some(e=>e.type==='error'))"),120000,'模型切换');
+        const result=await evaluate("({states:[state.asr,state.llm,state.emb],errors:window.testEvents.filter(e=>e.type==='error'),reindex:document.querySelector('#fileList').textContent})");
+        log(Object.values(selection).join('/'), result);
+        if(result.errors.length) throw new Error(result.errors[0].message);
+      }
+      return;
+    }
+    const rubric=JSON.parse(fs.readFileSync(path.join(auditDir,'题目.json'),'utf8'));
+    for(const [key,question] of rubric){
+      await answer(key,question,key!=='general');
+      fs.writeFileSync(resultFile,JSON.stringify(summary,null,2));
+    }
+    await evaluate('window.testEvents.length=0;document.querySelector("#ragToggle").checked=false');
+    await button('#micBtn');
+    await pause(6500);
+    await evaluate('window.stopAt=performance.now()');
+    await button('#micBtn');
+    const transcript=await waitEvent('transcript');
+    log('transcript',transcript);
+    await collectAnswer('voice');
+    log('voiceMs',await evaluate('Math.round(window.testEvents.find(e=>e.type==="answer").ts-window.stopAt)'));
+    await button('button[title="播报最新回答"]');
+    log('speechCall',await evaluate('window.testSpeech'));
+    log('synthesisIntercepted',true);
+    const png=await cdp('Page.captureScreenshot',{format:'png'});
+    if(!high) fs.writeFileSync(path.join(app,'界面预览.png'),Buffer.from(png.data,'base64'));
+    return;
+  }
   const question = '青岚实验箱的校验代号是什么？';
   if (!voiceOnly) await answer('plainText','深度学习是什么？请用一句话回答。',false);
   const noRag = voiceOnly ? null : await answer('withoutRag',question,false);
@@ -200,11 +276,12 @@ async function run() {
   }
 }
 run().catch(e => {summary.failure=e.stack;console.error(e);process.exitCode=1;}).finally(async () => {
-  fs.writeFileSync(path.join(runDir,classroomVoiceRun ? 'classroom_voice.json' : shortVoiceRun ? 'voice_followup.json' : 'result.json'),JSON.stringify(summary,null,2)+'\n');
+  fs.writeFileSync(audit ? resultFile : path.join(runDir,classroomVoiceRun ? 'classroom_voice.json' : shortVoiceRun ? 'voice_followup.json' : 'result.json'),JSON.stringify(summary,null,2)+'\n');
   if (ws) {
+    await cdp('Browser.close').catch(()=>{});
     ws.close();
   }
   edge.kill();
   server.kill();
-  console.log('RESULT', JSON.stringify(summary));
+  console.log('结束',summary.failure||'完成');
 });
