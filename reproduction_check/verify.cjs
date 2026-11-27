@@ -16,6 +16,8 @@ if(questionId && !comparison) throw new Error('单题测试需要指定对照模
 const cdpTimeout=requestedModel==='qwen3_17b'?180000:60000;
 const switchAfterLoad=process.argv.includes('--switch-after-load');
 if(switchAfterLoad && (!comparison || !requestedModel)) throw new Error('切换测试需要指定对照模式和目标模型');
+const contextTrial=process.argv.includes('--context-trial');
+if(contextTrial && comparison!=='candidate') throw new Error('上下文试验需要本地候选页面');
 const holdout=process.argv.includes('--holdout');
 const fresh=process.argv.includes('--fresh');
 const resultTag=process.argv.find(arg=>arg.startsWith('--result-tag='))?.split('=')[1];
@@ -122,6 +124,7 @@ async function collectAnswer(label) {
     const deltas = window.testEvents.filter(e => e.type === 'answer-delta');
     return {deltas:deltas.length,firstMs:deltas.length ? Math.round(deltas[0].ts - window._t0) : null,
       totalMs:Math.round(window.testEvents.find(e => e.type === 'answer').ts - window._t0),
+      contextTrial:window.testEvents.find(e=>e.type==='context-trial'),
       raw: window.testEvents.find(e=>e.type==='raw-answer')?.text,
       sourceShown:[...document.querySelectorAll('details > summary')].some(el => el.textContent.includes('RAG 引用来源'))};
   }));
@@ -233,6 +236,7 @@ async function run() {
       assert(html.includes(marker),'找不到证据排序入口');
       html=html.replace(marker,'const ranked=KB.filter(k=>k.source===window.testExpectedSource).map');
     }
+    if(contextTrial) html=require('./verify_context_trial.cjs').instrument(html);
     const body=Buffer.from(html,'utf8').toString('base64');
     ws.addEventListener('message',({data})=>{
       const event=JSON.parse(data);
@@ -348,15 +352,25 @@ async function run() {
     const questionFile = fresh ? '新题题目.json' : holdout ? '留出题目.json' : '题目.json';
     const rubric=JSON.parse(fs.readFileSync(path.join(auditDir,questionFile),'utf8'));
     if(questionId) assert(rubric.some(([key])=>key===questionId),'本次题集中没有所选题目');
-    for(const [key,question,,expectedSource] of rubric){
+    for(const [index,[key,question,,expectedSource]] of rubric.entries()){
       if(questionId && key!==questionId) continue;
       if(switchAfterLoad && !questionId && key!=='charge') continue;
       if(comparison==='single'){
         if(!expectedSource) continue;
         await evaluate(expression(source=>{window.testExpectedSource=source;},expectedSource));
       }
-      await answer(key,question,key!=='general');
-      fs.writeFileSync(resultFile,JSON.stringify(summary,null,2));
+      if(contextTrial){
+        // 交替先测完整或精简片段，减少固定运行顺序带来的偏差。
+        const variants=index%2===0?['full','compact']:['compact','full'];
+        for(const variant of variants){
+          await evaluate(expression(compact=>{window.useCompactEvidence=compact;},variant==='compact'));
+          await answer(key+'-'+variant,question,key!=='general');
+          fs.writeFileSync(resultFile,JSON.stringify(summary,null,2));
+        }
+      }else{
+        await answer(key,question,key!=='general');
+        fs.writeFileSync(resultFile,JSON.stringify(summary,null,2));
+      }
     }
     if(comparison) return;
     await evaluate('window.testEvents.length=0;document.querySelector("#ragToggle").checked=false');
