@@ -1,0 +1,796 @@
+{
+  "comparison": "candidate",
+  "requestedThreads": "8",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 13205
+  },
+  "errors": [],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "fast"
+    },
+    "asr": {
+      "type": "asr-ready",
+      "ts": 2056.685000002384
+    },
+    "llm": {
+      "type": "llm-ready",
+      "ts": 5098.305000007153
+    },
+    "emb": {
+      "type": "emb-ready",
+      "ts": 5209.689999997616
+    },
+    "environment": {
+      "isolated": true,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "model": "qwen3_17b"
+    },
+    "index": {
+      "type": "index-done",
+      "added": 3,
+      "total": 3,
+      "ts": 5560.9800000190735
+    },
+    "chunks": {
+      "lengths": [
+        360,
+        360,
+        100
+      ],
+      "overlap": true
+    },
+    "new-lock": {
+      "deltas": 68,
+      "firstMs": 3589,
+      "totalMs": 57956,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 246,
+        "outputTokens": 80,
+        "evidence": "资料1（新题设备说明.txt）：雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。\n资料2（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。\n资料3（新题备用设备.txt）：备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。",
+        "wasmThreads": 8,
+        "ts": 63800.83500003815
+      },
+      "raw": "者\n\n根据提供的资料：\n\n1. **每次停机后**需要对管路进行连续冲洗，持续时间不少于二十五秒，之后关闭冲洗阀。\n2. **当监测到流量低于每分钟六升且连续八秒**时，控制器会锁定出液阀。\n\n因此，两个条件同时满足时才会锁定出液阀：\n- 每次停机后",
+      "sourceShown": true,
+      "text": "者根据提供的资料：1.每次停机后需要对管路进行连续冲洗，持续时间不少于二十五秒，之后关闭冲洗阀。2.当监测到流量低于每分钟六升且连续八秒时，控制器会锁定出液阀。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "新题设备说明.txt",
+          "score": 0.5940300698415352,
+          "text": "雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。"
+        },
+        {
+          "source": "新题巡检记录.txt",
+          "score": 0.4464747618519547,
+          "text": "在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。"
+        },
+        {
+          "source": "新题备用设备.txt",
+          "score": 0.42062643949761963,
+          "text": "备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。"
+        }
+      ]
+    },
+    "new-cycle": {
+      "deltas": 7,
+      "firstMs": 3372,
+      "totalMs": 9551,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 240,
+        "outputTokens": 10,
+        "evidence": "资料1（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。\n资料2（新题设备说明.txt）：雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。\n资料3（新题备用设备.txt）：备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。",
+        "wasmThreads": 8,
+        "ts": 73380.68999999762
+      },
+      "raw": "滤芯每隔48小时更换一次。",
+      "sourceShown": true,
+      "text": "滤芯每隔48小时更换一次。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "新题巡检记录.txt",
+          "score": 0.6431285330270465,
+          "text": "在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。"
+        },
+        {
+          "source": "新题设备说明.txt",
+          "score": 0.495212827544921,
+          "text": "雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。"
+        },
+        {
+          "source": "新题备用设备.txt",
+          "score": 0.3953520799568024,
+          "text": "备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。"
+        }
+      ]
+    }
+  },
+  "runtimeResources": {
+    "samples": [
+      {
+        "elapsedMs": 1050,
+        "cpuPercent": 39,
+        "freeRamMiB": 12828,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 2059,
+        "cpuPercent": 26,
+        "freeRamMiB": 12396,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 3061,
+        "cpuPercent": 26,
+        "freeRamMiB": 11674,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 4060,
+        "cpuPercent": 32,
+        "freeRamMiB": 10368,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 5062,
+        "cpuPercent": 21,
+        "freeRamMiB": 7265,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 6065,
+        "cpuPercent": 21,
+        "freeRamMiB": 6546,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 7074,
+        "cpuPercent": 20,
+        "freeRamMiB": 6538,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 8085,
+        "cpuPercent": 42,
+        "freeRamMiB": 6569,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 9094,
+        "cpuPercent": 41,
+        "freeRamMiB": 6624,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 10109,
+        "cpuPercent": 33,
+        "freeRamMiB": 6555,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 11124,
+        "cpuPercent": 22,
+        "freeRamMiB": 6506,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 12124,
+        "cpuPercent": 22,
+        "freeRamMiB": 6417,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 13124,
+        "cpuPercent": 18,
+        "freeRamMiB": 6396,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 14136,
+        "cpuPercent": 19,
+        "freeRamMiB": 6360,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 15144,
+        "cpuPercent": 16,
+        "freeRamMiB": 6243,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 16152,
+        "cpuPercent": 14,
+        "freeRamMiB": 8393,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 17159,
+        "cpuPercent": 18,
+        "freeRamMiB": 8278,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 18164,
+        "cpuPercent": 10,
+        "freeRamMiB": 8242,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 19173,
+        "cpuPercent": 14,
+        "freeRamMiB": 8135,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 20182,
+        "cpuPercent": 11,
+        "freeRamMiB": 8071,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 21192,
+        "cpuPercent": 15,
+        "freeRamMiB": 8105,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 22204,
+        "cpuPercent": 11,
+        "freeRamMiB": 8626,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 23214,
+        "cpuPercent": 14,
+        "freeRamMiB": 8521,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 24222,
+        "cpuPercent": 12,
+        "freeRamMiB": 8457,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 25232,
+        "cpuPercent": 19,
+        "freeRamMiB": 8329,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 26236,
+        "cpuPercent": 19,
+        "freeRamMiB": 8300,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 27240,
+        "cpuPercent": 16,
+        "freeRamMiB": 8265,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 28246,
+        "cpuPercent": 13,
+        "freeRamMiB": 8667,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 29252,
+        "cpuPercent": 12,
+        "freeRamMiB": 8626,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 30262,
+        "cpuPercent": 14,
+        "freeRamMiB": 8504,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 31272,
+        "cpuPercent": 12,
+        "freeRamMiB": 8494,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 32280,
+        "cpuPercent": 15,
+        "freeRamMiB": 8379,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 33289,
+        "cpuPercent": 13,
+        "freeRamMiB": 8327,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 34300,
+        "cpuPercent": 13,
+        "freeRamMiB": 8742,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 35310,
+        "cpuPercent": 12,
+        "freeRamMiB": 8685,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 36319,
+        "cpuPercent": 13,
+        "freeRamMiB": 8567,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 37326,
+        "cpuPercent": 11,
+        "freeRamMiB": 8506,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 38335,
+        "cpuPercent": 14,
+        "freeRamMiB": 8379,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 39344,
+        "cpuPercent": 11,
+        "freeRamMiB": 8314,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 40350,
+        "cpuPercent": 14,
+        "freeRamMiB": 8687,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 41357,
+        "cpuPercent": 13,
+        "freeRamMiB": 8621,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 42365,
+        "cpuPercent": 18,
+        "freeRamMiB": 8465,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 43374,
+        "cpuPercent": 14,
+        "freeRamMiB": 8395,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 44389,
+        "cpuPercent": 17,
+        "freeRamMiB": 8225,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 45398,
+        "cpuPercent": 15,
+        "freeRamMiB": 8712,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 46403,
+        "cpuPercent": 11,
+        "freeRamMiB": 8652,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 47409,
+        "cpuPercent": 15,
+        "freeRamMiB": 8523,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 48421,
+        "cpuPercent": 14,
+        "freeRamMiB": 8456,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 49425,
+        "cpuPercent": 17,
+        "freeRamMiB": 8333,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 50430,
+        "cpuPercent": 12,
+        "freeRamMiB": 8283,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 51437,
+        "cpuPercent": 14,
+        "freeRamMiB": 8673,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 52449,
+        "cpuPercent": 12,
+        "freeRamMiB": 8606,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 53458,
+        "cpuPercent": 17,
+        "freeRamMiB": 8477,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 54467,
+        "cpuPercent": 11,
+        "freeRamMiB": 8414,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 55477,
+        "cpuPercent": 17,
+        "freeRamMiB": 8276,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 56480,
+        "cpuPercent": 10,
+        "freeRamMiB": 8736,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 57480,
+        "cpuPercent": 16,
+        "freeRamMiB": 8653,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 58481,
+        "cpuPercent": 10,
+        "freeRamMiB": 8532,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 59482,
+        "cpuPercent": 15,
+        "freeRamMiB": 8468,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 60486,
+        "cpuPercent": 16,
+        "freeRamMiB": 8329,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 61494,
+        "cpuPercent": 15,
+        "freeRamMiB": 8271,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 62500,
+        "cpuPercent": 12,
+        "freeRamMiB": 8691,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 63506,
+        "cpuPercent": 15,
+        "freeRamMiB": 8550,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 64514,
+        "cpuPercent": 16,
+        "freeRamMiB": 8526,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 65523,
+        "cpuPercent": 27,
+        "freeRamMiB": 8477,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 66531,
+        "cpuPercent": 34,
+        "freeRamMiB": 8521,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 67544,
+        "cpuPercent": 34,
+        "freeRamMiB": 8522,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 68555,
+        "cpuPercent": 16,
+        "freeRamMiB": 8770,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 69560,
+        "cpuPercent": 12,
+        "freeRamMiB": 8707,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 70568,
+        "cpuPercent": 15,
+        "freeRamMiB": 8611,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 71570,
+        "cpuPercent": 15,
+        "freeRamMiB": 8540,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 72575,
+        "cpuPercent": 17,
+        "freeRamMiB": 8438,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      },
+      {
+        "elapsedMs": 73579,
+        "cpuPercent": 16,
+        "freeRamMiB": 8375,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 54
+      }
+    ]
+  }
+}
