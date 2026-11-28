@@ -1,0 +1,552 @@
+{
+  "comparison": "candidate",
+  "requestedThreads": "4",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7949,
+    "freeRamMiB": 11525
+  },
+  "errors": [],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_06b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "precision": "fast"
+    },
+    "asr": {
+      "type": "asr-ready",
+      "backend": "wasm",
+      "ts": 2203.324999988079
+    },
+    "llm": {
+      "type": "llm-ready",
+      "backend": "webgpu",
+      "dtype": "q4f16",
+      "vendor": "nvidia",
+      "architecture": "lovelace",
+      "description": "",
+      "ts": 5717.490000009537
+    },
+    "emb": {
+      "type": "emb-ready",
+      "backend": "wasm",
+      "ts": 5876.834999978542
+    },
+    "environment": {
+      "isolated": true,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "model": "qwen3_06b"
+    },
+    "index": {
+      "type": "index-done",
+      "added": 4,
+      "total": 4,
+      "ts": 6507.485000014305
+    },
+    "chunks": {
+      "lengths": [
+        360,
+        360,
+        100
+      ],
+      "overlap": true
+    },
+    "code": {
+      "deltas": 4,
+      "firstMs": 1506,
+      "totalMs": 1990,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 187,
+        "outputTokens": 5,
+        "evidence": "资料1（课堂复现测试资料.txt）：青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。\n资料2（采样参数.xlsx）：[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80\n资料3（校准卡.pdf）：Calibration card: device ID NX-42.",
+        "wasmThreads": 4,
+        "ts": 8511.305000007153
+      },
+      "gpuSubmissions": 211,
+      "raw": "松柏三七",
+      "sourceShown": true,
+      "text": "松柏三七",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.7454544775027475,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.43217794298602386,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        },
+        {
+          "source": "校准卡.pdf",
+          "score": 0.38376738927242454,
+          "text": "Calibration card: device ID NX-42."
+        }
+      ]
+    },
+    "charge": {
+      "deltas": 19,
+      "firstMs": 439,
+      "totalMs": 1028,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 225,
+        "outputTokens": 24,
+        "evidence": "资料1（课堂复现测试资料.txt）：青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。\n资料2（记录器说明.docx）：记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。\n资料3（采样参数.xlsx）：[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80",
+        "wasmThreads": 4,
+        "ts": 9825.865000009537
+      },
+      "gpuSubmissions": 1009,
+      "raw": "根据资料1中的信息，“实验箱在使用之前需要充电十五分钟。”因此答案为：十五分钟。",
+      "sourceShown": true,
+      "text": "根据资料1中的信息，“实验箱在使用之前需要充电十五分钟。”因此答案为：十五分钟。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.7457827053137477,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "记录器说明.docx",
+          "score": 0.4971572065199181,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.4387693775936935,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        }
+      ]
+    },
+    "reserve": {
+      "deltas": 64,
+      "firstMs": 417,
+      "totalMs": 2115,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 229,
+        "outputTokens": 71,
+        "evidence": "资料1（记录器说明.docx）：记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。\n资料2（课堂复现测试资料.txt）：青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。\n资料3（采样参数.xlsx）：[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80",
+        "wasmThreads": 4,
+        "ts": 12104.919999957085
+      },
+      "gpuSubmissions": 2983,
+      "raw": "根据资料1，当供电电压连续五秒低于九伏时进入备用模式，同时只有连续三秒达到或超过十一伏时才会退出备用模式。因此，在电压低于九伏且持续时间不足五秒的情况下，记录器会进入备用模式。具体时间为电压低于九伏且持续时间不足五秒的时间段。",
+      "sourceShown": true,
+      "text": "根据资料1，当供电电压连续五秒低于九伏时进入备用模式，同时只有连续三秒达到或超过十一伏时才会退出备用模式。因此，在电压低于九伏且持续时间不足五秒的情况下，记录器会进入备用模式。具体时间为电压低于九伏且持续时间不足五秒的时间段。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "记录器说明.docx",
+          "score": 0.7033062380963453,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        },
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.5590189973947064,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.5388346662957036,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        }
+      ]
+    },
+    "restore": {
+      "deltas": 63,
+      "firstMs": 434,
+      "totalMs": 2225,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 233,
+        "outputTokens": 74,
+        "evidence": "资料1（记录器说明.docx）：记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。\n资料2（课堂复现测试资料.txt）：青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。\n资料3（采样参数.xlsx）：[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80",
+        "wasmThreads": 4,
+        "ts": 14469.254999995232
+      },
+      "gpuSubmissions": 3109,
+      "raw": "根据资料1，当电压连续五秒低于九伏时进入备用模式，而只有连续三秒达到或超过十一伏时才会退出备用模式。因此，在电压恢复到正常水平后，若满足连续三秒的要求则会退出备用模式。具体答案为：电压恢复至9V时退出备用模式需保持至少3秒。",
+      "sourceShown": true,
+      "text": "根据资料1，当电压连续五秒低于九伏时进入备用模式，而只有连续三秒达到或超过十一伏时才会退出备用模式。因此，在电压恢复到正常水平后，若满足连续三秒的要求则会退出备用模式。具体答案为：电压恢复至9V时退出备用模式需保持至少3秒。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "记录器说明.docx",
+          "score": 0.7203924476038697,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        },
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.549097893286183,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.508705137395143,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        }
+      ]
+    },
+    "rate": {
+      "deltas": 13,
+      "firstMs": 395,
+      "totalMs": 814,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 224,
+        "outputTokens": 20,
+        "evidence": "资料1（采样参数.xlsx）：[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80\n资料2（记录器说明.docx）：记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。\n资料3（课堂复现测试资料.txt）：青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。",
+        "wasmThreads": 4,
+        "ts": 15335.319999992847
+      },
+      "gpuSubmissions": 841,
+      "raw": "根据资料1中的信息，“温度”通道的采样率为20次/秒。",
+      "sourceShown": true,
+      "text": "根据资料1中的信息，“温度”通道的采样率为20次/秒。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.6700587454883025,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        },
+        {
+          "source": "记录器说明.docx",
+          "score": 0.47060246021210733,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        },
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.46516046922706333,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        }
+      ]
+    },
+    "calc": {
+      "deltas": 28,
+      "firstMs": 404,
+      "totalMs": 1038,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 235,
+        "outputTokens": 36,
+        "evidence": "资料1（采样参数.xlsx）：[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80\n资料2（记录器说明.docx）：记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。\n资料3（课堂复现测试资料.txt）：青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。",
+        "wasmThreads": 4,
+        "ts": 16704.03499996662
+      },
+      "gpuSubmissions": 1513,
+      "raw": "根据表格信息，压力通道的采样率为50，并且按照表中的要求连续记录了3秒钟。因此，能获得的压力样本数为3个。",
+      "sourceShown": true,
+      "text": "根据表格信息，压力通道的采样率为50，并且按照表中的要求连续记录了3秒钟。因此，能获得的压力样本数为3个。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.6995611087142377,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        },
+        {
+          "source": "记录器说明.docx",
+          "score": 0.5740286704067852,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        },
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.5197385606864604,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        }
+      ]
+    },
+    "pdf": {
+      "deltas": 1,
+      "firstMs": 439,
+      "totalMs": 441,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 201,
+        "outputTokens": 5,
+        "evidence": "资料1（课堂复现测试资料.txt）：青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。\n资料2（校准卡.pdf）：Calibration card: device ID NX-42.\n资料3（记录器说明.docx）：记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。",
+        "wasmThreads": 4,
+        "ts": 17248.289999961853
+      },
+      "gpuSubmissions": 211,
+      "raw": "NX-42",
+      "sourceShown": true,
+      "text": "NX-42",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.5199646720947169,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "校准卡.pdf",
+          "score": 0.5199325452130106,
+          "text": "Calibration card: device ID NX-42."
+        },
+        {
+          "source": "记录器说明.docx",
+          "score": 0.47589708878907944,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        }
+      ]
+    },
+    "absent": {
+      "deltas": 28,
+      "firstMs": 392,
+      "totalMs": 1003,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 225,
+        "outputTokens": 34,
+        "evidence": "资料1（课堂复现测试资料.txt）：青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。\n资料2（采样参数.xlsx）：[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80\n资料3（记录器说明.docx）：记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。",
+        "wasmThreads": 4,
+        "ts": 18556.70499998331
+      },
+      "gpuSubmissions": 1429,
+      "raw": "根据资料1中的信息，“青岚实验箱用于本地语音问答的模拟验收”，但并未提到具体的保修期限信息。因此，无法确定具体答案。",
+      "sourceShown": true,
+      "text": "根据资料1中的信息，“青岚实验箱用于本地语音问答的模拟验收”，但并未提到具体的保修期限信息。因此，无法确定具体答案。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "课堂复现测试资料.txt",
+          "score": 0.6747912388244797,
+          "text": "青岚实验箱用于本地语音问答的模拟验收。青岚实验箱的校验代号是松柏三七。实验箱在使用之前需要充电十五分钟。"
+        },
+        {
+          "source": "采样参数.xlsx",
+          "score": 0.42473966207960173,
+          "text": "[工作表 采样参数]\n通道,采样率（次/秒）\n温度,20\n压力,50\n位移,80"
+        },
+        {
+          "source": "记录器说明.docx",
+          "score": 0.40974012317222364,
+          "text": "记录器电源管理。工作时，如果供电电压连续五秒低于九伏，则进入备用模式。备用期间，只有供电电压连续三秒达到或超过十一伏才退出备用模式。短暂的电压波动不触发切换。"
+        }
+      ]
+    },
+    "general": {
+      "deltas": 12,
+      "firstMs": 165,
+      "totalMs": 595,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 92,
+        "outputTokens": 14,
+        "evidence": "",
+        "wasmThreads": 4,
+        "ts": 19294.714999973774
+      },
+      "gpuSubmissions": 589,
+      "raw": "语音识别的输入是声音信号，输出是语音文本。",
+      "sourceShown": true,
+      "text": "语音识别的输入是声音信号，输出是语音文本。",
+      "usedRag": false,
+      "sources": []
+    }
+  },
+  "runtimeWarnings": [
+    "\u001b[0;93m2026-11-28 17:31:16.455364 [W:onnxruntime:, session_state.cc:1280 VerifyEachNodeIsAssignedToAnEp] Some nodes were not assigned to the preferred execution providers which may or may not have an negative impact on performance. e.g. ORT explicitly assigns shape related ops to CPU to improve perf.\u001b[m",
+    "\u001b[0;93m2026-11-28 17:31:16.456729 [W:onnxruntime:, session_state.cc:1282 VerifyEachNodeIsAssignedToAnEp] Rerunning with verbose output on a non-minimal build will show node assignments.\u001b[m"
+  ],
+  "runtimeResources": {
+    "samples": [
+      {
+        "elapsedMs": 1048,
+        "cpuPercent": 33,
+        "freeRamMiB": 12178,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 1,
+        "gpuTempC": 68
+      },
+      {
+        "elapsedMs": 2058,
+        "cpuPercent": 24,
+        "freeRamMiB": 11687,
+        "gpuUsedMiB": 115,
+        "gpuFreeMiB": 7843,
+        "gpuPercent": 1,
+        "gpuTempC": 67
+      },
+      {
+        "elapsedMs": 3058,
+        "cpuPercent": 21,
+        "freeRamMiB": 11491,
+        "gpuUsedMiB": 114,
+        "gpuFreeMiB": 7844,
+        "gpuPercent": 10,
+        "gpuTempC": 65
+      },
+      {
+        "elapsedMs": 4061,
+        "cpuPercent": 34,
+        "freeRamMiB": 10802,
+        "gpuUsedMiB": 121,
+        "gpuFreeMiB": 7837,
+        "gpuPercent": 11,
+        "gpuTempC": 65
+      },
+      {
+        "elapsedMs": 5061,
+        "cpuPercent": 21,
+        "freeRamMiB": 9195,
+        "gpuUsedMiB": 105,
+        "gpuFreeMiB": 7853,
+        "gpuPercent": 11,
+        "gpuTempC": 65
+      },
+      {
+        "elapsedMs": 6072,
+        "cpuPercent": 17,
+        "freeRamMiB": 7881,
+        "gpuUsedMiB": 61,
+        "gpuFreeMiB": 7897,
+        "gpuPercent": 10,
+        "gpuTempC": 65
+      },
+      {
+        "elapsedMs": 7076,
+        "cpuPercent": 27,
+        "freeRamMiB": 8036,
+        "gpuUsedMiB": 390,
+        "gpuFreeMiB": 7568,
+        "gpuPercent": 70,
+        "gpuTempC": 64
+      },
+      {
+        "elapsedMs": 8087,
+        "cpuPercent": 21,
+        "freeRamMiB": 7987,
+        "gpuUsedMiB": 1034,
+        "gpuFreeMiB": 6924,
+        "gpuPercent": 2,
+        "gpuTempC": 64
+      },
+      {
+        "elapsedMs": 9096,
+        "cpuPercent": 21,
+        "freeRamMiB": 7629,
+        "gpuUsedMiB": 1128,
+        "gpuFreeMiB": 6830,
+        "gpuPercent": 100,
+        "gpuTempC": 67
+      },
+      {
+        "elapsedMs": 10106,
+        "cpuPercent": 21,
+        "freeRamMiB": 7474,
+        "gpuUsedMiB": 1284,
+        "gpuFreeMiB": 6674,
+        "gpuPercent": 14,
+        "gpuTempC": 65
+      },
+      {
+        "elapsedMs": 11110,
+        "cpuPercent": 24,
+        "freeRamMiB": 7332,
+        "gpuUsedMiB": 1448,
+        "gpuFreeMiB": 6510,
+        "gpuPercent": 39,
+        "gpuTempC": 67
+      },
+      {
+        "elapsedMs": 12115,
+        "cpuPercent": 26,
+        "freeRamMiB": 7275,
+        "gpuUsedMiB": 1450,
+        "gpuFreeMiB": 6508,
+        "gpuPercent": 40,
+        "gpuTempC": 68
+      },
+      {
+        "elapsedMs": 13123,
+        "cpuPercent": 19,
+        "freeRamMiB": 7070,
+        "gpuUsedMiB": 1510,
+        "gpuFreeMiB": 6448,
+        "gpuPercent": 39,
+        "gpuTempC": 67
+      },
+      {
+        "elapsedMs": 14130,
+        "cpuPercent": 23,
+        "freeRamMiB": 8313,
+        "gpuUsedMiB": 1530,
+        "gpuFreeMiB": 6428,
+        "gpuPercent": 55,
+        "gpuTempC": 68
+      },
+      {
+        "elapsedMs": 15138,
+        "cpuPercent": 20,
+        "freeRamMiB": 8422,
+        "gpuUsedMiB": 1515,
+        "gpuFreeMiB": 6443,
+        "gpuPercent": 27,
+        "gpuTempC": 67
+      },
+      {
+        "elapsedMs": 16146,
+        "cpuPercent": 19,
+        "freeRamMiB": 8356,
+        "gpuUsedMiB": 1534,
+        "gpuFreeMiB": 6424,
+        "gpuPercent": 67,
+        "gpuTempC": 76
+      },
+      {
+        "elapsedMs": 17151,
+        "cpuPercent": 13,
+        "freeRamMiB": 8112,
+        "gpuUsedMiB": 1534,
+        "gpuFreeMiB": 6424,
+        "gpuPercent": 10,
+        "gpuTempC": 74
+      },
+      {
+        "elapsedMs": 18155,
+        "cpuPercent": 12,
+        "freeRamMiB": 7991,
+        "gpuUsedMiB": 1534,
+        "gpuFreeMiB": 6424,
+        "gpuPercent": 48,
+        "gpuTempC": 66
+      },
+      {
+        "elapsedMs": 19163,
+        "cpuPercent": 10,
+        "freeRamMiB": 7876,
+        "gpuUsedMiB": 1598,
+        "gpuFreeMiB": 6360,
+        "gpuPercent": 52,
+        "gpuTempC": 76
+      }
+    ]
+  }
+}

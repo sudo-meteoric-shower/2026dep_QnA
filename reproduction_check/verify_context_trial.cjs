@@ -37,7 +37,9 @@ function instrument(html,promptProbe){
     const original='请只给出有依据的答案。';
     if(!html.includes(original)) throw new Error('找不到回答指令注入点');
     const instruction = promptProbe==='faithful' ? faithfulInstruction : '第一句直接给出有依据的答案，保留全部条件、数值和单位。必要时用一句话说明计算。';
-    html=html.replace(original,instruction);
+    const ending='\\n'+original+'"';
+    if(!html.includes(ending)) throw new Error('找不到回答末句');
+    html=html.replace(ending,'\\n'+instruction+'"');
   }
   const call='await llm(prompt,{max_new_tokens:80,do_sample:false,repetition_penalty:1.15,streamer,return_full_text:false});';
   if(!html.includes(call)) throw new Error('找不到试验计量入口');

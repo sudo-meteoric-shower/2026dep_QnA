@@ -57,7 +57,7 @@
         <h1 class="text-sm font-semibold text-gray-800">语音问答助手 <span class="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 align-middle ml-1">RAG 知识库增强</span> <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 align-middle ml-1" id="verTag">v16</span></h1>
       </div>
       <div class="flex items-center gap-4 text-[10px] text-gray-500">
-        <span id="engineText">WASM</span>
+        <span id="engineText">问答引擎</span>
         <span id="sourceTag" class="text-[9px] px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 whitespace-nowrap shrink-0">源：本地模型</span>
         <span id="checkStatus">待自检</span>
         <span id="kbStat"><i class="fas fa-book text-[#165DFF] mr-1"></i>知识库 0 块</span>
@@ -73,8 +73,8 @@
           <div class="flex items-center justify-between mb-2.5">
             <h2 class="text-xs font-semibold text-gray-800"><i class="fas fa-cubes text-[#165DFF] mr-1.5"></i>模型状态</h2>
             <div class="flex items-center gap-1">
-              <select id="precisionSelect" onchange="onPrecisionChange()" class="text-[10px] border border-gray-200 rounded px-1.5 py-1 text-gray-700 bg-white outline-none focus:border-[#165DFF]" title="使用本地量化权重（q8）">
-                <option value="fast" selected>快速·量化（q8）</option>
+              <select id="precisionSelect" onchange="onPrecisionChange()" class="text-[10px] border border-gray-200 rounded px-1.5 py-1 text-gray-700 bg-white outline-none focus:border-[#165DFF]" title="WebGPU 问答使用 q4f16，语音和向量模型按此选择加载">
+                <option value="fast" selected>快速·量化</option>
                 <option value="high">高精度</option>
               </select>
               <button onclick="checkLocal()" title="检查 models/ 目录三个模型是否齐全" class="btn text-[10px] text-green-600 hover:bg-green-50 px-1.5 py-1 rounded"><i class="fas fa-hard-drive mr-0.5"></i>自检</button>
@@ -95,9 +95,9 @@
             <div class="rounded-lg border border-gray-100 bg-gray-50/60 p-2 flex flex-col items-center gap-1.5">
               <div class="flex items-center gap-1"><i class="fas fa-brain text-purple-600 text-xs"></i><span class="text-[10px] font-medium text-gray-700 truncate">问答生成</span></div>
               <select id="llmModel" onchange="onModelChange('llm')" title="选择问答大模型" class="w-full text-[9px] border border-gray-200 rounded px-1 py-0.5 text-gray-700 bg-white outline-none focus:border-[#165DFF]">
-                <option value="qwen3_06b" selected>Qwen3-0.6B</option>
+                <option value="qwen3_06b">Qwen3-0.6B</option>
                 <option value="qwen25_15b">Qwen2.5-1.5B</option>
-                <option value="qwen3_17b">Qwen3-1.7B</option>
+                <option value="qwen3_17b" selected>Qwen3-1.7B</option>
               </select>
               <span id="llmBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">未加载</span>
               <button id="llmBtn" onclick="loadLLM()" class="btn w-full bg-[#165DFF] text-white py-1 rounded text-[10px]">加载</button>
@@ -244,16 +244,30 @@
       }
     };
     // 当前选中的模型 key（由界面下拉框驱动）
-    const activeModel={asr:"base",llm:"qwen3_06b",emb:"small"};
+    const activeModel={asr:"base",llm:"qwen3_17b",emb:"small"};
     // MODEL_FILES 始终指向当前选中的模型定义，供 fullUrl / check-local / load 使用
     const MODEL_FILES={
       asr:MODEL_CATALOG.asr.base,
-      llm:MODEL_CATALOG.llm.qwen3_06b,
+      llm:MODEL_CATALOG.llm.qwen3_17b,
       emb:MODEL_CATALOG.emb.small
     };
     const LOCAL_BASE="./models/";
     let asr=null, llm=null, embed=null;
     let precision="fast";
+    const preferGpu = new URLSearchParams(location.search).get("backend") !== "wasm";
+    // 两个 Qwen3 模型都有适合 GPU 的 q4f16 权重。ASR 与向量检索继续使用 WASM。
+    function gpuModel(model) {
+      return preferGpu && model === MODEL_FILES.llm && Boolean(model.hiFile);
+    }
+    function selectedFile(model) {
+      return gpuModel(model) || (precision === "high" && model.hiFile) ? model.hiFile : model.file;
+    }
+    function ragInstruction() {
+      return gpuModel(MODEL_FILES.llm) && activeModel.llm === "qwen3_17b"
+        ? "第一句直接回答问题。照原文保留数值、单位、比较关系和全部必要条件。资料没有说明时答“资料中未提及”。"
+        : "请只给出有依据的答案。";
+    }
+    let gpuInfo;
     async function loadLocal(task, model, dtype) {
       if (!HF) {
         HF = await import("./lib/transformers.min.js");
@@ -265,7 +279,18 @@
         wasm.wasmPaths = new URL("./ort/", location.href).href;
         wasm.numThreads = window.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
       }
-      const options={device:"wasm",dtype,progress_callback:report};
+      const useGpu = task === "text-generation" && gpuModel(model);
+      const options = {device:useGpu ? "webgpu" : "wasm", dtype, progress_callback:report};
+      if (useGpu) {
+        const webgpu = HF.env.backends.onnx.webgpu;
+        const adapter = webgpu.adapter || await navigator.gpu?.requestAdapter({powerPreference:"high-performance"});
+        if (!adapter || adapter.info?.isFallbackAdapter || !adapter.features.has("shader-f16")) {
+          throw new Error("问答模型需要支持 shader-f16 的硬件 WebGPU，可用 ?backend=wasm 启动 CPU 版。");
+        }
+        webgpu.adapter = adapter;
+        const info = adapter.info || {};
+        gpuInfo = {backend:"webgpu", dtype, vendor:info.vendor, architecture:info.architecture, description:info.description};
+      }
       if(model.local==="Qwen3-1.7B-ONNX"){
         // 浏览器初始化 1.7B 时，基础图优化将 WASM 内存推近 4 GiB 上限。
         options.session_options={enableCpuMemArena:false,enableMemPattern:false,graphOptimizationLevel:"disabled"};
@@ -308,16 +333,16 @@
           }
           const urls = {};
           for (const [key, model] of Object.entries(MODEL_FILES)) {
-            urls[key] = LOCAL_BASE + model.local + "/" + (precision==="high" && model.hiFile ? model.hiFile : model.file);
+            urls[key] = LOCAL_BASE + model.local + "/" + selectedFile(model);
           }
-          emit({type:"configured",urls});
+          emit({type:"configured",urls,llmBackend:gpuModel(MODEL_FILES.llm)?"WebGPU · q4f16":"WASM"});
           return;
         }
         if(type==="check-local"){
           const result={};
           for (const [key, model] of Object.entries(MODEL_FILES)) {
             const files = ["config.json", "tokenizer.json", "tokenizer_config.json",
-              precision==="high" && model.hiFile ? model.hiFile : model.file];
+              selectedFile(model)];
             if(key !== "emb") files.push("generation_config.json");
             if(key === "asr") files.push("preprocessor_config.json","onnx/decoder_model_merged_quantized.onnx");
             const checks = await Promise.all(files.map(async file=>{
@@ -337,12 +362,12 @@
             asr=await loadLocal("automatic-speech-recognition",model,high?model.dtHigh:model.dtFast);
           }else if(type==="load-llm"){
             pendingModel="llm";
-            llm=await loadLocal("text-generation",MODEL_FILES.llm,high && MODEL_FILES.llm.hiFile?"q4f16":"q8");
+            llm=await loadLocal("text-generation",MODEL_FILES.llm,selectedFile(MODEL_FILES.llm)===MODEL_FILES.llm.hiFile?"q4f16":"q8");
           }else{
             pendingModel="emb";
             embed=await loadLocal("feature-extraction",MODEL_FILES.emb,high?"q4":"q8");
           }
-          emit({type:pendingModel+"-ready"});
+          emit({type:pendingModel+"-ready", ...(pendingModel==="llm" && gpuModel(MODEL_FILES.llm) ? gpuInfo : {backend:"wasm"})});
           return;
         }
 
@@ -382,7 +407,7 @@
           }
           // Qwen3 系列需关闭思考（/no_think）；Qwen2.5 非思考模型显式追加中文指令
           const isThink=String(activeModel.llm).indexOf("qwen3")>=0;
-          const task=evidence ? evidence+"\n\n问题："+q+"\n请只给出有依据的答案。" : q+"\n请用简体中文简明回答。";
+          const task=evidence ? evidence+"\n\n问题："+q+"\n"+ragInstruction() : q+"\n请用简体中文简明回答。";
           const userContent=isThink ? task+"\n/no_think" : task;
           const messages=[{role:"system",content:system},{role:"user",content:userContent}];
           const tok=llm.tokenizer;
@@ -532,6 +557,7 @@
       const m=e.data;
       if(m.type==='worker-ready'){ configure(); return; }
       if(m.type==='configured'){
+        $('engineText').textContent='问答 '+m.llmBackend;
         if(m.urls){
           const u=m.urls;
           const row=(k,t)=>'<div class="flex items-start gap-1"><span class="w-8 flex-shrink-0 text-gray-400">'+t+'</span><a href="'+u[k]+'" target="_blank" rel="noopener" class="text-[#165DFF] hover:underline break-all">'+u[k]+'</a></div>';

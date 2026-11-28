@@ -3,6 +3,7 @@ const path = require('node:path');
 const {spawn,execFileSync} = require('node:child_process');
 const runDir = path.resolve(__dirname);
 const app = path.join(runDir, '..', 'voice_qa_local');
+const webgpu = process.argv.includes('--webgpu');
 const high=process.argv.includes('--high');
 const matrix=process.argv.includes('--matrix');
 const comparison = process.argv.find(arg => arg.startsWith('--compare='))?.split('=')[1];
@@ -17,11 +18,12 @@ const cdpTimeout=requestedModel==='qwen3_17b'?180000:60000;
 const switchAfterLoad=process.argv.includes('--switch-after-load');
 if(switchAfterLoad && (!comparison || !requestedModel)) throw new Error('切换测试需要指定对照模式和目标模型');
 const promptProbe=process.argv.find(arg=>arg.startsWith('--prompt-probe='))?.split('=')[1];
-if(promptProbe && !['evidence-last','brief','faithful'].includes(promptProbe)) throw new Error('未知提示词探测模式');
+if(promptProbe && !['original','evidence-last','brief','faithful'].includes(promptProbe)) throw new Error('未知提示词探测模式');
 const requestedThreads=process.argv.find(arg=>arg.startsWith('--wasm-threads='))?.split('=')[1];
 if(requestedThreads && !['2','4','8','12','16'].includes(requestedThreads)) throw new Error('未知 WASM 线程数');
 const monitorResources=process.argv.includes('--monitor-resources');
 if(monitorResources && !requestedThreads) throw new Error('资源对照需要指定线程数');
+if(webgpu && (!monitorResources || comparison!=='candidate')) throw new Error('WebGPU 测评需要候选页面与资源监控');
 const studySet = process.argv.find(arg=>arg.startsWith('--study-set='))?.slice('--study-set='.length);
 const studyEmbedding = process.argv.find(arg=>arg.startsWith('--study-emb='))?.slice('--study-emb='.length);
 if (studySet && (!/^[a-z0-9-]+$/.test(studySet) || !['small','base'].includes(studyEmbedding) || comparison!=='candidate')) throw new Error('无效的检索对照参数');
@@ -42,7 +44,7 @@ const resultFile=path.join(auditDir,resultName+(resultTag?'-'+resultTag:'')+'.js
 const gpuMemory=execFileSync('nvidia-smi',['--query-gpu=memory.free','--format=csv,noheader,nounits'],{encoding:'utf8',windowsHide:true}).trim();
 const freeRam=require('node:os').freemem();
 console.log('启动前可用资源',gpuMemory+' MiB 显存',Math.round(freeRam/2**20)+' MiB 内存');
-if(Number(gpuMemory)<512 || freeRam<(monitorResources?8:7)*2**30) throw new Error('可用资源不足，本轮未启动模型');
+if(Number(gpuMemory)<(webgpu?6144:512) || freeRam<(monitorResources?8:7)*2**30) throw new Error('可用资源不足，本轮未启动模型');
 const profile = fs.mkdtempSync(path.join(runDir, 'edge-profile-'));
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const shortVoiceRun = process.argv.includes('--short-voice');
@@ -50,11 +52,12 @@ const classroomVoiceRun = process.argv.includes('--classroom-voice');
 const voiceOnly = shortVoiceRun || classroomVoiceRun;
 const fixture = audit || classroomVoiceRun ? 'voice_classroom.wav' : shortVoiceRun ? 'voice_short.wav' : 'voice_fixture.wav';
 const hostname = '127.0.0.1';
-const url = 'http://' + hostname + ':8000/voice_qa_assistant_local.html';
+const url = 'http://' + hostname + ':8000/voice_qa_assistant_local.html' + (webgpu ? '' : '?backend=wasm');
 const summary = {comparison,diagnostic,ortProbe,promptProbe,requestedThreads,loadedModelFiles:[],resources:{freeVramMiB:Number(gpuMemory),freeRamMiB:Math.round(freeRam/2**20)},errors: [], failedRequests: [], remoteRequests: [], checks: {}};
 if(ortProbe) summary.wasmTrace=[];
+if(webgpu) summary.runtimeWarnings=[];
 const edgeArgs = [
-  '--headless=new','--mute-audio','--disable-gpu', '--window-size=1450,950', '--remote-debugging-port=0', '--user-data-dir=' + profile,
+  '--headless=new','--mute-audio','--edge-skip-compat-layer-relaunch', ...(webgpu ? ['--force_high_performance_gpu'] : ['--disable-gpu']), '--window-size=1450,950', '--remote-debugging-port=0', '--user-data-dir=' + profile,
   '--no-first-run', '--disable-background-networking', '--disable-component-update',
   '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1, EXCLUDE localhost',
   '--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream',
@@ -85,6 +88,8 @@ if(monitorResources){
   stopMonitoring=require('./verify_resource_monitor.cjs').startResourceMonitor(summary.runtimeResources,message=>{
     resourceAbort=new Error(message);
     // 仅关闭为本次评测新建的浏览器和服务器。
+    // Edge 偶尔重启浏览器主进程，先经本次调试连接关闭同一实例。
+    if(ws?.readyState===WebSocket.OPEN) ws.send(JSON.stringify({id:0,method:'Browser.close'}));
     stopBrowser();
     server.kill();
     ws?.close();
@@ -146,6 +151,7 @@ async function button(selector) {
 async function answer(label, question, useRag) {
   await evaluate(expression(({question,useRag}) => {
     window.testEvents.length = 0;
+    window.gpuStart = window.gpuSubmissions;
     document.querySelector('#ragToggle').checked = useRag;
     document.querySelector('#questionInput').value = question;
   }, {question,useRag}));
@@ -159,9 +165,11 @@ async function collectAnswer(label) {
     return {deltas:deltas.length,firstMs:deltas.length ? Math.round(deltas[0].ts - window._t0) : null,
       totalMs:Math.round(window.testEvents.find(e => e.type === 'answer').ts - window._t0),
       contextTrial:window.testEvents.find(e=>e.type==='context-trial'),
+      gpuSubmissions: window.gpuStart === undefined ? undefined : window.gpuSubmissions-window.gpuStart,
       raw: window.testEvents.find(e=>e.type==='raw-answer')?.text,
       sourceShown:[...document.querySelectorAll('details > summary')].some(el => el.textContent.includes('RAG 引用来源'))};
   }));
+  if(webgpu) assert(metrics.gpuSubmissions>0,label+' 生成期间未记录 GPU 命令提交');
   log(label, {...metrics, text:result.text, usedRag:result.usedRag, sources:result.sources});
   if(!comparison) assert(result.text && !result.text.includes('模型未返回有效内容'), label + ' returned no usable answer');
   return result;
@@ -204,7 +212,8 @@ async function run() {
     }
     if (event.method === 'Runtime.consoleAPICalled' && event.params.type === 'error'){
       const message=event.params.args.map(a=>a.value||a.description).join(' ');
-      if(!ortProbe || !/\[[IVW]:onnxruntime:/i.test(message)) summary.errors.push(message);
+      if(webgpu && /\[W:onnxruntime:/i.test(message)) summary.runtimeWarnings.push(message);
+      else if(!ortProbe || !/\[[IVW]:onnxruntime:/i.test(message)) summary.errors.push(message);
     }
     if (event.method === 'Runtime.exceptionThrown') summary.errors.push(event.params.exceptionDetails.exception?.description || event.params.exceptionDetails.text);
     if (event.method === 'Log.entryAdded' && event.params.entry.level === 'error')
@@ -270,6 +279,10 @@ async function run() {
       assert(html.includes(marker),'找不到证据排序入口');
       html=html.replace(marker,'const ranked=KB.filter(k=>k.source===window.testExpectedSource).map');
     }
+    // 对照试验固定原指令，再由对应试验选择变量；默认测评直接运行页面的正式指令。
+    if (promptProbe || studySet) {
+      html=html.replace('q+"\\n"+ragInstruction()', 'q+"\\n请只给出有依据的答案。"');
+    }
     if(contextTrial || promptProbe || requestedThreads){
       html=require('./verify_context_trial.cjs').instrument(html,promptProbe);
       if(requestedThreads){
@@ -301,6 +314,17 @@ async function run() {
       }
     });
     await cdp('Fetch.enable',{patterns:[{urlPattern:url,resourceType:'Document'}]});
+  }
+  if (webgpu) {
+    await cdp('Page.addScriptToEvaluateOnNewDocument',{source:expression(() => {
+      window.gpuSubmissions = 0;
+      const submit = GPUQueue.prototype.submit;
+      GPUQueue.prototype.submit = function(...args) {
+        const result = submit.apply(this,args);
+        window.gpuSubmissions++;
+        return result;
+      };
+    })});
   }
   await cdp('Page.navigate',{url});
   await poll(async () => {
@@ -371,6 +395,7 @@ async function run() {
   for (const kind of ['asr','llm','emb']) {
     if(!summary.checks[kind]) log(kind,await waitEvent(kind+'-ready'));
   }
+  if(webgpu) assert(summary.checks.llm.backend==='webgpu' && summary.checks.llm.vendor==='nvidia','未验证到 NVIDIA WebGPU 问答引擎');
   if(switchAfterLoad){
     await chooseModel();
     await button('#llmBtn');

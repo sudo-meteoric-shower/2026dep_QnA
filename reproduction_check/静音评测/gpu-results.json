@@ -1,0 +1,961 @@
+{
+  "comparison": [
+    {
+      "key": "06-original",
+      "suite": "classic",
+      "file": "candidate-gpu-06-original.json",
+      "count": 9,
+      "correct": 6,
+      "avgSec": 1.25,
+      "firstSec": 0.51,
+      "peakGpuPct": 100,
+      "minVramMiB": 6360,
+      "minRamMiB": 7070,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "code",
+          "correct": true,
+          "ms": 1990,
+          "firstMs": 1506,
+          "out": 5,
+          "dispatch": 211
+        },
+        {
+          "id": "charge",
+          "correct": true,
+          "ms": 1028,
+          "firstMs": 439,
+          "out": 24,
+          "dispatch": 1009
+        },
+        {
+          "id": "reserve",
+          "correct": false,
+          "ms": 2115,
+          "firstMs": 417,
+          "out": 71,
+          "dispatch": 2983
+        },
+        {
+          "id": "restore",
+          "correct": false,
+          "ms": 2225,
+          "firstMs": 434,
+          "out": 74,
+          "dispatch": 3109
+        },
+        {
+          "id": "rate",
+          "correct": true,
+          "ms": 814,
+          "firstMs": 395,
+          "out": 20,
+          "dispatch": 841
+        },
+        {
+          "id": "calc",
+          "correct": false,
+          "ms": 1038,
+          "firstMs": 404,
+          "out": 36,
+          "dispatch": 1513
+        },
+        {
+          "id": "pdf",
+          "correct": true,
+          "ms": 441,
+          "firstMs": 439,
+          "out": 5,
+          "dispatch": 211
+        },
+        {
+          "id": "absent",
+          "correct": true,
+          "ms": 1003,
+          "firstMs": 392,
+          "out": 34,
+          "dispatch": 1429
+        },
+        {
+          "id": "general",
+          "correct": true,
+          "ms": 595,
+          "firstMs": 165,
+          "out": 14,
+          "dispatch": 589
+        }
+      ]
+    },
+    {
+      "key": "06-original",
+      "suite": "fresh",
+      "file": "candidate-fresh-gpu-06-original.json",
+      "count": 6,
+      "correct": 6,
+      "avgSec": 1.293,
+      "firstSec": 0.607,
+      "peakGpuPct": 100,
+      "minVramMiB": 6481,
+      "minRamMiB": 7115,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "new-flush",
+          "correct": true,
+          "ms": 2379,
+          "firstMs": 1314,
+          "out": 35,
+          "dispatch": 1471
+        },
+        {
+          "id": "new-lock",
+          "correct": true,
+          "ms": 2058,
+          "firstMs": 448,
+          "out": 80,
+          "dispatch": 3361
+        },
+        {
+          "id": "new-tag",
+          "correct": true,
+          "ms": 1089,
+          "firstMs": 457,
+          "out": 30,
+          "dispatch": 1261
+        },
+        {
+          "id": "new-cycle",
+          "correct": true,
+          "ms": 956,
+          "firstMs": 469,
+          "out": 24,
+          "dispatch": 1009
+        },
+        {
+          "id": "new-backup",
+          "correct": true,
+          "ms": 534,
+          "firstMs": 499,
+          "out": 5,
+          "dispatch": 211
+        },
+        {
+          "id": "new-absent",
+          "correct": true,
+          "ms": 741,
+          "firstMs": 452,
+          "out": 15,
+          "dispatch": 631
+        }
+      ]
+    },
+    {
+      "key": "06-original",
+      "suite": "book",
+      "file": "candidate-gpu-book-06.json",
+      "count": 6,
+      "correct": 2,
+      "avgSec": 1.977,
+      "firstSec": 1.569,
+      "peakGpuPct": 100,
+      "minVramMiB": 5843,
+      "minRamMiB": 6102,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "book-watt",
+          "correct": false,
+          "ms": 2875,
+          "firstMs": 2851,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "book-gen",
+          "correct": false,
+          "ms": 1726,
+          "firstMs": 1553,
+          "out": 8,
+          "dispatch": 337
+        },
+        {
+          "id": "book-open",
+          "correct": true,
+          "ms": 2195,
+          "firstMs": 1163,
+          "out": 51,
+          "dispatch": 2143
+        },
+        {
+          "id": "book-recorder",
+          "correct": false,
+          "ms": 1337,
+          "firstMs": 1160,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "book-speed",
+          "correct": false,
+          "ms": 2076,
+          "firstMs": 1206,
+          "out": 47,
+          "dispatch": 1975
+        },
+        {
+          "id": "book-absent",
+          "correct": true,
+          "ms": 1652,
+          "firstMs": 1484,
+          "out": 4,
+          "dispatch": 169
+        }
+      ]
+    },
+    {
+      "key": "06-faithful",
+      "suite": "classic",
+      "file": "candidate-gpu-06-faithful.json",
+      "count": 9,
+      "correct": 2,
+      "avgSec": 0.797,
+      "firstSec": 0.517,
+      "peakGpuPct": 100,
+      "minVramMiB": 6402,
+      "minRamMiB": 7187,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "code",
+          "correct": false,
+          "ms": 1765,
+          "firstMs": 1266,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "charge",
+          "correct": false,
+          "ms": 588,
+          "firstMs": 457,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "reserve",
+          "correct": false,
+          "ms": 599,
+          "firstMs": 456,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "restore",
+          "correct": false,
+          "ms": 585,
+          "firstMs": 483,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "rate",
+          "correct": false,
+          "ms": 851,
+          "firstMs": 499,
+          "out": 15,
+          "dispatch": 631
+        },
+        {
+          "id": "calc",
+          "correct": false,
+          "ms": 1196,
+          "firstMs": 469,
+          "out": 37,
+          "dispatch": 1555
+        },
+        {
+          "id": "pdf",
+          "correct": false,
+          "ms": 526,
+          "firstMs": 404,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "absent",
+          "correct": true,
+          "ms": 563,
+          "firstMs": 448,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "general",
+          "correct": true,
+          "ms": 501,
+          "firstMs": 174,
+          "out": 14,
+          "dispatch": 589
+        }
+      ]
+    },
+    {
+      "key": "06-faithful",
+      "suite": "fresh",
+      "file": "candidate-fresh-gpu-06-faithful.json",
+      "count": 6,
+      "correct": 1,
+      "avgSec": 0.788,
+      "firstSec": 0.626,
+      "peakGpuPct": 92,
+      "minVramMiB": 6495,
+      "minRamMiB": 7400,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "new-flush",
+          "correct": false,
+          "ms": 1738,
+          "firstMs": 1300,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "new-lock",
+          "correct": false,
+          "ms": 647,
+          "firstMs": 521,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "new-tag",
+          "correct": false,
+          "ms": 603,
+          "firstMs": 499,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "new-cycle",
+          "correct": false,
+          "ms": 563,
+          "firstMs": 464,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "new-backup",
+          "correct": false,
+          "ms": 631,
+          "firstMs": 520,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "new-absent",
+          "correct": true,
+          "ms": 548,
+          "firstMs": 455,
+          "out": 6,
+          "dispatch": 253
+        }
+      ]
+    },
+    {
+      "key": "06-faithful",
+      "suite": "book",
+      "file": "candidate-gpu-book-06.json",
+      "count": 6,
+      "correct": 1,
+      "avgSec": 1.751,
+      "firstSec": 1.479,
+      "peakGpuPct": 100,
+      "minVramMiB": 5843,
+      "minRamMiB": 6102,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "book-watt",
+          "correct": false,
+          "ms": 1956,
+          "firstMs": 1777,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "book-gen",
+          "correct": false,
+          "ms": 2070,
+          "firstMs": 1879,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "book-open",
+          "correct": false,
+          "ms": 1422,
+          "firstMs": 1259,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "book-recorder",
+          "correct": false,
+          "ms": 1364,
+          "firstMs": 1228,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "book-speed",
+          "correct": false,
+          "ms": 2107,
+          "firstMs": 1290,
+          "out": 41,
+          "dispatch": 1723
+        },
+        {
+          "id": "book-absent",
+          "correct": true,
+          "ms": 1588,
+          "firstMs": 1439,
+          "out": 6,
+          "dispatch": 253
+        }
+      ]
+    },
+    {
+      "key": "17-original",
+      "suite": "classic",
+      "file": "candidate-gpu-17-original.json",
+      "count": 9,
+      "correct": 8,
+      "avgSec": 1.494,
+      "firstSec": 0.782,
+      "peakGpuPct": 100,
+      "minVramMiB": 5096,
+      "minRamMiB": 5733,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "code",
+          "correct": true,
+          "ms": 2090,
+          "firstMs": 1543,
+          "out": 5,
+          "dispatch": 211
+        },
+        {
+          "id": "charge",
+          "correct": true,
+          "ms": 891,
+          "firstMs": 794,
+          "out": 5,
+          "dispatch": 211
+        },
+        {
+          "id": "reserve",
+          "correct": true,
+          "ms": 1509,
+          "firstMs": 731,
+          "out": 16,
+          "dispatch": 673
+        },
+        {
+          "id": "restore",
+          "correct": true,
+          "ms": 1125,
+          "firstMs": 856,
+          "out": 9,
+          "dispatch": 379
+        },
+        {
+          "id": "rate",
+          "correct": true,
+          "ms": 802,
+          "firstMs": 799,
+          "out": 3,
+          "dispatch": 127
+        },
+        {
+          "id": "calc",
+          "correct": false,
+          "ms": 4410,
+          "firstMs": 806,
+          "out": 76,
+          "dispatch": 3193
+        },
+        {
+          "id": "pdf",
+          "correct": true,
+          "ms": 1196,
+          "firstMs": 589,
+          "out": 14,
+          "dispatch": 589
+        },
+        {
+          "id": "absent",
+          "correct": true,
+          "ms": 885,
+          "firstMs": 642,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "general",
+          "correct": true,
+          "ms": 537,
+          "firstMs": 279,
+          "out": 7,
+          "dispatch": 295
+        }
+      ]
+    },
+    {
+      "key": "17-original",
+      "suite": "fresh",
+      "file": "candidate-fresh-gpu-17-original.json",
+      "count": 6,
+      "correct": 6,
+      "avgSec": 1.484,
+      "firstSec": 1.054,
+      "peakGpuPct": 100,
+      "minVramMiB": 5223,
+      "minRamMiB": 5666,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "new-flush",
+          "correct": true,
+          "ms": 2392,
+          "firstMs": 2281,
+          "out": 5,
+          "dispatch": 211
+        },
+        {
+          "id": "new-lock",
+          "correct": true,
+          "ms": 1458,
+          "firstMs": 746,
+          "out": 14,
+          "dispatch": 589
+        },
+        {
+          "id": "new-tag",
+          "correct": true,
+          "ms": 2268,
+          "firstMs": 834,
+          "out": 28,
+          "dispatch": 1177
+        },
+        {
+          "id": "new-cycle",
+          "correct": true,
+          "ms": 932,
+          "firstMs": 846,
+          "out": 5,
+          "dispatch": 211
+        },
+        {
+          "id": "new-backup",
+          "correct": true,
+          "ms": 888,
+          "firstMs": 885,
+          "out": 4,
+          "dispatch": 169
+        },
+        {
+          "id": "new-absent",
+          "correct": true,
+          "ms": 967,
+          "firstMs": 734,
+          "out": 6,
+          "dispatch": 253
+        }
+      ]
+    },
+    {
+      "key": "17-original",
+      "suite": "book",
+      "file": "candidate-gpu-book-17.json",
+      "count": 6,
+      "correct": 5,
+      "avgSec": 3.438,
+      "firstSec": 2.517,
+      "peakGpuPct": 100,
+      "minVramMiB": 4575,
+      "minRamMiB": 5253,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "book-watt",
+          "correct": false,
+          "ms": 4029,
+          "firstMs": 3932,
+          "out": 7,
+          "dispatch": 295
+        },
+        {
+          "id": "book-gen",
+          "correct": true,
+          "ms": 3377,
+          "firstMs": 2659,
+          "out": 15,
+          "dispatch": 631
+        },
+        {
+          "id": "book-open",
+          "correct": true,
+          "ms": 3649,
+          "firstMs": 2020,
+          "out": 34,
+          "dispatch": 1429
+        },
+        {
+          "id": "book-recorder",
+          "correct": true,
+          "ms": 3622,
+          "firstMs": 2059,
+          "out": 31,
+          "dispatch": 1303
+        },
+        {
+          "id": "book-speed",
+          "correct": true,
+          "ms": 3274,
+          "firstMs": 2081,
+          "out": 25,
+          "dispatch": 1051
+        },
+        {
+          "id": "book-absent",
+          "correct": true,
+          "ms": 2676,
+          "firstMs": 2350,
+          "out": 6,
+          "dispatch": 253
+        }
+      ]
+    },
+    {
+      "key": "17-faithful",
+      "suite": "classic",
+      "file": "candidate-gpu-17-faithful.json",
+      "count": 9,
+      "correct": 9,
+      "avgSec": 1.674,
+      "firstSec": 0.805,
+      "peakGpuPct": 100,
+      "minVramMiB": 5140,
+      "minRamMiB": 5208,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "code",
+          "correct": true,
+          "ms": 2549,
+          "firstMs": 1439,
+          "out": 16,
+          "dispatch": 673
+        },
+        {
+          "id": "charge",
+          "correct": true,
+          "ms": 976,
+          "firstMs": 801,
+          "out": 4,
+          "dispatch": 169
+        },
+        {
+          "id": "reserve",
+          "correct": true,
+          "ms": 1743,
+          "firstMs": 844,
+          "out": 18,
+          "dispatch": 757
+        },
+        {
+          "id": "restore",
+          "correct": true,
+          "ms": 1672,
+          "firstMs": 852,
+          "out": 15,
+          "dispatch": 631
+        },
+        {
+          "id": "rate",
+          "correct": true,
+          "ms": 1245,
+          "firstMs": 748,
+          "out": 11,
+          "dispatch": 463
+        },
+        {
+          "id": "calc",
+          "correct": true,
+          "ms": 3925,
+          "firstMs": 824,
+          "out": 67,
+          "dispatch": 2815
+        },
+        {
+          "id": "pdf",
+          "correct": true,
+          "ms": 1367,
+          "firstMs": 689,
+          "out": 14,
+          "dispatch": 589
+        },
+        {
+          "id": "absent",
+          "correct": true,
+          "ms": 1000,
+          "firstMs": 745,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "general",
+          "correct": true,
+          "ms": 586,
+          "firstMs": 299,
+          "out": 7,
+          "dispatch": 295
+        }
+      ]
+    },
+    {
+      "key": "17-faithful",
+      "suite": "fresh",
+      "file": "candidate-fresh-gpu-17-faithful.json",
+      "count": 6,
+      "correct": 6,
+      "avgSec": 1.591,
+      "firstSec": 0.979,
+      "peakGpuPct": 100,
+      "minVramMiB": 5233,
+      "minRamMiB": 5154,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "new-flush",
+          "correct": true,
+          "ms": 2357,
+          "firstMs": 1813,
+          "out": 4,
+          "dispatch": 169
+        },
+        {
+          "id": "new-lock",
+          "correct": true,
+          "ms": 1503,
+          "firstMs": 818,
+          "out": 15,
+          "dispatch": 631
+        },
+        {
+          "id": "new-tag",
+          "correct": true,
+          "ms": 2189,
+          "firstMs": 831,
+          "out": 28,
+          "dispatch": 1177
+        },
+        {
+          "id": "new-cycle",
+          "correct": true,
+          "ms": 1189,
+          "firstMs": 799,
+          "out": 9,
+          "dispatch": 379
+        },
+        {
+          "id": "new-backup",
+          "correct": true,
+          "ms": 1223,
+          "firstMs": 805,
+          "out": 10,
+          "dispatch": 421
+        },
+        {
+          "id": "new-absent",
+          "correct": true,
+          "ms": 1083,
+          "firstMs": 806,
+          "out": 6,
+          "dispatch": 253
+        }
+      ]
+    },
+    {
+      "key": "17-faithful",
+      "suite": "book",
+      "file": "candidate-gpu-book-17.json",
+      "count": 6,
+      "correct": 5,
+      "avgSec": 3.876,
+      "firstSec": 2.395,
+      "peakGpuPct": 100,
+      "minVramMiB": 4575,
+      "minRamMiB": 5253,
+      "adapter": "nvidia lovelace",
+      "runtimeWarnings": 2,
+      "rows": [
+        {
+          "id": "book-watt",
+          "correct": true,
+          "ms": 2929,
+          "firstMs": 2886,
+          "out": 6,
+          "dispatch": 253
+        },
+        {
+          "id": "book-gen",
+          "correct": true,
+          "ms": 3851,
+          "firstMs": 2714,
+          "out": 23,
+          "dispatch": 967
+        },
+        {
+          "id": "book-open",
+          "correct": true,
+          "ms": 4191,
+          "firstMs": 2084,
+          "out": 46,
+          "dispatch": 1933
+        },
+        {
+          "id": "book-recorder",
+          "correct": false,
+          "ms": 3981,
+          "firstMs": 2041,
+          "out": 40,
+          "dispatch": 1681
+        },
+        {
+          "id": "book-speed",
+          "correct": true,
+          "ms": 5500,
+          "firstMs": 2189,
+          "out": 67,
+          "dispatch": 2815
+        },
+        {
+          "id": "book-absent",
+          "correct": true,
+          "ms": 2805,
+          "firstMs": 2458,
+          "out": 6,
+          "dispatch": 253
+        }
+      ]
+    }
+  ],
+  "defaultVerification": [
+    {
+      "n": "candidate-gpu-default",
+      "errors": 0,
+      "warnings": 2,
+      "issues": [],
+      "failure": null,
+      "model": "qwen3_17b",
+      "adapter": "nvidia",
+      "count": 9,
+      "diff": [],
+      "meanMs": 1639.6666666666667,
+      "firstMs": 796.1111111111111,
+      "dispatchMin": 169,
+      "vram": 5138,
+      "ram": 4443,
+      "gpu": 100
+    },
+    {
+      "n": "candidate-fresh-gpu-default",
+      "errors": 0,
+      "warnings": 2,
+      "issues": [],
+      "failure": null,
+      "model": "qwen3_17b",
+      "adapter": "nvidia",
+      "count": 6,
+      "diff": [],
+      "meanMs": 1624.3333333333333,
+      "firstMs": 999.6666666666666,
+      "dispatchMin": 169,
+      "vram": 5233,
+      "ram": 4551,
+      "gpu": 100
+    },
+    {
+      "n": "candidate-gpu-book-verified",
+      "errors": 0,
+      "warnings": 2,
+      "issues": [],
+      "failure": null,
+      "model": "qwen3_17b",
+      "adapter": "nvidia",
+      "count": 12,
+      "diff": [],
+      "meanMs": 3596.0833333333335,
+      "firstMs": 2428.9166666666665,
+      "dispatchMin": 253,
+      "vram": 4576,
+      "ram": 4691,
+      "gpu": 100
+    },
+    {
+      "n": "candidate-gpu-recheck-original",
+      "errors": 0,
+      "warnings": 2,
+      "issues": [],
+      "failure": null,
+      "model": "qwen3_17b",
+      "adapter": "nvidia",
+      "count": 1,
+      "diff": [],
+      "meanMs": 5560,
+      "firstMs": 1681,
+      "dispatchMin": 3193,
+      "vram": 5242,
+      "ram": 4912,
+      "gpu": 71
+    },
+    {
+      "n": "candidate-gpu-recheck-faithful",
+      "errors": 0,
+      "warnings": 2,
+      "issues": [],
+      "failure": null,
+      "model": "qwen3_17b",
+      "adapter": "nvidia",
+      "count": 1,
+      "diff": [],
+      "meanMs": 5271,
+      "firstMs": 1765,
+      "dispatchMin": 2815,
+      "vram": 5256,
+      "ram": 4876,
+      "gpu": 75
+    }
+  ],
+  "interrupted": {
+    "file": "candidate-gpu-book-default.json",
+    "ramMiB": 4048,
+    "freeGpuMiBMin": 4623,
+    "reason": "系统内存保护停测，成功复测见 candidate-gpu-book-verified"
+  }
+}

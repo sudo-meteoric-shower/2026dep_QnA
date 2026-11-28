@@ -1,0 +1,454 @@
+{
+  "comparison": "candidate",
+  "requestedThreads": "4",
+  "loadedModelFiles": [],
+  "resources": {
+    "freeVramMiB": 7957,
+    "freeRamMiB": 12264
+  },
+  "errors": [],
+  "failedRequests": [],
+  "remoteRequests": [],
+  "checks": {
+    "selfCheck": {
+      "asr": {
+        "ok": true,
+        "label": "Whisper-base"
+      },
+      "llm": {
+        "ok": true,
+        "label": "Qwen3-0.6B"
+      },
+      "emb": {
+        "ok": true,
+        "label": "bge-small-zh"
+      }
+    },
+    "requestedModel": {
+      "model": "qwen3_17b",
+      "files": {
+        "ok": true,
+        "label": "Qwen3-1.7B"
+      },
+      "precision": "fast"
+    },
+    "asr": {
+      "type": "asr-ready",
+      "backend": "wasm",
+      "ts": 2506.7699999809265
+    },
+    "llm": {
+      "type": "llm-ready",
+      "backend": "webgpu",
+      "dtype": "q4f16",
+      "vendor": "nvidia",
+      "architecture": "lovelace",
+      "description": "",
+      "ts": 7642.614999949932
+    },
+    "emb": {
+      "type": "emb-ready",
+      "backend": "wasm",
+      "ts": 7830.90499997139
+    },
+    "environment": {
+      "isolated": true,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "model": "qwen3_17b"
+    },
+    "index": {
+      "type": "index-done",
+      "added": 3,
+      "total": 3,
+      "ts": 8140.174999952316
+    },
+    "chunks": {
+      "lengths": [
+        360,
+        360,
+        100
+      ],
+      "overlap": true
+    },
+    "new-flush": {
+      "deltas": 2,
+      "firstMs": 2281,
+      "totalMs": 2392,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 246,
+        "outputTokens": 5,
+        "evidence": "资料1（新题设备说明.txt）：雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。\n资料2（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。\n资料3（新题备用设备.txt）：备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。",
+        "wasmThreads": 4,
+        "ts": 10778.824999988079
+      },
+      "gpuSubmissions": 211,
+      "raw": "25秒。",
+      "sourceShown": true,
+      "text": "25秒。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "新题设备说明.txt",
+          "score": 0.6613487993348832,
+          "text": "雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。"
+        },
+        {
+          "source": "新题巡检记录.txt",
+          "score": 0.588671113867568,
+          "text": "在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。"
+        },
+        {
+          "source": "新题备用设备.txt",
+          "score": 0.41575105669128554,
+          "text": "备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。"
+        }
+      ]
+    },
+    "new-lock": {
+      "deltas": 13,
+      "firstMs": 746,
+      "totalMs": 1458,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 246,
+        "outputTokens": 14,
+        "evidence": "资料1（新题设备说明.txt）：雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。\n资料2（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。\n资料3（新题备用设备.txt）：备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。",
+        "wasmThreads": 4,
+        "ts": 12406.044999957085
+      },
+      "gpuSubmissions": 589,
+      "raw": "监测到流量低于每分钟六升且连续八秒.",
+      "sourceShown": true,
+      "text": "监测到流量低于每分钟六升且连续八秒.",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "新题设备说明.txt",
+          "score": 0.5940300698415352,
+          "text": "雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。"
+        },
+        {
+          "source": "新题巡检记录.txt",
+          "score": 0.4464747618519547,
+          "text": "在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。"
+        },
+        {
+          "source": "新题备用设备.txt",
+          "score": 0.42062643949761963,
+          "text": "备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。"
+        }
+      ]
+    },
+    "new-tag": {
+      "deltas": 17,
+      "firstMs": 834,
+      "totalMs": 2268,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 245,
+        "outputTokens": 28,
+        "evidence": "资料1（新题备用设备.txt）：备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。\n资料2（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。\n资料3（新题设备说明.txt）：雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。",
+        "wasmThreads": 4,
+        "ts": 14707.219999969006
+      },
+      "gpuSubmissions": 1177,
+      "raw": "资料2（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286。",
+      "sourceShown": true,
+      "text": "资料2（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "新题备用设备.txt",
+          "score": 0.6967964187319431,
+          "text": "备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。"
+        },
+        {
+          "source": "新题巡检记录.txt",
+          "score": 0.6939290914879487,
+          "text": "在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。"
+        },
+        {
+          "source": "新题设备说明.txt",
+          "score": 0.4593443779318273,
+          "text": "雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。"
+        }
+      ]
+    },
+    "new-cycle": {
+      "deltas": 2,
+      "firstMs": 846,
+      "totalMs": 932,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 240,
+        "outputTokens": 5,
+        "evidence": "资料1（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。\n资料2（新题设备说明.txt）：雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。\n资料3（新题备用设备.txt）：备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。",
+        "wasmThreads": 4,
+        "ts": 15681.120000004768
+      },
+      "gpuSubmissions": 211,
+      "raw": "48小时。",
+      "sourceShown": true,
+      "text": "48小时。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "新题巡检记录.txt",
+          "score": 0.6431285330270465,
+          "text": "在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。"
+        },
+        {
+          "source": "新题设备说明.txt",
+          "score": 0.495212827544921,
+          "text": "雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。"
+        },
+        {
+          "source": "新题备用设备.txt",
+          "score": 0.3953520799568024,
+          "text": "备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。"
+        }
+      ]
+    },
+    "new-backup": {
+      "deltas": 1,
+      "firstMs": 885,
+      "totalMs": 888,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 243,
+        "outputTokens": 4,
+        "evidence": "资料1（新题备用设备.txt）：备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。\n资料2（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。\n资料3（新题设备说明.txt）：雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。",
+        "wasmThreads": 4,
+        "ts": 16744.32999998331
+      },
+      "gpuSubmissions": 169,
+      "raw": "35。",
+      "sourceShown": true,
+      "text": "35。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "新题备用设备.txt",
+          "score": 0.6373484568536365,
+          "text": "备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。"
+        },
+        {
+          "source": "新题巡检记录.txt",
+          "score": 0.581577472345927,
+          "text": "在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。"
+        },
+        {
+          "source": "新题设备说明.txt",
+          "score": 0.526646768788126,
+          "text": "雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。"
+        }
+      ]
+    },
+    "new-absent": {
+      "deltas": 5,
+      "firstMs": 734,
+      "totalMs": 967,
+      "contextTrial": {
+        "type": "context-trial",
+        "inputTokens": 244,
+        "outputTokens": 6,
+        "evidence": "资料1（新题设备说明.txt）：雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。\n资料2（新题巡检记录.txt）：在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。\n资料3（新题备用设备.txt）：备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。",
+        "wasmThreads": 4,
+        "ts": 17939.524999976158
+      },
+      "gpuSubmissions": 253,
+      "raw": "资料中未提及。",
+      "sourceShown": true,
+      "text": "资料中未提及。",
+      "usedRag": true,
+      "sources": [
+        {
+          "source": "新题设备说明.txt",
+          "score": 0.5457234558746683,
+          "text": "雾化单元操作规程。每次停机后应对管路连续冲洗二十五秒，然后关闭冲洗阀。监测到流量低于每分钟六升且连续八秒时，控制器锁定出液阀。工位人员检查管路后可申请复位。"
+        },
+        {
+          "source": "新题巡检记录.txt",
+          "score": 0.542265209046209,
+          "text": "在用的光学巡检仪登记编号为GX-286，由当班人员核验。雾化单元的滤芯每使用四十八小时更换一次，更换后的滤芯运行时长重新计数。"
+        },
+        {
+          "source": "新题备用设备.txt",
+          "score": 0.3622071090786286,
+          "text": "备用光学巡检仪的登记编号为GX-862，收进工具柜前应充电三十五分钟。使用前核对备用机的状态记录。"
+        }
+      ]
+    }
+  },
+  "runtimeWarnings": [
+    "\u001b[0;93m2026-11-28 17:29:16.078589 [W:onnxruntime:, session_state.cc:1280 VerifyEachNodeIsAssignedToAnEp] Some nodes were not assigned to the preferred execution providers which may or may not have an negative impact on performance. e.g. ORT explicitly assigns shape related ops to CPU to improve perf.\u001b[m",
+    "\u001b[0;93m2026-11-28 17:29:16.080615 [W:onnxruntime:, session_state.cc:1282 VerifyEachNodeIsAssignedToAnEp] Rerunning with verbose output on a non-minimal build will show node assignments.\u001b[m"
+  ],
+  "runtimeResources": {
+    "samples": [
+      {
+        "elapsedMs": 1027,
+        "cpuPercent": 32,
+        "freeRamMiB": 12711,
+        "gpuUsedMiB": 0,
+        "gpuFreeMiB": 7957,
+        "gpuPercent": 0,
+        "gpuTempC": 62
+      },
+      {
+        "elapsedMs": 2033,
+        "cpuPercent": 17,
+        "freeRamMiB": 12437,
+        "gpuUsedMiB": 115,
+        "gpuFreeMiB": 7843,
+        "gpuPercent": 2,
+        "gpuTempC": 61
+      },
+      {
+        "elapsedMs": 3036,
+        "cpuPercent": 28,
+        "freeRamMiB": 12096,
+        "gpuUsedMiB": 113,
+        "gpuFreeMiB": 7845,
+        "gpuPercent": 11,
+        "gpuTempC": 59
+      },
+      {
+        "elapsedMs": 4037,
+        "cpuPercent": 30,
+        "freeRamMiB": 11227,
+        "gpuUsedMiB": 120,
+        "gpuFreeMiB": 7838,
+        "gpuPercent": 15,
+        "gpuTempC": 59
+      },
+      {
+        "elapsedMs": 5039,
+        "cpuPercent": 20,
+        "freeRamMiB": 10736,
+        "gpuUsedMiB": 104,
+        "gpuFreeMiB": 7854,
+        "gpuPercent": 11,
+        "gpuTempC": 59
+      },
+      {
+        "elapsedMs": 6039,
+        "cpuPercent": 23,
+        "freeRamMiB": 10366,
+        "gpuUsedMiB": 52,
+        "gpuFreeMiB": 7906,
+        "gpuPercent": 11,
+        "gpuTempC": 59
+      },
+      {
+        "elapsedMs": 7053,
+        "cpuPercent": 19,
+        "freeRamMiB": 7744,
+        "gpuUsedMiB": 60,
+        "gpuFreeMiB": 7898,
+        "gpuPercent": 20,
+        "gpuTempC": 59
+      },
+      {
+        "elapsedMs": 8061,
+        "cpuPercent": 23,
+        "freeRamMiB": 6144,
+        "gpuUsedMiB": 196,
+        "gpuFreeMiB": 7762,
+        "gpuPercent": 44,
+        "gpuTempC": 59
+      },
+      {
+        "elapsedMs": 9067,
+        "cpuPercent": 30,
+        "freeRamMiB": 6087,
+        "gpuUsedMiB": 1570,
+        "gpuFreeMiB": 6388,
+        "gpuPercent": 10,
+        "gpuTempC": 60
+      },
+      {
+        "elapsedMs": 10073,
+        "cpuPercent": 20,
+        "freeRamMiB": 5983,
+        "gpuUsedMiB": 1691,
+        "gpuFreeMiB": 6267,
+        "gpuPercent": 2,
+        "gpuTempC": 59
+      },
+      {
+        "elapsedMs": 11086,
+        "cpuPercent": 26,
+        "freeRamMiB": 5950,
+        "gpuUsedMiB": 2621,
+        "gpuFreeMiB": 5337,
+        "gpuPercent": 100,
+        "gpuTempC": 74
+      },
+      {
+        "elapsedMs": 12095,
+        "cpuPercent": 18,
+        "freeRamMiB": 5742,
+        "gpuUsedMiB": 2649,
+        "gpuFreeMiB": 5309,
+        "gpuPercent": 12,
+        "gpuTempC": 63
+      },
+      {
+        "elapsedMs": 13108,
+        "cpuPercent": 26,
+        "freeRamMiB": 5666,
+        "gpuUsedMiB": 2653,
+        "gpuFreeMiB": 5305,
+        "gpuPercent": 100,
+        "gpuTempC": 66
+      },
+      {
+        "elapsedMs": 14112,
+        "cpuPercent": 17,
+        "freeRamMiB": 7367,
+        "gpuUsedMiB": 2733,
+        "gpuFreeMiB": 5225,
+        "gpuPercent": 64,
+        "gpuTempC": 78
+      },
+      {
+        "elapsedMs": 15118,
+        "cpuPercent": 15,
+        "freeRamMiB": 7392,
+        "gpuUsedMiB": 2140,
+        "gpuFreeMiB": 5818,
+        "gpuPercent": 28,
+        "gpuTempC": 66
+      },
+      {
+        "elapsedMs": 16122,
+        "cpuPercent": 16,
+        "freeRamMiB": 7303,
+        "gpuUsedMiB": 2719,
+        "gpuFreeMiB": 5239,
+        "gpuPercent": 70,
+        "gpuTempC": 65
+      },
+      {
+        "elapsedMs": 17128,
+        "cpuPercent": 14,
+        "freeRamMiB": 7124,
+        "gpuUsedMiB": 2735,
+        "gpuFreeMiB": 5223,
+        "gpuPercent": 26,
+        "gpuTempC": 65
+      },
+      {
+        "elapsedMs": 18137,
+        "cpuPercent": 11,
+        "freeRamMiB": 6933,
+        "gpuUsedMiB": 2735,
+        "gpuFreeMiB": 5223,
+        "gpuPercent": 49,
+        "gpuTempC": 65
+      }
+    ]
+  }
+}

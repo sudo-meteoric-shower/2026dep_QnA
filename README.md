@@ -1,12 +1,14 @@
-# 本地语音问答助手基础版
+# 本地语音问答助手 · GPU 实验分支
 
-本分支在课堂原型基础上按《提示词.txt》调整。打开 `voice_qa_local/启动本地服务.bat`，使用默认的 Whisper-base、Qwen3-0.6B 和 bge-small-zh-v1.5。首次取得代码后，使用 Git LFS 获取已收录的权重，再按需运行 `voice_qa_local/download_models.py` 补齐本地模型。
+默认使用 Qwen3-1.7B q4f16 在 WebGPU 上生成回答，Whisper-base 和 BGE-small 使用 WASM。浏览器在本机加载模型。需要支持 WebGPU 与 shader-f16 的显卡，在本机已验证 RTX 4060 Laptop。CPU 课堂版保存在 `version1` 和 `1_7_try` 分支。
 
-使用步骤在 [运行说明](voice_qa_local/README.md)。原型测试记录保留在 reproduction_check 目录，本轮的预设题目、合成材料与逐题计时在 [静音评测](reproduction_check/静音评测)。
+初次使用先用 Git LFS 取得已收录的文件。默认问答权重为 `voice_qa_local/models/Qwen3-1.7B-ONNX/onnx/model_q4f16.onnx`，可用项目原有的 `voice_qa_local/download_models.py` 获取缺少的模型。双击 `voice_qa_local/启动本地服务.bat`，在页面点击「全部加载」。需要显式运行 CPU 时，在页面地址末尾加上 `?backend=wasm`。
+
+[运行说明](voice_qa_local/README.md) · [GPU 同题测评与复现命令](reproduction_check/静音评测/WebGPU同题对照.md)
 
 ## 原版对照评测
 
-问答模型默认值与老师发来的实际程序一致。书面提示词指定的 Qwen2.5-1.5B 仍可在下拉菜单中选择。
+此前基础版的问答模型默认值与老师发来的实际程序一致。书面提示词指定的 Qwen2.5-1.5B 仍可在下拉菜单中选择。
 
 在仓库目录运行 `node reproduction_check/verify.cjs --compare=teacher` 可用原题复测老师原版。运行参数可换成 `--compare=current`（提交 76367a2 的默认 1.5B）、`--compare=single`（只给正确来源）或 `--compare=small`（提交 76367a2 手选 Qwen3-0.6B）。在 current 和 small 模式追加 `--holdout` 可切换至留出题。运行会更新相应的本地 JSON 记录。
 
