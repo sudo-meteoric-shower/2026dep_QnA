@@ -17,11 +17,14 @@ const cdpTimeout=requestedModel==='qwen3_17b'?180000:60000;
 const switchAfterLoad=process.argv.includes('--switch-after-load');
 if(switchAfterLoad && (!comparison || !requestedModel)) throw new Error('切换测试需要指定对照模式和目标模型');
 const promptProbe=process.argv.find(arg=>arg.startsWith('--prompt-probe='))?.split('=')[1];
-if(promptProbe && !['evidence-last','brief'].includes(promptProbe)) throw new Error('未知提示词探测模式');
+if(promptProbe && !['evidence-last','brief','faithful'].includes(promptProbe)) throw new Error('未知提示词探测模式');
 const requestedThreads=process.argv.find(arg=>arg.startsWith('--wasm-threads='))?.split('=')[1];
 if(requestedThreads && !['2','4','8','12','16'].includes(requestedThreads)) throw new Error('未知 WASM 线程数');
 const monitorResources=process.argv.includes('--monitor-resources');
 if(monitorResources && !requestedThreads) throw new Error('资源对照需要指定线程数');
+const studySet = process.argv.find(arg=>arg.startsWith('--study-set='))?.slice('--study-set='.length);
+const studyEmbedding = process.argv.find(arg=>arg.startsWith('--study-emb='))?.slice('--study-emb='.length);
+if (studySet && (!/^[a-z0-9-]+$/.test(studySet) || !['small','base'].includes(studyEmbedding) || comparison!=='candidate')) throw new Error('无效的检索对照参数');
 const contextTrial=process.argv.includes('--context-trial');
 if((contextTrial || promptProbe || requestedThreads) && comparison!=='candidate') throw new Error('上下文试验需要本地候选页面');
 const holdout=process.argv.includes('--holdout');
@@ -275,6 +278,16 @@ async function run() {
         html=html.replace(threadOption,'wasm.numThreads = '+Number(requestedThreads)+';');
       }
     }
+    if (studySet) {
+      const original = '请只给出有依据的答案。';
+      const marker = '          let system=m.system';
+      const ranked = '            sources=ranked.map';
+      assert([original,marker,ranked].every(s=>html.includes(s)), '找不到阅读理解评测入口');
+      html=html.replace('\\n'+original+'"', '\\n"+(typeof window.studyPrompt==="string" ? window.studyPrompt : window.studyPrompt ? '+JSON.stringify(require('./verify_context_trial.cjs').faithfulInstruction)+' : "'+original+'")')
+        .replace(marker, '          const retrievalStart=performance.now();\n'+marker)
+        .replace(ranked, '            emit({type:"study-retrieval",ms:performance.now()-retrievalStart});\n'+ranked);
+      assert(html.includes('window.studyPrompt ?'), '回答指令未接入');
+    }
     const body=Buffer.from(html,'utf8').toString('base64');
     ws.addEventListener('message',({data})=>{
       const event=JSON.parse(data);
@@ -337,6 +350,16 @@ async function run() {
     log('requestedModel', {model:modelChoice,files:selected.result.llm,precision:high?'high':'fast'});
     assert(selected.result.llm.ok,'所选问答模型文件未就绪');
   };
+  if (studySet) {
+    await evaluate(expression(value=>{
+      window.testEvents.length=0;
+      document.getElementById('embModel').value=value;
+      onModelChange('emb');
+    },studyEmbedding));
+    const check=await waitEvent('local-checked');
+    assert(check.result.emb.ok && check.result.emb.label==='bge-'+studyEmbedding+'-zh','向量模型自检失败');
+    log('studyEmbedding',check.result.emb.label);
+  }
   if(modelChoice && !switchAfterLoad) await chooseModel();
   if(high) await evaluate("document.getElementById('precisionSelect').value='high';onPrecisionChange()");
   if(ortProbe || process.argv.includes('--llm-first')){
@@ -358,8 +381,9 @@ async function run() {
     const {root}=await cdp('DOM.getDocument');
     const {nodeId}=await cdp('DOM.querySelector',{nodeId:root.nodeId,selector:'#fileInput'});
     const fixtures=fresh?['新题设备说明.txt','新题巡检记录.txt','新题备用设备.txt']:holdout?['留出资料.txt','留出采样.xlsx','留出干扰项.txt']:['记录器说明.docx','采样参数.xlsx','校准卡.pdf'];
-    const files=fixtures.map(f=>path.join(auditDir,f));
-    if(!holdout && !fresh) files.push(path.join(runDir,'课堂复现测试资料.txt'));
+    const study = studySet && JSON.parse(fs.readFileSync(path.join(auditDir, 'study-'+studySet+'.json'),'utf8'));
+    const files=(study ? study.files : fixtures).map(f=>path.join(auditDir,f));
+    if(!study && !holdout && !fresh) files.push(path.join(runDir,'课堂复现测试资料.txt'));
     await cdp('DOM.setFileInputFiles',{nodeId,files});
     log('index',await waitEvent('index-done'));
     const parsed=await evaluate("Object.values(state.files).filter(file=>file.chunks>0).length");
@@ -388,7 +412,7 @@ async function run() {
       return;
     }
     const questionFile = fresh ? '新题题目.json' : holdout ? '留出题目.json' : '题目.json';
-    const rubric=JSON.parse(fs.readFileSync(path.join(auditDir,questionFile),'utf8'));
+    const rubric=study ? study.questions : JSON.parse(fs.readFileSync(path.join(auditDir,questionFile),'utf8'));
     const selectedQuestions=questionId?.split(',');
     if(selectedQuestions){
       assert(selectedQuestions.every(id=>rubric.some(([key])=>key===id)),'本次题集中没有所选题目');
@@ -400,7 +424,15 @@ async function run() {
         if(!expectedSource) continue;
         await evaluate(expression(source=>{window.testExpectedSource=source;},expectedSource));
       }
-      if(contextTrial){
+      if(study){
+        for (const variant of (index%2 ? ['direct','original'] : ['original','direct'])) {
+          await evaluate(expression(value=>{window.studyPrompt=value;},variant==='direct' ? study.instruction || true : false));
+          const label=key+'-'+variant;
+          await answer(label,question,true);
+          summary.checks[label].retrievalMs=await evaluate("window.testEvents.find(e=>e.type==='study-retrieval')?.ms");
+          fs.writeFileSync(resultFile,JSON.stringify(summary,null,2));
+        }
+      }else if(contextTrial){
         // 交替先测完整或精简片段，减少固定运行顺序带来的偏差。
         const variants=index%2===0?['full','compact']:['compact','full'];
         for(const variant of variants){

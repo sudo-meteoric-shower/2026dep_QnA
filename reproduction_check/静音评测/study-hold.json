@@ -1,0 +1,40 @@
+{
+  "instruction": "按资料原词用一行答完。多项用顿号隔开，数字、单位和条件照录；查不到就答“资料中未提及”。",
+  "files": [
+    "local-control-pages/控制工程导论-书页02.txt",
+    "local-control-pages/控制工程导论-书页03.txt",
+    "local-control-pages/控制工程导论-书页04.txt",
+    "local-control-pages/控制工程导论-书页05.txt",
+    "local-control-pages/控制工程导论-书页06.txt",
+    "local-control-pages/控制工程导论-书页07.txt",
+    "local-control-pages/控制工程导论-书页08.txt",
+    "local-control-pages/控制工程导论-书页09.txt",
+    "local-control-pages/控制工程导论-书页10.txt"
+  ],
+  "questions": [
+    [
+      "hold-manual",
+      "发电机由人来调节时，教材概括人主要完成哪三项工作？",
+      "测量、比较、执行，三项齐全",
+      "控制工程导论-书页05.txt"
+    ],
+    [
+      "hold-arrows",
+      "元件方框的进入箭头和引出箭头各表示什么信号？",
+      "进入为输入信号，引出为输出信号",
+      "控制工程导论-书页07.txt"
+    ],
+    [
+      "hold-compound",
+      "书中把开环和闭环适当结合的方式叫什么？在保持稳定性的基础上可以提高哪两种性能？",
+      "复合控制；精度、抗外部干扰能力",
+      "控制工程导论-书页08.txt"
+    ],
+    [
+      "book-open",
+      "教材建议在什么条件下优先选用开环控制？请同时说清对输入、扰动和精度的要求。",
+      "输入预先已知；无扰动或扰动不大；控制精度要求不高",
+      "控制工程导论-书页08.txt"
+    ]
+  ]
+}
