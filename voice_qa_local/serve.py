@@ -67,21 +67,22 @@ def serving_this_page(url):
         return False
 
 
-def run(open_gpu):
+def run(open_gpu, prefer_mic_array=False):
     os.chdir(APP)
     url = f"http://{ADDRESS[0]}:{ADDRESS[1]}/{PAGE}"
+    window_url = url + ("?mic=array" if prefer_mic_array else "")
     socketserver.ThreadingTCPServer.allow_reuse_address = os.name != "nt"
     try:
         server = socketserver.ThreadingTCPServer(ADDRESS, Handler)
     except OSError:
         if open_gpu and serving_this_page(url):
-            open_gpu_window(url)
+            open_gpu_window(window_url)
             print("已复用本地服务，并打开 GPU 专用 Edge 窗口。", flush=True)
             return
         raise
     with server:
         if open_gpu:
-            open_gpu_window(url)
+            open_gpu_window(window_url)
         print(f"本地服务已启动 {url}", flush=True)
         print("关闭本窗口或按 Ctrl+C 停止服务", flush=True)
         try:
@@ -93,7 +94,9 @@ def run(open_gpu):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--open-gpu", action="store_true", help="用独立 Edge 配置打开问答页面")
+    parser.add_argument("--prefer-mic-array", action="store_true", help="项目窗口优先使用麦克风阵列")
     try:
-        run(parser.parse_args().open_gpu)
+        args = parser.parse_args()
+        run(args.open_gpu, args.prefer_mic_array)
     except OSError as error:
         sys.exit(f"启动失败：{error}")

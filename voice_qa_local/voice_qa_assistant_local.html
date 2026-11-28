@@ -769,13 +769,43 @@
       try{audioCtx&&audioCtx.close();}catch(e){}
       procNode=null;srcNode=null;gainNode=null;silentNode=null;mediaStream=null;audioCtx=null;
     }
+    async function openMicrophone(){
+      const devices=navigator.mediaDevices;
+      const audio={channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:false};
+      const open=id=>devices.getUserMedia({audio:{...audio,deviceId:id}});
+      const systemDefault=()=>open({ideal:"default"});
+      if(new URLSearchParams(location.search).get("mic")!=="array") return systemDefault();
+
+      const isArray=label=>/麦克风阵列|麥克風陣列|microphone array|array microphone/i.test(label);
+      const findArray=async()=>{
+        const inputs=await devices.enumerateDevices();
+        return inputs.find(d=>d.kind==="audioinput" && d.deviceId && !["default","communications"].includes(d.deviceId) && isArray(d.label));
+      };
+      // 首次授权前，浏览器可能隐藏设备名称。
+      const known=await findArray().catch(()=>null);
+      if(known){
+        try {return await open({exact:known.deviceId});}
+        catch(e){if(!["NotFoundError","OverconstrainedError","NotReadableError"].includes(e.name)) throw e;}
+      }
+      const stream=await systemDefault();
+      if(known || isArray(stream.getAudioTracks()[0]?.label || "")) return stream;
+      try{
+        const array=await findArray();
+        if(array){
+          const selected=await open({exact:array.deviceId});
+          stream.getTracks().forEach(track=>track.stop());
+          return selected;
+        }
+      }catch{ /* 阵列不可用时继续使用已经取得的系统输入。 */ }
+      return stream;
+    }
     async function toggleRecording(){
       if(recording){stopRecording();return;}
       if(state.asr!=='ready'){alert('请先加载语音识别模型');return;}
       if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('当前浏览器不支持麦克风采集，请在 localhost 或 HTTPS 下使用');return;}
       try{
         // 关键：关闭 autoGainControl（与浏览器AGC叠加会削波失真）；保留基础降噪与回声消除
-        mediaStream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:false}});
+        mediaStream=await openMicrophone();
       }catch(err){
         alert('无法访问麦克风：'+err.message+'。请在地址栏允许麦克风权限，并确认使用 localhost 或 HTTPS 访问。');return;
       }
@@ -802,7 +832,7 @@
       }
       recording=true;
       $('micBtn').classList.add('recording');$('micIcon').className='fas fa-stop text-sm';
-      $('micHint').textContent='录音中…再次点击结束';setStatus('录音中','bg-red-50 text-red-600');
+      $('micHint').textContent='录音中 · '+(mediaStream.getAudioTracks()[0]?.label || '麦克风')+' · 再次点击结束';setStatus('录音中','bg-red-50 text-red-600');
       setWave(true);resetPipe();pipe(1,'active');
       recTimer=setTimeout(()=>{if(recording)stopRecording();},20000);
     }

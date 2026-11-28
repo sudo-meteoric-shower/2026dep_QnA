@@ -4,9 +4,9 @@ chcp 65001 >nul
 cd /d "%~dp0"
 where python >nul 2>&1
 if errorlevel 1 (
-    py -3 serve.py --open-gpu
+    py -3 serve.py --open-gpu --prefer-mic-array
 ) else (
-    python serve.py --open-gpu
+    python serve.py --open-gpu --prefer-mic-array
 )
 if errorlevel 1 (
     pause
