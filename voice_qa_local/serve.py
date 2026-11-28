@@ -6,9 +6,14 @@ Windows 的 Python MIME 表跟随系统注册表，.mjs 未注册会被当成 te
 浏览器安全策略禁止 import text/plain 模块，导致 ONNX 运行时加载失败
 （no available backend found / Failed to fetch dynamically imported module）。
 """
+import argparse
 import http.server
+import os
 import socketserver
+import subprocess
 import sys
+from pathlib import Path
+from urllib.request import ProxyHandler, build_opener
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     extensions_map = {
@@ -31,12 +36,64 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
         super().end_headers()
 
-if __name__ == "__main__":
-    socketserver.ThreadingTCPServer.allow_reuse_address = True
-    with socketserver.ThreadingTCPServer(("127.0.0.1", 8000), Handler) as httpd:
-        print("本地服务已启动: http://localhost:8000/voice_qa_assistant_local.html", flush=True)
+APP = Path(__file__).resolve().parent
+PAGE = "voice_qa_assistant_local.html"
+ADDRESS = ("127.0.0.1", 8000)
+
+
+def open_gpu_window(url):
+    for variable in ("ProgramFiles(x86)", "ProgramFiles", "LOCALAPPDATA"):
+        root = os.environ.get(variable)
+        if root:
+            edge = Path(root) / "Microsoft/Edge/Application/msedge.exe"
+            if edge.is_file():
+                break
+    else:
+        raise FileNotFoundError("找不到 Microsoft Edge，请检查 Edge 是否已安装。")
+    profile = APP.parent / "reproduction_check" / "edge-profile-gpu-manual"
+    subprocess.Popen([str(edge), f"--user-data-dir={profile}", "--force_high_performance_gpu",
+                      "--no-first-run", "--no-default-browser-check", "--new-window", url])
+
+
+def serving_this_page(url):
+    try:
+        opener = build_opener(ProxyHandler({}))
+        expected = (APP / PAGE).read_bytes()
+        with opener.open(url, timeout=3) as response:
+            return (response.getheader("Cross-Origin-Opener-Policy") == "same-origin"
+                    and response.getheader("Cross-Origin-Embedder-Policy") == "require-corp"
+                    and response.read(len(expected) + 1) == expected)
+    except OSError:
+        return False
+
+
+def run(open_gpu):
+    os.chdir(APP)
+    url = f"http://{ADDRESS[0]}:{ADDRESS[1]}/{PAGE}"
+    socketserver.ThreadingTCPServer.allow_reuse_address = os.name != "nt"
+    try:
+        server = socketserver.ThreadingTCPServer(ADDRESS, Handler)
+    except OSError:
+        if open_gpu and serving_this_page(url):
+            open_gpu_window(url)
+            print("已复用本地服务，并打开 GPU 专用 Edge 窗口。", flush=True)
+            return
+        raise
+    with server:
+        if open_gpu:
+            open_gpu_window(url)
+        print(f"本地服务已启动 {url}", flush=True)
         print("关闭本窗口或按 Ctrl+C 停止服务", flush=True)
         try:
-            httpd.serve_forever()
+            server.serve_forever()
         except KeyboardInterrupt:
             pass
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--open-gpu", action="store_true", help="用独立 Edge 配置打开问答页面")
+    try:
+        run(parser.parse_args().open_gpu)
+    except OSError as error:
+        sys.exit(f"启动失败：{error}")

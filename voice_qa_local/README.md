@@ -1,6 +1,6 @@
 # 笔记本语音问答助手 v16
 
-双击 `启动本地服务.bat`，或在本目录运行 `python serve.py` 后打开 `http://localhost:8000/voice_qa_assistant_local.html`。服务仅监听本机，提供 JavaScript 和 WASM 的 MIME 类型及浏览器多线程所需的响应头。本机普通 `python -m http.server 8000` 会把 .mjs 标成 text/plain，浏览器无法加载该模块。演示使用上述启动器。
+双击 `启动本地服务.bat` 即可在 GPU 专用 Edge 窗口打开问答页。启动器会复用已经运行的项目服务；新启动服务时请保留命令窗口。专用窗口和日常使用的 Edge 可以同时打开。也可在本目录运行 `python serve.py --open-gpu`。服务仅监听本机，提供 JavaScript 和 WASM 的 MIME 类型及浏览器多线程所需的响应头。本机普通 `python -m http.server 8000` 会把 .mjs 标成 text/plain，浏览器无法加载该模块。演示使用上述启动器。
 
 1. 本分支页面自动选中 Whisper-base、Qwen3-1.7B 和 bge-small-zh-v1.5。点击「全部加载」或各卡片的「加载」。顶部自检检查当前配置的本地文件，卡片「已就绪」表示推理管线已加载。
 2. 上传有可提取正文的 PDF、Word（DOCX）、Excel（XLSX/XLS）或 TXT，可多选。BGE 将 360 字符、重叠 60 字符的原文窗口编码为单位向量。改变向量模型或精度后请重新上传资料建索引。
