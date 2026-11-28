@@ -1,0 +1,2061 @@
+{
+  "before": {
+    "energySaver": false,
+    "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+    "time": "2026-11-28T13:41:22.6311009+08:00",
+    "chargePercent": 89,
+    "ac": true
+  },
+  "after": {
+    "energySaver": false,
+    "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+    "time": "2026-11-28T13:47:03.9675864+08:00",
+    "chargePercent": 92,
+    "ac": true
+  },
+  "samples": [
+    {
+      "energySaver": false,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-28T13:41:22.6311009+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:23.7630061+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:24.7707440+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:25.7782301+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:26.7814485+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:27.7898081+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:28.8026386+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:29.8171056+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:30.8284484+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:31.8409168+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:32.8511481+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:33.8601706+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:34.8674742+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:35.8750144+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:36.8796739+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:37.8884809+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:38.8937099+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:39.8957512+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:40.9011524+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:41.9057793+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:42.9160218+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:43.9244959+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:44.9365467+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:45.9430631+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:46.9474487+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:47.9537450+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:48.9591983+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:49.9662537+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:50.9703974+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:51.9735611+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:52.9858295+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:53.9926945+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:55.0079804+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:56.0150687+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:57.0201687+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:58.0290994+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:41:59.0331947+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:00.0392312+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:01.0442707+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:02.0537500+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:03.0627922+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:04.0724684+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:05.0811498+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:06.0883085+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:07.1002373+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:08.1095643+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:09.1134715+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:10.1177227+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:11.1220159+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:12.1277215+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:13.1342937+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:14.1394173+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:15.1472899+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:16.1536781+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:17.1582996+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:18.1639830+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:19.1661811+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:20.1772354+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:21.1829304+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:22.1889741+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:23.1949125+08:00",
+      "chargePercent": 89,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:24.1993576+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:25.2063006+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:26.2114233+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:27.2209590+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:28.2296887+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:29.2384218+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:30.2443163+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:31.2508667+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:32.2589496+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:33.2635684+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:34.2637340+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:35.2676499+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:36.2713125+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:37.2767536+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:38.2837640+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:39.2955903+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:40.3030568+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:41.3095246+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:42.3142805+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:43.3205208+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:44.3229885+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:45.3260413+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:46.3274843+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:47.3322076+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:48.3366867+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:49.3406053+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:50.3520805+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:51.3567241+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:52.3656804+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:53.3772533+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:54.3865567+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:55.4031063+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:56.4177514+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:57.4338149+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:58.4381236+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:42:59.4413280+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:00.4463173+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:01.4479005+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:02.4540073+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:03.4645763+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:04.4755617+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:05.4828976+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:06.4914404+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:07.4967155+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:08.5022661+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:09.5109694+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:10.5172051+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:11.5225983+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:12.5292106+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:13.5353246+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:14.5441956+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:15.5481628+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:16.5581187+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:17.5714703+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:18.5804260+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:19.5879188+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:20.5920583+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:21.5954372+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:22.6019840+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:23.6096377+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:24.6155420+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:25.6201599+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:26.6289929+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:27.6360136+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:28.6451545+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:29.6519278+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:30.6572062+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:31.6591075+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:32.6612934+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:33.6625764+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:34.6722655+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:35.6769226+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:36.6814789+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:37.6931498+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:38.7007120+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:39.7069391+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:40.7111330+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:41.7172114+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:42.7198146+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:43.7249124+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:44.7338833+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:45.7398429+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:46.7465257+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:47.7554030+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:48.7638853+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:49.7725729+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:50.7830946+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:51.7924471+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:52.8008617+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:53.8082686+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:54.8169267+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:55.8245644+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:56.8304379+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:57.8344897+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:58.8389541+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:43:59.8465923+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:00.8515700+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:01.8607141+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:02.8708059+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:03.8822797+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:04.8901003+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:05.8968917+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:06.9024513+08:00",
+      "chargePercent": 90,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:07.9108611+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:08.9166975+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:09.9237145+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:10.9328398+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:11.9393443+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:12.9412987+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:13.9494101+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:14.9548207+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:15.9645248+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:16.9772171+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:17.9829392+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:18.9873790+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:19.9979594+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:21.0054638+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:22.0094856+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:23.0160815+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:24.0228221+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:25.0369500+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:26.0393998+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:27.0481442+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:28.0612408+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:29.0668221+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:30.0725502+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:31.0785482+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:32.0862563+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:33.1025057+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:34.1092838+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:35.1173064+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:36.1280994+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:37.1367266+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:38.1443499+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:39.1553592+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:40.1644972+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:41.1660790+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:42.1680420+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:43.1742996+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:44.1782582+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:45.1840201+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:46.1901454+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:47.1938020+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:48.1991796+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:49.2118406+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:50.2208145+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:51.2336528+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:52.2445252+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:53.2537322+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:54.2574529+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:55.2627743+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:56.2717830+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:57.2767010+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:58.2820784+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:44:59.2915788+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:00.2996132+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:01.3103898+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:02.3249890+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:03.3305137+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:04.3402148+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:05.3502262+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:06.3586836+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:07.3654235+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:08.3697874+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:09.3718691+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:10.3764070+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:11.3851655+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:12.3921824+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:13.4009165+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:14.4082127+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:15.4154709+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:16.4235539+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:17.4293311+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:18.4441559+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:19.4453524+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:20.4510121+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:21.4579525+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:22.4631994+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:23.4686186+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:24.4872527+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:25.4934943+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:26.5042381+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:27.5110726+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:28.5233667+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:29.5304667+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:30.5368303+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:31.5431587+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:32.5531597+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:33.5626678+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:34.5679595+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:35.5800646+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:36.5946957+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:37.6042762+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:38.6134413+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:39.6174635+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:40.6197236+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:41.6203657+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:42.6254987+08:00",
+      "chargePercent": 91,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:43.6323533+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:44.6395680+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:45.6485120+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:46.6524230+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:47.6640524+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:48.6772837+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:49.6876574+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:50.6949974+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:51.7046131+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:52.7105060+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:53.7199944+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:54.7248928+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:55.7298301+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:56.7334656+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:57.7392458+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:58.7432771+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:45:59.7454907+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:00.7475368+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:01.7521411+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:02.7593091+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:03.7665892+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:04.7678079+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:05.7733441+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:06.7787142+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:07.7866341+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:08.7938072+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:09.7968093+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:10.8029509+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:11.8090894+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:12.8167354+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:13.8250523+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:14.8263802+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:15.8331413+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:16.8347587+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:17.8378887+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:18.8439486+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:19.8450915+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:20.8509318+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:21.8556164+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:22.8661417+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:23.8702023+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:24.8778489+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:25.8870504+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:26.8919498+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:27.8974463+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:28.9031712+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:29.9126347+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:30.9152389+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:31.9219419+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:32.9258883+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:33.9301457+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:34.9369308+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:35.9404204+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:36.9464565+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:37.9541624+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:38.9579913+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:39.9738007+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:40.9891792+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:41.9942503+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:43.0074981+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:44.0190534+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:45.0242842+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:46.0258669+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:47.0366243+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:48.0450065+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:49.0523005+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:50.0625153+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:51.0670803+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:52.0741302+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:53.0781268+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:54.0825239+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:55.0881644+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:56.0945038+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:57.1012354+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:58.1124321+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:46:59.1237073+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:47:00.1302694+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:47:01.1350806+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:47:02.1395670+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "time": "2026-11-28T13:47:03.1416261+08:00",
+      "chargePercent": 92,
+      "ac": true
+    },
+    {
+      "energySaver": false,
+      "plan": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "time": "2026-11-28T13:47:03.9675864+08:00",
+      "chargePercent": 92,
+      "ac": true
+    }
+  ],
+  "exitCode": 0
+}
